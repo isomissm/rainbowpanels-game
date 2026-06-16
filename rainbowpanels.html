@@ -990,9 +990,9 @@ const CONFIG = {
 	// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ❄️ 雪玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		SNOW_COUNT:        7,  // 雪玉の初期カウント
-		SNOW_FREEZE_MIN:   3,  // 凍結ターン数（最小）※自然解凍までのターン数
-		SNOW_FREEZE_MAX:   5,  // 凍結ターン数（最大）※自然解凍までのターン数
+		SNOW_COUNT:        5,  // 雪玉の初期カウント
+		SNOW_FREEZE_MIN:   5,  // 凍結ターン数（最小）※自然解凍までのターン数
+		SNOW_FREEZE_MAX:   7,  // 凍結ターン数（最大）※自然解凍までのターン数
 		SNOW_FREEZE_TARGET_MIN: 3,  // 一度に凍結させるパネル枚数（最小）
 		SNOW_FREEZE_TARGET_MAX: 5,  // 一度に凍結させるパネル枚数（最大）
 		SNOWY_EFFECT_DURATION: 700,  // 白いオーバーレイの表示時間（ms）
@@ -1864,6 +1864,9 @@ update() {
         isGameOver = false;
         gameElapsedTime = 0;
         skillStock = 0; skillGauge = 0; particles = []; specialEffects = []; textEffects = []; dangerCounts = {}; frozenCells = {};
+        sunnyThreshold = CONFIG.THRESHOLD.SUNNY_START;
+        rainyThreshold = CONFIG.THRESHOLD.RAINY_START;
+        snowThreshold = CONFIG.THRESHOLD.SNOW_START;
 		
         collectedRainbowBalls.fill(false);
 		everCollectedRainbowBalls.fill(false);
@@ -3159,12 +3162,12 @@ update() {
 	}
 
 	async function triggerRainy(col, row) {
-		// 対象候補（通常パネル＋お邪魔パネル）を収集
+		// 対象候補（通常パネルのみ）を収集
 		let candidates = [];
 		for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
 			for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
 				const t = board[r][c];
-				if ((t >= 0 && t < CONFIG.PANEL_TYPE.OBSTACLE) || t === CONFIG.PANEL_TYPE.OBSTACLE) {
+				if (t >= 0 && t < CONFIG.PANEL_TYPE.OBSTACLE) {
 					candidates.push({r, c});
 				}
 			}
