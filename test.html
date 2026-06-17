@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3つ並べパズル - Rainbow Panels (ver5.5.2)</title>
+<title>3つ並べパズル - Rainbow Panels (ver5.5.3)</title>
 <style>
 body {
     background-color: #CAF5FF;
@@ -864,7 +864,7 @@ canvas {
         </div>
         <div style="font-size:11px; font-weight:900; margin-bottom:4px; color:#cbd5e1; text-align:left; width:85%; max-width:270px; letter-spacing: 0.05em;">🌈 TOP 10 RANKING</div>
         <div id="ranking-box"> </div>
-        <button id="retry-btn" onclick="initGame()" style="padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:13px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">もう一度挑戦</button>
+        <button id="retry-btn" onclick="initGame()" style="padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:13px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">もう一度プレイする</button>
         <button id="reset-ranking-btn" onclick="confirmResetRanking()" style="margin-top:8px; padding:6px 16px; border-radius:20px; border:1.5px solid rgba(255,255,255,0.3); cursor:pointer; font-weight:700; font-size:11px; background:transparent; color:#cbd5e1;">ランキングをリセットする</button>
         <button id="back-to-game-btn" onclick="closeRankingScreen()" style="display:none; padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:13px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">ゲームに戻る</button>
       </div>
@@ -1130,9 +1130,9 @@ const CONFIG = {
             RANK_3rd:    "#e17055", // ランキング3位（銅）
         },
 	
-		PARTICLE_COUNT_NORMAL:  10,  // 通常パネル消去時のパーティクル数
-		PARTICLE_COUNT_RAINBOW: 20,  // 虹玉・七色玉消去時のパーティクル数
-		PARTICLE_COUNT_SKILL:   12,  // スキル発動時のパーティクル数
+		PARTICLE_COUNT_NORMAL:  6,  // 通常パネル消去時のパーティクル数
+		PARTICLE_COUNT_RAINBOW: 12,  // 虹玉・七色玉消去時のパーティクル数
+		PARTICLE_COUNT_SKILL:   10,  // スキル発動時のパーティクル数
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🔧 システム内部用（基本的に変更不要）
@@ -2110,7 +2110,6 @@ update() {
 					ctx.beginPath();
 					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
-					ctx.strokeStyle = "white"; ctx.lineWidth = 1.5; ctx.stroke();
 					// 稲妻描画
 					let cx2 = x + CONFIG.CELL_SIZE/2;
 					let cy2 = y + CONFIG.CELL_SIZE/2;
@@ -2143,8 +2142,6 @@ update() {
 					ctx.beginPath();
 					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
-					ctx.strokeStyle = "white"; ctx.lineWidth = 1.5; ctx.stroke();
-					// アイコンを中央に描画（読み込めない場合は☀記号）
 					ctx.shadowBlur = 0;
 					if (sunnyImage.complete && sunnyImage.naturalWidth !== 0) {
 						const iconSize = 36;
@@ -2172,9 +2169,7 @@ update() {
 					ctx.beginPath();
 					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
-					ctx.strokeStyle = "white"; ctx.lineWidth = 1.5; ctx.stroke();
 					ctx.shadowBlur = 0;
-					// アイコンを中央に描画（読み込めない場合は🌧️記号）
 					if (rainyImage.complete && rainyImage.naturalWidth !== 0) {
 						const iconSize = 36;
 						ctx.drawImage(rainyImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
@@ -2213,7 +2208,6 @@ update() {
 					ctx.beginPath();
 					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
-					ctx.strokeStyle = "white"; ctx.lineWidth = 1.5; ctx.stroke();
 					ctx.shadowBlur = 0;
 					// カウント表示：7〜4は濃い青、3以下は濃い赤紫
 					ctx.fillStyle = isCold ? "#8b0a50" : "#0984e3";
