@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3つ並べパズル - Rainbow Panels (ver5.5.3)</title>
+<title>3つ並べパズル - Rainbow Panels (ver5.5.3-w)</title>
 <style>
 body {
     background-color: #CAF5FF;
@@ -1804,6 +1804,13 @@ update() {
     const RAINY_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><g fill="#0068E5"><rect x="23.6" y="37.2" width="2.3" height="16.2" transform="translate(10.1 -4.2) rotate(12.2)"/><path d="M19.3,70.1c2.4.5,4.7-1.6,4.6-4.6,0-2.2-.9-6.2-1.6-9.2-1.9,2.4-4.3,5.7-5.3,7.7-1.3,2.7-.1,5.5,2.3,6.1Z"/><rect x="40.4" y="39.1" width="2.3" height="22" transform="translate(11.5 -7.6) rotate(12.2)"/><path d="M35.4,77.8c2.4.5,4.7-1.6,4.6-4.6,0-2.2-.9-6.2-1.6-9.2-1.9,2.4-4.3,5.7-5.3,7.7-1.3,2.7-.1,5.5,2.3,6.1Z"/><rect x="57.8" y="37.7" width="2.3" height="20.6" transform="translate(11.5 -11.4) rotate(12.2)"/><path d="M53,75c2.4.5,4.7-1.6,4.6-4.6,0-2.2-.9-6.2-1.6-9.2-1.9,2.4-4.3,5.7-5.3,7.7s-.1,5.5,2.3,6.1Z"/></g><path fill="#DCE7E7" d="M61.3,12.9c-2.3-10.1-20.3-12-25.6-2.8-6.3-2.3-13.5,2.2-13.8,7.5-11.5,2-10.3,16,2.9,14.9,2.6,4.6,12.1,6.5,17.1,3.2,4.8,4.2,15.8,3,18.4-1.8,14.1.3,17.5-18.4,1-21Z"/></svg>';
 
     const CLOUD_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path fill="#ffffff" d="M66.9,30.7c-3-14.5-26.9-17.2-33.9-4-8.3-3.3-18,3.2-18.4,10.9-15.3,2.9-13.7,23.1,3.8,21.5,3.5,6.6,16,9.3,22.7,4.5,6.3,6,20.9,4.4,24.5-2.7,18.7.3,23.2-26.5,1.3-30.2Z"/></svg>';
+	
+	// 七色の玉のシェイプ（添付SVG：通常玉／勾玉風シェイプ）をPath2D化
+	const BALL_SHAPE_PATH_DATA = "M 41, 42 m -35, 0 a 35,35 0 1,0 70,0 a 35,35 0 1,0 -70,0";
+	const BALL_SHAPE = new Path2D(BALL_SHAPE_PATH_DATA);
+	// このパスのバウンディングボックスから求めた中心座標と縦幅（viewBox 0 0 85 85 基準）
+	const BALL_SHAPE_CENTER = { x: 40.84, y: 41.85 };
+	const BALL_SHAPE_HEIGHT = 69.32;
 
     const sunnyImage = new Image(); sunnyImage.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(SUNNY_ICON_SVG);
     sunnyImage.onload = () => draw(); sunnyImage.onerror = () => draw();
@@ -2057,32 +2064,35 @@ update() {
                     ctx.textAlign = "center"; ctx.textBaseline = "middle";
 					ctx.fillText(count, x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2);
                     ctx.restore();
-                } else if (type >= CONFIG.PANEL_TYPE.BALL_MIN && type <= CONFIG.PANEL_TYPE.BALL_MAX) {
-                    // ▼ここから追加：7色の玉のグラデーション描画
+				} else if (type >= CONFIG.PANEL_TYPE.BALL_MIN && type <= CONFIG.PANEL_TYPE.BALL_MAX) {
+                    // ▼ここから追加：7色の玉のグラデーション描画（勾玉シェイプ）
                     let cIdx = type - 102;
                     ctx.save();
-                    let grad = ctx.createRadialGradient(
-                        x + CONFIG.CELL_SIZE/2 - 4, y + CONFIG.CELL_SIZE/2 - 4, 2, 
-                        x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 2
-                    );
 
-					grad.addColorStop(0, "#ffffff");              // 中心の一点だけを白に
-                    grad.addColorStop(0.15, CONFIG.COLORS[cIdx]); // 早めに本来の色に変化させる
-                    grad.addColorStop(0.85, CONFIG.COLORS[cIdx]); // 外側の手前まで本来の色をキープする
-                    grad.addColorStop(1.0, "#666666");            // フチの影を明るいグレーにして抑える（元は#222222）
-					
+                    const ballCx = x + CONFIG.CELL_SIZE/2;
+                    const ballCy = y + CONFIG.CELL_SIZE/2;
+                    const ballScale = (CONFIG.CELL_SIZE - 8) / BALL_SHAPE_HEIGHT; // 元の円と同じ大きさに揃える
+
+                    ctx.translate(ballCx, ballCy);
+                    ctx.scale(ballScale, ballScale);
+                    ctx.translate(-BALL_SHAPE_CENTER.x, -BALL_SHAPE_CENTER.y);
+
+                    let grad = ctx.createRadialGradient(
+						BALL_SHAPE_CENTER.x - 8, BALL_SHAPE_CENTER.y - 20, 2,   // 白い点の位置（x座標, y座標, 半径）
+						BALL_SHAPE_CENTER.x, BALL_SHAPE_CENTER.y, 50             // 全体の色が広がる範囲（位置は固定）
+					);
+
+					grad.addColorStop(0, "#ffffff");              // 白い点（やや左上にオフセット）
+                    grad.addColorStop(0.25, CONFIG.COLORS[cIdx]);  // 白→本来の色への変化を広めに取る ※白い点のサイズ変更はここの数値
+                    grad.addColorStop(0.75, CONFIG.COLORS[cIdx]); // 本来の色を保つ範囲
+                    grad.addColorStop(1.0, "#666666");            // フチの影
+
 					ctx.fillStyle = grad;
-                    ctx.beginPath(); 
-                    ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2); 
-                    ctx.fill();
-                    ctx.strokeStyle = "white"; 
-                    ctx.lineWidth = 1.5; 
-                    ctx.stroke();
+                    ctx.fill(BALL_SHAPE);
                     ctx.restore();
                     // ▲ここまで追加
 					
 				} else if (type === CONFIG.PANEL_TYPE.ALMIGHTY) {
-					ctx.save();
 					let grad = ctx.createLinearGradient(x, y, x + CONFIG.CELL_SIZE, y + CONFIG.CELL_SIZE);
 					grad.addColorStop(0.0,  '#ff4757');
 					grad.addColorStop(0.4, '#ffe53b');
