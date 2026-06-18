@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3つ並べパズル - Rainbow Panels (ver5.5.3-w)</title>
+<title>3つ並べパズル - Rainbow Panels (ver5.5.5)</title>
 <style>
 body {
     background-color: #CAF5FF;
@@ -1427,6 +1427,40 @@ const CONFIG = {
 		get isFinished() { return this.rings.every(r => r.alpha <= 0); }
 	}
 	
+	class RainyPopEffect {
+		constructor(x, y) {
+			this.x = x; this.y = y;
+			this.rings = [
+				{ r: 0, alpha: 0.9, speed: 1.8 },
+				{ r: 0, alpha: 0.6, speed: 1.2 },
+				{ r: 0, alpha: 0.4, speed: 0.7 },
+			];
+		}
+		update() {
+			this.rings.forEach(ring => {
+				ring.r += ring.speed;
+				ring.alpha -= 0.022;
+			});
+		}
+		draw() {
+			this.rings.forEach(ring => {
+				if (ring.alpha <= 0) return;
+				ctx.save();
+				ctx.globalAlpha = ring.alpha;
+				let grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, ring.r);
+				grad.addColorStop(0,   "rgba(120, 200, 255, 1.0)");
+				grad.addColorStop(0.5, "rgba(30, 144, 255, 0.6)");
+				grad.addColorStop(1.0, "rgba(0, 100, 255, 0.0)");
+				ctx.fillStyle = grad;
+				ctx.beginPath();
+				ctx.arc(this.x, this.y, ring.r, 0, Math.PI * 2);
+				ctx.fill();
+				ctx.restore();
+			});
+		}
+		get isFinished() { return this.rings.every(r => r.alpha <= 0); }
+	}
+	
 	class RainyEffect {
 		constructor(canvasWidth, canvasHeight) {
 			this.drops = [];
@@ -1539,6 +1573,47 @@ update() {
 		get isFinished() { return this.age > this.duration; }
 	}
 
+	// パネル入れ替えのエフェクト（ぽわっと光る）
+	class SwapGlowEffect {
+		constructor(c1, r1, c2, r2) {
+			this.c1 = c1; this.r1 = r1;
+			this.c2 = c2; this.r2 = r2;
+			this.alpha = 1.0;
+		}
+		update() {
+			// ① 光が出現している時間を長くする（残像感を出す）
+			this.alpha -= 0.03; // 数値を小さくする（例: 0.02）と、ゆっくり消えるようになり目立ちます
+		}
+		draw() {
+			if (this.alpha <= 0) return;
+			ctx.save();
+			ctx.shadowColor = `rgba(255, 255, 255, ${this.alpha})`;
+			
+			// ② ぽわっとした光の広がりを大きくする
+			ctx.shadowBlur = 25; // 数値を大きくする（例: 25 〜 30）と、光の輪が広がります
+			
+			ctx.strokeStyle = `rgba(255, 255, 255, ${this.alpha})`;
+			
+			// ③ 光の芯（ベースの線）を太くする
+			ctx.lineWidth = 4; // 数値を大きくする（例: 5 〜 6）と、中心の光が強くなります
+			
+			// パネル1のフチを描画
+			let x1 = this.c1 * CONFIG.CELL_SIZE;
+			let y1 = this.r1 * CONFIG.CELL_SIZE;
+			roundRect(x1 + 5, y1 + 5, CONFIG.CELL_SIZE - 10, CONFIG.CELL_SIZE - 10, 9);
+			ctx.stroke();
+
+			// パネル2のフチを描画
+			let x2 = this.c2 * CONFIG.CELL_SIZE;
+			let y2 = this.r2 * CONFIG.CELL_SIZE;
+			roundRect(x2 + 5, y2 + 5, CONFIG.CELL_SIZE - 10, CONFIG.CELL_SIZE - 10, 9);
+			ctx.stroke();
+
+			ctx.restore();
+		}
+		get isFinished() { return this.alpha <= 0; }
+	}
+	
     class Particle {
         constructor(x, y, color, type = "star") {
             this.x = x; this.y = y; this.color = color; this.type = type;
@@ -2153,15 +2228,8 @@ update() {
 					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
 					ctx.shadowBlur = 0;
-					if (sunnyImage.complete && sunnyImage.naturalWidth !== 0) {
-						const iconSize = 36;
-						ctx.drawImage(sunnyImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
-					} else {
-						ctx.fillStyle = "#ff6b00";
-						ctx.font = "bold 26px sans-serif";
-						ctx.textAlign = "center"; ctx.textBaseline = "middle";
-						ctx.fillText("☀", x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2 + 1);
-					}
+					const iconSize = 36;
+					ctx.drawImage(sunnyImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
 					ctx.restore();
 				} else if (type === CONFIG.PANEL_TYPE.RAINY) {
 					ctx.save();
@@ -2180,15 +2248,8 @@ update() {
 					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
 					ctx.shadowBlur = 0;
-					if (rainyImage.complete && rainyImage.naturalWidth !== 0) {
-						const iconSize = 36;
-						ctx.drawImage(rainyImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
-					} else {
-						ctx.fillStyle = "#ffffff";
-						ctx.font = "bold 26px sans-serif";
-						ctx.textAlign = "center"; ctx.textBaseline = "middle";
-						ctx.fillText("🌧️", x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2 + 1);
-					}
+					const iconSize = 36;
+					ctx.drawImage(rainyImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
 					ctx.restore();
                 } else if (type === CONFIG.PANEL_TYPE.SNOW) {
 					// ❄ 雪玉（カウント表示 + カウント3以下で色変化）
@@ -2396,6 +2457,10 @@ update() {
 						isAnimating = true;
                         const temp = board[r][c]; board[r][c] = board[selected.r][selected.c]; board[selected.r][selected.c] = temp;
 						lastMovedCell = [{r: selected.r, c: selected.c}, {r, c}];
+						
+						// ▼パネルを入れ替えた直後に光るエフェクトを発生させる
+						specialEffects.push(new SwapGlowEffect(selected.c, selected.r, c, r));
+						
                         selected = null;
                         
 				if (isLevelRainbow) {
@@ -2945,7 +3010,9 @@ update() {
                 if (type >= 0 && type < 7) {
                     clearedTypes[type] = (clearedTypes[type] || 0) + 1;
                 }
-                spawnParticles(m.c, m.r, CONFIG.COLORS[type] || "#ffffff");
+                if (type !== CONFIG.PANEL_TYPE.ALLCLEAR) {
+                    spawnParticles(m.c, m.r, CONFIG.COLORS[type] || "#ffffff");
+                }
                 board[m.r][m.c] = -1;
                 // 隣接マスが凍結中なら解凍
                 [[m.r-1, m.c], [m.r+1, m.c], [m.r, m.c-1], [m.r, m.c+1]].forEach(([nr, nc]) => {
@@ -3277,6 +3344,11 @@ update() {
 			[candidates[i], candidates[j]] = [candidates[j], candidates[i]];
 		}
 		const targets = candidates.slice(0, count);
+
+		// 中心にぽわんエフェクト（青系）
+		const cx = col * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
+		const cy = row * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
+		specialEffects.push(new RainyPopEffect(cx, cy));
 
 		// 1. 背景薄青＋雨粒エフェクト
 		rainyOverlayAlpha = 0.3;
