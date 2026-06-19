@@ -2473,7 +2473,7 @@ update() {
 					} else {
 						// 全消しパネルの出現チェック
 						if (allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
-							addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
+							await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
 							allClearSpawnCount = null; // 使用済みにする
 						}
 						updateRainbowUI();
