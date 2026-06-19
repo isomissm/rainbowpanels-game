@@ -2037,8 +2037,10 @@ update() {
 		almightyThreshold = CONFIG.THRESHOLD.ALMIGHTY_START;
 		darkFastThreshold = CONFIG.THRESHOLD.DARK_FAST_START;
         isGameOver = false;
-        gameElapsedTime = 0;
-        skillStock = 0; skillGauge = 0; particles = []; specialEffects = []; textEffects = []; dangerCounts = {}; frozenCells = {};
+		gameElapsedTime = 0;
+        gameStartTime = null;
+        document.getElementById('debug-time').textContent = `TIME: ${formatTime(0)}`;
+		skillStock = 0; skillGauge = 0; particles = []; specialEffects = []; textEffects = []; dangerCounts = {}; frozenCells = {};
         sunnyThreshold = CONFIG.THRESHOLD.SUNNY_START;
         rainyThreshold = CONFIG.THRESHOLD.RAINY_START;
         snowThreshold = CONFIG.THRESHOLD.SNOW_START;
@@ -2497,7 +2499,7 @@ update() {
 
                             await checkSnowFreezes();
                             
-                            checkDifficultyThresholds();
+                            await checkDifficultyThresholds();
                             
                             updateLevelUI(); 
                             draw();
@@ -2591,6 +2593,7 @@ update() {
         }
         if (!froze) return false;
 
+		isAnimating = true; // 凍結処理中は操作をロック
         // 1. 白いオーバーレイ＋雪エフェクト
         snowyOverlayAlpha = 0.5;
         specialEffects.push(new SnowyEffect(canvas.width, canvas.height));
@@ -2629,6 +2632,7 @@ update() {
         }
         snowyOverlayAlpha = 0;
         draw();
+        isAnimating = false; // 凍結処理完了、操作ロック解除
 
         return true;
     }
@@ -3011,7 +3015,9 @@ update() {
                     clearedTypes[type] = (clearedTypes[type] || 0) + 1;
                 }
                 if (type !== CONFIG.PANEL_TYPE.ALLCLEAR) {
-                    spawnParticles(m.c, m.r, CONFIG.COLORS[type] || "#ffffff");
+                    if (type !== CONFIG.PANEL_TYPE.ALLCLEAR) {
+                    spawnParticles(m.c, m.r, CONFIG.COLORS[type]);
+                }
                 }
                 board[m.r][m.c] = -1;
                 // 隣接マスが凍結中なら解凍
@@ -3102,42 +3108,42 @@ update() {
         isAnimating = false; draw();
     }
 
-    function checkDifficultyThresholds() {
+    async function checkDifficultyThresholds() {
         if (movesUntilNextObstacle <= 0) {
             addObstacle();
             obstacleDropCount++; 
             movesUntilNextObstacle = getCurrentObstaclePace();
         }
 		if (score >= CONFIG.THRESHOLD.RAINY_START && score >= rainyThreshold) {
-			addSingleSpecialPanel(CONFIG.PANEL_TYPE.RAINY);
+			await addSingleSpecialPanel(CONFIG.PANEL_TYPE.RAINY);
 			rainyThreshold += CONFIG.THRESHOLD.RAINY_INTERVAL;
 		}
         
         if (score >= CONFIG.THRESHOLD.LIGHT_START && score >= lightPanelThreshold) {
-            addSingleSpecialPanel(CONFIG.PANEL_TYPE.RAINBOW);
+            await addSingleSpecialPanel(CONFIG.PANEL_TYPE.RAINBOW);
             // レベルレインボー中は出現間隔を半分にする
             let interval = isLevelRainbow ? CONFIG.THRESHOLD.LIGHT_INTERVAL / 2 : CONFIG.THRESHOLD.LIGHT_INTERVAL;
             lightPanelThreshold += interval; 
         }
 
         if (score >= CONFIG.THRESHOLD.DARK_START && score >= darkPanelThreshold) { 
-            addSingleSpecialPanel(CONFIG.PANEL_TYPE.DARK);
+            await addSingleSpecialPanel(CONFIG.PANEL_TYPE.DARK);
             darkPanelThreshold += CONFIG.THRESHOLD.DARK_INTERVAL; 
         }
 		if (score >= CONFIG.THRESHOLD.ALMIGHTY_START && score >= almightyThreshold) {
-			addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALMIGHTY);
+			await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALMIGHTY);
 			almightyThreshold += CONFIG.THRESHOLD.ALMIGHTY_INTERVAL;
 		}
 		if (score >= CONFIG.THRESHOLD.DARK_FAST_START && score >= darkFastThreshold) {
-			addSingleSpecialPanel(CONFIG.PANEL_TYPE.DARK, CONFIG.DARK_PANEL_FAST_COUNT);
+			await addSingleSpecialPanel(CONFIG.PANEL_TYPE.DARK, CONFIG.DARK_PANEL_FAST_COUNT);
 			darkFastThreshold += CONFIG.THRESHOLD.DARK_FAST_INTERVAL;
 		}
 		if (score >= CONFIG.THRESHOLD.SUNNY_START && score >= sunnyThreshold) {
-			addSingleSpecialPanel(CONFIG.PANEL_TYPE.SUNNY);
+			await addSingleSpecialPanel(CONFIG.PANEL_TYPE.SUNNY);
 			sunnyThreshold += CONFIG.THRESHOLD.SUNNY_INTERVAL;
 		}
 		if (score >= CONFIG.THRESHOLD.SNOW_START && score >= snowThreshold) {
-			addSingleSpecialPanel(CONFIG.PANEL_TYPE.SNOW);
+			await addSingleSpecialPanel(CONFIG.PANEL_TYPE.SNOW);
 			snowThreshold += CONFIG.THRESHOLD.SNOW_INTERVAL;
 		}
     }
@@ -3200,7 +3206,7 @@ update() {
         }
     }
 
-	function addSingleSpecialPanel(type, initCount = CONFIG.DARK_PANEL_INIT_COUNT) {
+	async function addSingleSpecialPanel(type, initCount = CONFIG.DARK_PANEL_INIT_COUNT) {
 		let r, c; let tries = 0;
 		while (tries < 100) {
 			r = Math.floor(Math.random() * CONFIG.BOARD_SIZE);
@@ -3227,6 +3233,8 @@ update() {
 					dangerCounts[`${r},${c}`] = CONFIG.SNOW_COUNT;
 					specialEffects.push(new SpecialSpawnEffect(targetX, targetY, CONFIG.PANEL_TYPE.RAINBOW));
 				}
+				draw();
+				await new Promise(res => setTimeout(res, 500)); // 特殊パネル出現後に少し待つ
 				break;
 			}
 			tries++;
