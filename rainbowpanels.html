@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3つ並べパズル - Rainbow Panels (ver5.5.0)</title>
+<title>3つ並べパズル - Rainbow Panels (ver5.5.5)</title>
 <style>
 body {
     background-color: #CAF5FF;
@@ -228,7 +228,7 @@ canvas {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    padding: 25px 10px 15px 10px;
+    padding: 25px 10px 1px 10px;
     box-sizing: border-box;
 }
 #right-ui-bottom {
@@ -255,6 +255,26 @@ canvas {
     margin-bottom: 8px;
     letter-spacing: 0.05em;
     font-variant-numeric: tabular-nums;
+}
+.best-score-label-mobile {
+    display: none; /* PCでは非表示にする */
+}
+.view-ranking-btn {
+    font-size: 11px;
+    font-weight: 700;
+    color: #4a90e2;
+    background: #fff;
+    border: 1.5px solid #b2d4f5;
+    border-radius: 10px;
+    padding: 4px 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+}
+.view-ranking-btn-pc {
+    margin-bottom: 10px;
+}
+.view-ranking-btn-mobile {
+    display: none;
 }
 .score-val {
     font-size: 36px;
@@ -528,7 +548,6 @@ opacity: 0;
 }
 /* ゲームリセットボタン */
 #reset-btn {
-    margin-top: 10px;
     padding: 16px 45px;
     background: #ff7675;
     color: #fff;
@@ -544,6 +563,9 @@ opacity: 0;
 }
 #reset-btn:active {
     transform: scale(0.97);
+}
+.reset-btn-spacer {
+    height: 36px; /*リセットボタン上のスペース（PCブラウザレイアウト）*/
 }
 @keyframes rainbowBg {
 0% {
@@ -625,7 +647,15 @@ body {
     gap: 0;
 }
 #best-score {
-    display: none; /* スマホでは非表示 */
+    display: none; /* PC用のBEST表示はスマホでは使わない */
+}
+.best-score-label-mobile {
+    display: block;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 900;
+    color: #3D9DFF;
+    margin: 20px auto -20px auto;
 }
 #right-ui-top .ui-section-title {
     text-align: center;
@@ -704,6 +734,28 @@ canvas {
 #skill-box {
     width: 100%;
     padding: 8px 20px;
+}
+.view-ranking-btn-pc {
+    display: none;
+}
+.view-ranking-btn-mobile {
+    display: block;
+    margin: 24px auto 6px auto;
+}
+.reset-btn-mobile {
+    display: block;
+    margin: 0 auto;
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 3px 10px;
+    cursor: pointer;
+}
+.reset-btn-spacer {
+    height: 12px; /*リセットボタン上のスペース（スマホレイアウト）*/
 }
 }
 /*@mediaここまで*/
@@ -812,7 +864,9 @@ canvas {
         </div>
         <div style="font-size:11px; font-weight:900; margin-bottom:4px; color:#cbd5e1; text-align:left; width:85%; max-width:270px; letter-spacing: 0.05em;">🌈 TOP 10 RANKING</div>
         <div id="ranking-box"> </div>
-        <button onclick="initGame()" style="padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:13px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">もう一度挑戦</button>
+        <button id="retry-btn" onclick="initGame()" style="padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:13px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">もう一度プレイする</button>
+        <button id="reset-ranking-btn" onclick="confirmResetRanking()" style="margin-top:8px; padding:6px 16px; border-radius:20px; border:1.5px solid rgba(255,255,255,0.3); cursor:pointer; font-weight:700; font-size:11px; background:transparent; color:#cbd5e1;">ランキングをリセットする</button>
+        <button id="back-to-game-btn" onclick="closeRankingScreen()" style="display:none; padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:13px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">ゲームに戻る</button>
       </div>
     </div>
     <div id="level-status-bar"> <span id="status-level" class="status-level-val">LEVEL 1</span> <span class="status-next-label">Next
@@ -825,6 +879,7 @@ canvas {
   </div>
   <div id="right-ui">
     <div id="right-ui-top">
+      <button id="view-ranking-btn" onclick="showRankingScreen()" class="view-ranking-btn view-ranking-btn-pc">🏆 ランキングを見る</button>
       <div id="best-score" class="best-score-label">BEST: 0000</div>
       <div class="score-group">
         <div class="ui-section-title">SCORE</div>
@@ -852,9 +907,12 @@ canvas {
     </div>
   </div>
 </div>
+<div id="best-score-mobile" class="best-score-label-mobile">BEST: 0000</div>
+<button id="view-ranking-btn-mobile" onclick="showRankingScreen()" class="view-ranking-btn view-ranking-btn-mobile">🏆 ランキングを見る</button>
+<div class="reset-btn-spacer"></div>
+<button id="reset-btn" onclick="openResetModal()" class="reset-btn-mobile">ゲームをリセットする</button>
 <!-- ゲームの説明文 -->
-<div class="description">3手以内に同じ色のパネルを<br>
-  縦横3つ繋げて消してハイスコアを目指そう！<br>
+<div class="description">3手以内に同じ色のパネルを<br>  縦横3つ繋げて消してハイスコアを目指そう！<br>
   連鎖すると虹色ゲージが貯まって<br>
   BURSTカウンター（★）が増えるよ<br>
   <hr class="desc-divider">
@@ -909,7 +967,6 @@ canvas {
     </table>
   </div>
 </div>
-<button id="reset-btn" onclick="openResetModal()">ゲームをリセットする</button>
 <div id="reset-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="reset-modal-content">
     <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">最初からやりなおす？</h3>
@@ -1073,9 +1130,9 @@ const CONFIG = {
             RANK_3rd:    "#e17055", // ランキング3位（銅）
         },
 	
-		PARTICLE_COUNT_NORMAL:  10,  // 通常パネル消去時のパーティクル数
-		PARTICLE_COUNT_RAINBOW: 20,  // 虹玉・七色玉消去時のパーティクル数
-		PARTICLE_COUNT_SKILL:   12,  // スキル発動時のパーティクル数
+		PARTICLE_COUNT_NORMAL:  6,  // 通常パネル消去時のパーティクル数
+		PARTICLE_COUNT_RAINBOW: 12,  // 虹玉・七色玉消去時のパーティクル数
+		PARTICLE_COUNT_SKILL:   10,  // スキル発動時のパーティクル数
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🔧 システム内部用（基本的に変更不要）
@@ -1119,6 +1176,7 @@ const CONFIG = {
 
     let gameStartTime = null;
     let gameElapsedTime = 0;
+    let isPaused = false;
     
     let totalSpentMoves = 0;      
     let obstacleDropCount = 0;    
@@ -1369,6 +1427,40 @@ const CONFIG = {
 		get isFinished() { return this.rings.every(r => r.alpha <= 0); }
 	}
 	
+	class RainyPopEffect {
+		constructor(x, y) {
+			this.x = x; this.y = y;
+			this.rings = [
+				{ r: 0, alpha: 0.9, speed: 1.8 },
+				{ r: 0, alpha: 0.6, speed: 1.2 },
+				{ r: 0, alpha: 0.4, speed: 0.7 },
+			];
+		}
+		update() {
+			this.rings.forEach(ring => {
+				ring.r += ring.speed;
+				ring.alpha -= 0.022;
+			});
+		}
+		draw() {
+			this.rings.forEach(ring => {
+				if (ring.alpha <= 0) return;
+				ctx.save();
+				ctx.globalAlpha = ring.alpha;
+				let grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, ring.r);
+				grad.addColorStop(0,   "rgba(120, 200, 255, 1.0)");
+				grad.addColorStop(0.5, "rgba(30, 144, 255, 0.6)");
+				grad.addColorStop(1.0, "rgba(0, 100, 255, 0.0)");
+				ctx.fillStyle = grad;
+				ctx.beginPath();
+				ctx.arc(this.x, this.y, ring.r, 0, Math.PI * 2);
+				ctx.fill();
+				ctx.restore();
+			});
+		}
+		get isFinished() { return this.rings.every(r => r.alpha <= 0); }
+	}
+	
 	class RainyEffect {
 		constructor(canvasWidth, canvasHeight) {
 			this.drops = [];
@@ -1481,6 +1573,47 @@ update() {
 		get isFinished() { return this.age > this.duration; }
 	}
 
+	// パネル入れ替えのエフェクト（ぽわっと光る）
+	class SwapGlowEffect {
+		constructor(c1, r1, c2, r2) {
+			this.c1 = c1; this.r1 = r1;
+			this.c2 = c2; this.r2 = r2;
+			this.alpha = 1.0;
+		}
+		update() {
+			// ① 光が出現している時間を長くする（残像感を出す）
+			this.alpha -= 0.03; // 数値を小さくする（例: 0.02）と、ゆっくり消えるようになり目立ちます
+		}
+		draw() {
+			if (this.alpha <= 0) return;
+			ctx.save();
+			ctx.shadowColor = `rgba(255, 255, 255, ${this.alpha})`;
+			
+			// ② ぽわっとした光の広がりを大きくする
+			ctx.shadowBlur = 25; // 数値を大きくする（例: 25 〜 30）と、光の輪が広がります
+			
+			ctx.strokeStyle = `rgba(255, 255, 255, ${this.alpha})`;
+			
+			// ③ 光の芯（ベースの線）を太くする
+			ctx.lineWidth = 4; // 数値を大きくする（例: 5 〜 6）と、中心の光が強くなります
+			
+			// パネル1のフチを描画
+			let x1 = this.c1 * CONFIG.CELL_SIZE;
+			let y1 = this.r1 * CONFIG.CELL_SIZE;
+			roundRect(x1 + 5, y1 + 5, CONFIG.CELL_SIZE - 10, CONFIG.CELL_SIZE - 10, 9);
+			ctx.stroke();
+
+			// パネル2のフチを描画
+			let x2 = this.c2 * CONFIG.CELL_SIZE;
+			let y2 = this.r2 * CONFIG.CELL_SIZE;
+			roundRect(x2 + 5, y2 + 5, CONFIG.CELL_SIZE - 10, CONFIG.CELL_SIZE - 10, 9);
+			ctx.stroke();
+
+			ctx.restore();
+		}
+		get isFinished() { return this.alpha <= 0; }
+	}
+	
     class Particle {
         constructor(x, y, color, type = "star") {
             this.x = x; this.y = y; this.color = color; this.type = type;
@@ -1746,6 +1879,13 @@ update() {
     const RAINY_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><g fill="#0068E5"><rect x="23.6" y="37.2" width="2.3" height="16.2" transform="translate(10.1 -4.2) rotate(12.2)"/><path d="M19.3,70.1c2.4.5,4.7-1.6,4.6-4.6,0-2.2-.9-6.2-1.6-9.2-1.9,2.4-4.3,5.7-5.3,7.7-1.3,2.7-.1,5.5,2.3,6.1Z"/><rect x="40.4" y="39.1" width="2.3" height="22" transform="translate(11.5 -7.6) rotate(12.2)"/><path d="M35.4,77.8c2.4.5,4.7-1.6,4.6-4.6,0-2.2-.9-6.2-1.6-9.2-1.9,2.4-4.3,5.7-5.3,7.7-1.3,2.7-.1,5.5,2.3,6.1Z"/><rect x="57.8" y="37.7" width="2.3" height="20.6" transform="translate(11.5 -11.4) rotate(12.2)"/><path d="M53,75c2.4.5,4.7-1.6,4.6-4.6,0-2.2-.9-6.2-1.6-9.2-1.9,2.4-4.3,5.7-5.3,7.7s-.1,5.5,2.3,6.1Z"/></g><path fill="#DCE7E7" d="M61.3,12.9c-2.3-10.1-20.3-12-25.6-2.8-6.3-2.3-13.5,2.2-13.8,7.5-11.5,2-10.3,16,2.9,14.9,2.6,4.6,12.1,6.5,17.1,3.2,4.8,4.2,15.8,3,18.4-1.8,14.1.3,17.5-18.4,1-21Z"/></svg>';
 
     const CLOUD_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path fill="#ffffff" d="M66.9,30.7c-3-14.5-26.9-17.2-33.9-4-8.3-3.3-18,3.2-18.4,10.9-15.3,2.9-13.7,23.1,3.8,21.5,3.5,6.6,16,9.3,22.7,4.5,6.3,6,20.9,4.4,24.5-2.7,18.7.3,23.2-26.5,1.3-30.2Z"/></svg>';
+	
+	// 七色の玉のシェイプ（添付SVG：通常玉／勾玉風シェイプ）をPath2D化
+	const BALL_SHAPE_PATH_DATA = "M 41, 42 m -35, 0 a 35,35 0 1,0 70,0 a 35,35 0 1,0 -70,0";
+	const BALL_SHAPE = new Path2D(BALL_SHAPE_PATH_DATA);
+	// このパスのバウンディングボックスから求めた中心座標と縦幅（viewBox 0 0 85 85 基準）
+	const BALL_SHAPE_CENTER = { x: 40.84, y: 41.85 };
+	const BALL_SHAPE_HEIGHT = 69.32;
 
     const sunnyImage = new Image(); sunnyImage.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(SUNNY_ICON_SVG);
     sunnyImage.onload = () => draw(); sunnyImage.onerror = () => draw();
@@ -1786,6 +1926,7 @@ update() {
         let ranking = loadRanking();
         let best = ranking[0] ? ranking[0].score : 0;
         document.getElementById('best-score').innerText = "BEST: " + String(best).padStart(4, '0');
+        document.getElementById('best-score-mobile').innerText = "BEST: " + String(best).padStart(4, '0');
     }
 
     function showEndGameOverlay() {
@@ -1829,6 +1970,40 @@ update() {
         });
         document.getElementById('ranking-box').innerHTML = html;
     }
+	
+	function showRankingScreen() {
+        if (!isGameOver) {
+            isPaused = true;
+            gameElapsedTime = gameStartTime ? Date.now() - gameStartTime : gameElapsedTime;
+            document.getElementById('name-input-box').style.display = 'none';
+            document.getElementById('retry-btn').style.display = 'none';
+            document.getElementById('reset-ranking-btn').style.display = 'none';
+            document.getElementById('back-to-game-btn').style.display = 'inline-block';
+            document.querySelector('#overlay h2').style.display = 'none';
+            document.getElementById('final-score').style.display = 'none';
+        }
+        renderRankingList();
+        document.getElementById('overlay').style.display = 'flex';
+    }
+
+    function closeRankingScreen() {
+        isPaused = false;
+        if (gameStartTime) gameStartTime = Date.now() - gameElapsedTime;
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('back-to-game-btn').style.display = 'none';
+        document.getElementById('retry-btn').style.display = 'inline-block';
+        document.getElementById('reset-ranking-btn').style.display = 'inline-block';
+        document.querySelector('#overlay h2').style.display = 'block';
+        document.getElementById('final-score').style.display = 'block';
+    }
+
+    function confirmResetRanking() {
+        if (confirm("これまでのスコア記録を消して全部0に戻します。\n本当に消していいですか？")) {
+            localStorage.removeItem('rainbow_puzzle_ranking');
+            updateBestScoreDisplay();
+            renderRankingList();
+        }
+    }
 
     function saveRankedScore() {
         let nameField = document.getElementById('player-name-field');
@@ -1862,8 +2037,10 @@ update() {
 		almightyThreshold = CONFIG.THRESHOLD.ALMIGHTY_START;
 		darkFastThreshold = CONFIG.THRESHOLD.DARK_FAST_START;
         isGameOver = false;
-        gameElapsedTime = 0;
-        skillStock = 0; skillGauge = 0; particles = []; specialEffects = []; textEffects = []; dangerCounts = {}; frozenCells = {};
+		gameElapsedTime = 0;
+        gameStartTime = null;
+        document.getElementById('debug-time').textContent = `TIME: ${formatTime(0)}`;
+		skillStock = 0; skillGauge = 0; particles = []; specialEffects = []; textEffects = []; dangerCounts = {}; frozenCells = {};
         sunnyThreshold = CONFIG.THRESHOLD.SUNNY_START;
         rainyThreshold = CONFIG.THRESHOLD.RAINY_START;
         snowThreshold = CONFIG.THRESHOLD.SNOW_START;
@@ -1964,32 +2141,35 @@ update() {
                     ctx.textAlign = "center"; ctx.textBaseline = "middle";
 					ctx.fillText(count, x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2);
                     ctx.restore();
-                } else if (type >= CONFIG.PANEL_TYPE.BALL_MIN && type <= CONFIG.PANEL_TYPE.BALL_MAX) {
-                    // ▼ここから追加：7色の玉のグラデーション描画
+				} else if (type >= CONFIG.PANEL_TYPE.BALL_MIN && type <= CONFIG.PANEL_TYPE.BALL_MAX) {
+                    // ▼ここから追加：7色の玉のグラデーション描画（勾玉シェイプ）
                     let cIdx = type - 102;
                     ctx.save();
-                    let grad = ctx.createRadialGradient(
-                        x + CONFIG.CELL_SIZE/2 - 4, y + CONFIG.CELL_SIZE/2 - 4, 2, 
-                        x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 2
-                    );
 
-					grad.addColorStop(0, "#ffffff");              // 中心の一点だけを白に
-                    grad.addColorStop(0.15, CONFIG.COLORS[cIdx]); // 早めに本来の色に変化させる
-                    grad.addColorStop(0.85, CONFIG.COLORS[cIdx]); // 外側の手前まで本来の色をキープする
-                    grad.addColorStop(1.0, "#666666");            // フチの影を明るいグレーにして抑える（元は#222222）
-					
+                    const ballCx = x + CONFIG.CELL_SIZE/2;
+                    const ballCy = y + CONFIG.CELL_SIZE/2;
+                    const ballScale = (CONFIG.CELL_SIZE - 8) / BALL_SHAPE_HEIGHT; // 元の円と同じ大きさに揃える
+
+                    ctx.translate(ballCx, ballCy);
+                    ctx.scale(ballScale, ballScale);
+                    ctx.translate(-BALL_SHAPE_CENTER.x, -BALL_SHAPE_CENTER.y);
+
+                    let grad = ctx.createRadialGradient(
+						BALL_SHAPE_CENTER.x - 8, BALL_SHAPE_CENTER.y - 20, 2,   // 白い点の位置（x座標, y座標, 半径）
+						BALL_SHAPE_CENTER.x, BALL_SHAPE_CENTER.y, 50             // 全体の色が広がる範囲（位置は固定）
+					);
+
+					grad.addColorStop(0, "#ffffff");              // 白い点（やや左上にオフセット）
+                    grad.addColorStop(0.25, CONFIG.COLORS[cIdx]);  // 白→本来の色への変化を広めに取る ※白い点のサイズ変更はここの数値
+                    grad.addColorStop(0.75, CONFIG.COLORS[cIdx]); // 本来の色を保つ範囲
+                    grad.addColorStop(1.0, "#666666");            // フチの影
+
 					ctx.fillStyle = grad;
-                    ctx.beginPath(); 
-                    ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2); 
-                    ctx.fill();
-                    ctx.strokeStyle = "white"; 
-                    ctx.lineWidth = 1.5; 
-                    ctx.stroke();
+                    ctx.fill(BALL_SHAPE);
                     ctx.restore();
                     // ▲ここまで追加
 					
 				} else if (type === CONFIG.PANEL_TYPE.ALMIGHTY) {
-					ctx.save();
 					let grad = ctx.createLinearGradient(x, y, x + CONFIG.CELL_SIZE, y + CONFIG.CELL_SIZE);
 					grad.addColorStop(0.0,  '#ff4757');
 					grad.addColorStop(0.4, '#ffe53b');
@@ -2017,7 +2197,6 @@ update() {
 					ctx.beginPath();
 					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
-					ctx.strokeStyle = "white"; ctx.lineWidth = 1.5; ctx.stroke();
 					// 稲妻描画
 					let cx2 = x + CONFIG.CELL_SIZE/2;
 					let cy2 = y + CONFIG.CELL_SIZE/2;
@@ -2050,18 +2229,9 @@ update() {
 					ctx.beginPath();
 					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
-					ctx.strokeStyle = "white"; ctx.lineWidth = 1.5; ctx.stroke();
-					// アイコンを中央に描画（読み込めない場合は☀記号）
 					ctx.shadowBlur = 0;
-					if (sunnyImage.complete && sunnyImage.naturalWidth !== 0) {
-						const iconSize = 36;
-						ctx.drawImage(sunnyImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
-					} else {
-						ctx.fillStyle = "#ff6b00";
-						ctx.font = "bold 26px sans-serif";
-						ctx.textAlign = "center"; ctx.textBaseline = "middle";
-						ctx.fillText("☀", x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2 + 1);
-					}
+					const iconSize = 36;
+					ctx.drawImage(sunnyImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
 					ctx.restore();
 				} else if (type === CONFIG.PANEL_TYPE.RAINY) {
 					ctx.save();
@@ -2079,18 +2249,9 @@ update() {
 					ctx.beginPath();
 					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
-					ctx.strokeStyle = "white"; ctx.lineWidth = 1.5; ctx.stroke();
 					ctx.shadowBlur = 0;
-					// アイコンを中央に描画（読み込めない場合は🌧️記号）
-					if (rainyImage.complete && rainyImage.naturalWidth !== 0) {
-						const iconSize = 36;
-						ctx.drawImage(rainyImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
-					} else {
-						ctx.fillStyle = "#ffffff";
-						ctx.font = "bold 26px sans-serif";
-						ctx.textAlign = "center"; ctx.textBaseline = "middle";
-						ctx.fillText("🌧️", x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2 + 1);
-					}
+					const iconSize = 36;
+					ctx.drawImage(rainyImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
 					ctx.restore();
                 } else if (type === CONFIG.PANEL_TYPE.SNOW) {
 					// ❄ 雪玉（カウント表示 + カウント3以下で色変化）
@@ -2120,7 +2281,6 @@ update() {
 					ctx.beginPath();
 					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
-					ctx.strokeStyle = "white"; ctx.lineWidth = 1.5; ctx.stroke();
 					ctx.shadowBlur = 0;
 					// カウント表示：7〜4は濃い青、3以下は濃い赤紫
 					ctx.fillStyle = isCold ? "#8b0a50" : "#0984e3";
@@ -2259,15 +2419,15 @@ update() {
             if (textEffects[i].life <= 0) textEffects.splice(i, 1);
             else textEffects[i].draw();
         }
-		if (gameStartTime && !isGameOver) {
+		if (gameStartTime && !isGameOver && !isPaused) {
 			document.getElementById('debug-time').textContent = `TIME: ${formatTime(Date.now() - gameStartTime)}`;
-		} else if (isGameOver) {
+		} else if (isGameOver || isPaused) {
 			document.getElementById('debug-time').textContent = `TIME: ${formatTime(gameElapsedTime)}`;
 		}
 	}
 
     setInterval(() => {
-        if (!isGameOver) {
+        if (!isGameOver && !isPaused) {
             selectionPulse += 0.08; 
             draw();
         }
@@ -2281,7 +2441,7 @@ update() {
     }
 
     canvas.addEventListener('click', async (e) => {
-        if (isAnimating || isGameOver) return;
+        if (isAnimating || isGameOver || isPaused) return;document.getElementById('debug-time')
         const rect = canvas.getBoundingClientRect();
         const c = Math.floor((e.clientX - rect.left) / (rect.width / CONFIG.BOARD_SIZE));
         const r = Math.floor((e.clientY - rect.top) / (rect.height / CONFIG.BOARD_SIZE));
@@ -2299,6 +2459,10 @@ update() {
 						isAnimating = true;
                         const temp = board[r][c]; board[r][c] = board[selected.r][selected.c]; board[selected.r][selected.c] = temp;
 						lastMovedCell = [{r: selected.r, c: selected.c}, {r, c}];
+						
+						// ▼パネルを入れ替えた直後に光るエフェクトを発生させる
+						specialEffects.push(new SwapGlowEffect(selected.c, selected.r, c, r));
+						
                         selected = null;
                         
 				if (isLevelRainbow) {
@@ -2309,7 +2473,7 @@ update() {
 					} else {
 						// 全消しパネルの出現チェック
 						if (allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
-							addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
+							await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
 							allClearSpawnCount = null; // 使用済みにする
 						}
 						updateRainbowUI();
@@ -2335,7 +2499,7 @@ update() {
 
                             await checkSnowFreezes();
                             
-                            checkDifficultyThresholds();
+                            await checkDifficultyThresholds();
                             
                             updateLevelUI(); 
                             draw();
@@ -2429,6 +2593,7 @@ update() {
         }
         if (!froze) return false;
 
+		isAnimating = true; // 凍結処理中は操作をロック
         // 1. 白いオーバーレイ＋雪エフェクト
         snowyOverlayAlpha = 0.5;
         specialEffects.push(new SnowyEffect(canvas.width, canvas.height));
@@ -2467,6 +2632,7 @@ update() {
         }
         snowyOverlayAlpha = 0;
         draw();
+        isAnimating = false; // 凍結処理完了、操作ロック解除
 
         return true;
     }
@@ -2848,7 +3014,11 @@ update() {
                 if (type >= 0 && type < 7) {
                     clearedTypes[type] = (clearedTypes[type] || 0) + 1;
                 }
-                spawnParticles(m.c, m.r, CONFIG.COLORS[type] || "#ffffff");
+                if (type !== CONFIG.PANEL_TYPE.ALLCLEAR) {
+                    if (type !== CONFIG.PANEL_TYPE.ALLCLEAR) {
+                    spawnParticles(m.c, m.r, CONFIG.COLORS[type]);
+                }
+                }
                 board[m.r][m.c] = -1;
                 // 隣接マスが凍結中なら解凍
                 [[m.r-1, m.c], [m.r+1, m.c], [m.r, m.c-1], [m.r, m.c+1]].forEach(([nr, nc]) => {
@@ -2938,42 +3108,42 @@ update() {
         isAnimating = false; draw();
     }
 
-    function checkDifficultyThresholds() {
+    async function checkDifficultyThresholds() {
         if (movesUntilNextObstacle <= 0) {
             addObstacle();
             obstacleDropCount++; 
             movesUntilNextObstacle = getCurrentObstaclePace();
         }
 		if (score >= CONFIG.THRESHOLD.RAINY_START && score >= rainyThreshold) {
-			addSingleSpecialPanel(CONFIG.PANEL_TYPE.RAINY);
+			await addSingleSpecialPanel(CONFIG.PANEL_TYPE.RAINY);
 			rainyThreshold += CONFIG.THRESHOLD.RAINY_INTERVAL;
 		}
         
         if (score >= CONFIG.THRESHOLD.LIGHT_START && score >= lightPanelThreshold) {
-            addSingleSpecialPanel(CONFIG.PANEL_TYPE.RAINBOW);
+            await addSingleSpecialPanel(CONFIG.PANEL_TYPE.RAINBOW);
             // レベルレインボー中は出現間隔を半分にする
             let interval = isLevelRainbow ? CONFIG.THRESHOLD.LIGHT_INTERVAL / 2 : CONFIG.THRESHOLD.LIGHT_INTERVAL;
             lightPanelThreshold += interval; 
         }
 
         if (score >= CONFIG.THRESHOLD.DARK_START && score >= darkPanelThreshold) { 
-            addSingleSpecialPanel(CONFIG.PANEL_TYPE.DARK);
+            await addSingleSpecialPanel(CONFIG.PANEL_TYPE.DARK);
             darkPanelThreshold += CONFIG.THRESHOLD.DARK_INTERVAL; 
         }
 		if (score >= CONFIG.THRESHOLD.ALMIGHTY_START && score >= almightyThreshold) {
-			addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALMIGHTY);
+			await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALMIGHTY);
 			almightyThreshold += CONFIG.THRESHOLD.ALMIGHTY_INTERVAL;
 		}
 		if (score >= CONFIG.THRESHOLD.DARK_FAST_START && score >= darkFastThreshold) {
-			addSingleSpecialPanel(CONFIG.PANEL_TYPE.DARK, CONFIG.DARK_PANEL_FAST_COUNT);
+			await addSingleSpecialPanel(CONFIG.PANEL_TYPE.DARK, CONFIG.DARK_PANEL_FAST_COUNT);
 			darkFastThreshold += CONFIG.THRESHOLD.DARK_FAST_INTERVAL;
 		}
 		if (score >= CONFIG.THRESHOLD.SUNNY_START && score >= sunnyThreshold) {
-			addSingleSpecialPanel(CONFIG.PANEL_TYPE.SUNNY);
+			await addSingleSpecialPanel(CONFIG.PANEL_TYPE.SUNNY);
 			sunnyThreshold += CONFIG.THRESHOLD.SUNNY_INTERVAL;
 		}
 		if (score >= CONFIG.THRESHOLD.SNOW_START && score >= snowThreshold) {
-			addSingleSpecialPanel(CONFIG.PANEL_TYPE.SNOW);
+			await addSingleSpecialPanel(CONFIG.PANEL_TYPE.SNOW);
 			snowThreshold += CONFIG.THRESHOLD.SNOW_INTERVAL;
 		}
     }
@@ -3036,7 +3206,7 @@ update() {
         }
     }
 
-	function addSingleSpecialPanel(type, initCount = CONFIG.DARK_PANEL_INIT_COUNT) {
+	async function addSingleSpecialPanel(type, initCount = CONFIG.DARK_PANEL_INIT_COUNT) {
 		let r, c; let tries = 0;
 		while (tries < 100) {
 			r = Math.floor(Math.random() * CONFIG.BOARD_SIZE);
@@ -3063,6 +3233,8 @@ update() {
 					dangerCounts[`${r},${c}`] = CONFIG.SNOW_COUNT;
 					specialEffects.push(new SpecialSpawnEffect(targetX, targetY, CONFIG.PANEL_TYPE.RAINBOW));
 				}
+				draw();
+				await new Promise(res => setTimeout(res, 500)); // 特殊パネル出現後に少し待つ
 				break;
 			}
 			tries++;
@@ -3180,6 +3352,11 @@ update() {
 			[candidates[i], candidates[j]] = [candidates[j], candidates[i]];
 		}
 		const targets = candidates.slice(0, count);
+
+		// 中心にぽわんエフェクト（青系）
+		const cx = col * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
+		const cy = row * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
+		specialEffects.push(new RainyPopEffect(cx, cy));
 
 		// 1. 背景薄青＋雨粒エフェクト
 		rainyOverlayAlpha = 0.3;
