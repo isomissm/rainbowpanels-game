@@ -1880,7 +1880,7 @@ update() {
 
     const CLOUD_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path fill="#ffffff" d="M66.9,30.7c-3-14.5-26.9-17.2-33.9-4-8.3-3.3-18,3.2-18.4,10.9-15.3,2.9-13.7,23.1,3.8,21.5,3.5,6.6,16,9.3,22.7,4.5,6.3,6,20.9,4.4,24.5-2.7,18.7.3,23.2-26.5,1.3-30.2Z"/></svg>';
 	
-	// 七色の玉のシェイプ（添付SVG：通常玉／勾玉シェイプ）をPath2D化
+	// 七色の玉のシェイプ（SVG：通常玉／勾玉シェイプ）をPath2D化
 	const BALL_SHAPE_PATH_DATA = "M 41, 42 m -35, 0 a 35,35 0 1,0 70,0 a 35,35 0 1,0 -70,0";
 	const BALL_SHAPE = new Path2D(BALL_SHAPE_PATH_DATA);
 	// このパスのバウンディングボックスから求めた中心座標と縦幅（viewBox 0 0 85 85 基準）
@@ -2102,24 +2102,24 @@ update() {
                     ctx.beginPath(); ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2); ctx.fill();
                     ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
                     
-                    const glints = [
-                        { ox: 12, oy: 13, freq: 0.6, offset: 0.0 },  
-                        { ox: 38, oy: 11, freq: 0.4, offset: 1.8 },  
-                        { ox: 14, oy: 40, freq: 0.5, offset: 3.2 },  
-                        { ox: 39, oy: 38, freq: 0.7, offset: 4.5 },  
-                        { ox: 25, oy: 15, freq: 0.45, offset: 2.5 }, 
-                        { ox: 27, oy: 36, freq: 0.55, offset: 5.8 }  
-                    ];
-                    
-                    glints.forEach(g => {
-                        let wave = Math.sin(selectionPulse * g.freq + g.offset) - 0.35;
+					// ▼虹玉のキラキラエフェクト出現位置と周期をランダム化
+                    let rbSeed = r * 928371 + c * 137 + 17; // セル位置から固定の種を作る
+                    const rbRand = () => { rbSeed = (rbSeed * 9301 + 49297) % 233280; return rbSeed / 233280; }; // 簡易疑似乱数
+
+                    for (let i = 0; i < 6; i++) {
+                        let ox = 8 + rbRand() * 38;
+                        let oy = 8 + rbRand() * 38;
+                        let freq = 0.35 + rbRand() * 0.4;
+                        let offset = rbRand() * 6.28;
+
+                        let wave = Math.sin(selectionPulse * freq + offset) - 0.35;
                         if (wave > 0) {
                             let alpha = Math.min(wave * 1.5, 0.9);
                             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
                             ctx.font = "13px sans-serif";
-                            ctx.fillText("✦", x + g.ox, y + g.oy);
+                            ctx.fillText("✦", x + ox, y + oy);
                         }
-                    });                    
+                    }
                     ctx.restore();
 				} else if (type === CONFIG.PANEL_TYPE.DARK) {
                     ctx.save();
@@ -2168,25 +2168,24 @@ update() {
                     ctx.fill(BALL_SHAPE);
                     ctx.restore();
 
-                    // ▼虹玉と同じキラキラエフェクト（セルごとにズラす）
-                    const cellSeed = (r * 7 + c * 13) % 10; // セル位置から疑似ランダムな種を作る
-                    const ballGlints = [
-                        { ox: 12, oy: 13, freq: 0.6,  offset: 0.0 },  
-                        { ox: 38, oy: 11, freq: 0.4,  offset: 1.8 },  
-                        { ox: 14, oy: 40, freq: 0.5,  offset: 3.2 },  
-                        { ox: 39, oy: 38, freq: 0.7,  offset: 4.5 },  
-                        { ox: 25, oy: 15, freq: 0.45, offset: 2.5 }, 
-                        { ox: 27, oy: 36, freq: 0.55, offset: 5.8 }  
-                    ];
-                    ballGlints.forEach(g => {
-                        let wave = Math.sin(selectionPulse * g.freq + g.offset + cellSeed) - 0.35;
+                    // ▼七色の玉のキラキラエフェクト出現位置と周期をランダム化
+                    let seed = r * 928371 + c * 137 + 17; // セル位置から固定の種を作る
+                    const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }; // 簡易疑似乱数（同じseedなら毎回同じ値）
+
+                    for (let i = 0; i < 6; i++) {
+                        let ox = 8 + rand() * 38;   // 玉の範囲内でランダムな位置
+                        let oy = 8 + rand() * 38;
+                        let freq = 0.35 + rand() * 0.4;  // 光る速さもランダム
+                        let offset = rand() * 6.28;      // 光るタイミングもランダム
+
+                        let wave = Math.sin(selectionPulse * freq + offset) - 0.35;
                         if (wave > 0) {
                             let alpha = Math.min(wave * 1.5, 0.9);
                             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
                             ctx.font = "13px sans-serif";
-                            ctx.fillText("✦", x + g.ox, y + g.oy);
+                            ctx.fillText("✦", x + ox, y + oy);
                         }
-                    });
+                    }
 						
 				} else if (type === CONFIG.PANEL_TYPE.ALMIGHTY) {
 					let grad = ctx.createLinearGradient(x, y, x + CONFIG.CELL_SIZE, y + CONFIG.CELL_SIZE);
