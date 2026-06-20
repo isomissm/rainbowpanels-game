@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3つ並べパズル - Rainbow Panels (ver5.5.6)</title>
+<title>3つ並べパズル - Rainbow Panels (ver5.5.7)</title>
 <style>
 body {
     background-color: #CAF5FF;
@@ -3066,8 +3066,10 @@ update() {
 					spawnRainbowParticles(s.c, s.r);
 					if (skillStock < CONFIG.SKILL_STOCK_MAX) {
 						const canvasRect = canvas.getBoundingClientRect();
-						const panelX = canvasRect.left + (s.c * CONFIG.CELL_SIZE) + (CONFIG.CELL_SIZE / 2) + window.scrollX;
-						const panelY = canvasRect.top + (s.r * CONFIG.CELL_SIZE) + (CONFIG.CELL_SIZE / 2) + window.scrollY;
+						const scaleX = canvasRect.width / canvas.width;
+						const scaleY = canvasRect.height / canvas.height;
+						const panelX = canvasRect.left + (s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * scaleX + window.scrollX;
+						const panelY = canvasRect.top + (s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * scaleY + window.scrollY;
 						setTimeout(() => {
 							if (!isGameOver) animateCurveChargeParticle(panelX, panelY);
 						}, 500);
@@ -3077,8 +3079,10 @@ update() {
 				} else if (board[s.r][s.c] >= CONFIG.PANEL_TYPE.BALL_MIN && board[s.r][s.c] <= CONFIG.PANEL_TYPE.BALL_MAX) {
 					spawnRainbowParticles(s.c, s.r);
 					const canvasRect = canvas.getBoundingClientRect();
-					const ballFromX = canvasRect.left + (s.c * CONFIG.CELL_SIZE) + (CONFIG.CELL_SIZE / 2);
-					const ballFromY = canvasRect.top  + (s.r * CONFIG.CELL_SIZE) + (CONFIG.CELL_SIZE / 2);
+					const scaleX = canvasRect.width / canvas.width;
+					const scaleY = canvasRect.height / canvas.height;
+					const ballFromX = canvasRect.left + (s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * scaleX;
+					const ballFromY = canvasRect.top  + (s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * scaleY;
 					collectRainbowBall(board[s.r][s.c] - 102, ballFromX, ballFromY);
 				} else if (board[s.r][s.c] === CONFIG.PANEL_TYPE.ALLCLEAR) {
 					board[s.r][s.c] = -1;
