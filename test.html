@@ -351,23 +351,32 @@ background-position: -200% 0%;
     justify-content: center;
 }
 .stock-star {
-    font-size: 34px;
-    color: #cbd5e1;
-    text-shadow: 0 1px 1px rgba(0,0,0,0.1);
-    display: inline-block;
-    line-height: 1;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-/* 星がアクティブな時の虹色グラデーション */
-.stock-star.active {
-    background: linear-gradient(90deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff4757);
-    background-size: 200% 100%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: rainbowFlow 4s linear infinite, starPopStyle 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    text-shadow: none;
+.stock-star svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+/* BURSTカウンター未獲得時（グレー） */
+.stock-star .rb-arc {
+    fill: #cbd5e1;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+}
+.stock-star.active .rb-arc {
     filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.15));
+}
+#stock-1.active .rb-arc { fill: url(#rbArcGrad1); }
+#stock-2.active .rb-arc { fill: url(#rbArcGrad2); }
+#stock-3.active .rb-arc { fill: url(#rbArcGrad3); }
+.stock-star.active {
+    animation: starPopStyle 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 @keyframes starPopStyle {
 0% {
@@ -377,7 +386,7 @@ transform: scale(1);
 transform: scale(1.4);
 }
 100% {
-transform: scale(1.15);
+transform: scale(1);
 }
 }
 /* ボタン背後で広がるパステルカラー波紋 */
@@ -594,7 +603,7 @@ background: #ffd6d6;
     animation: rainbowBg 4s linear infinite;
 }
 .rainbow-moves {
-    background: linear-gradient(90deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff9300, #ff4757);
+    background: linear-gradient(90deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff4757);
     background-size: 200% 100%;
     animation: rainbowFlow 2s linear infinite;
     -webkit-background-clip: text;
@@ -897,10 +906,57 @@ canvas {
       </div>
       <div class="skill-combined-box" id="skill-box">
         <div class="stock-container" id="stars-container-row">
-          <div id="stock-1" class="stock-star">★</div>
-          <div id="stock-2" class="stock-star">★</div>
-          <div id="stock-3" class="stock-star">★</div>
+		<div id="stock-1" class="stock-star">
+            <svg viewBox="0 0 85 85">
+              <defs>
+                <radialGradient id="rbArcGrad1" cx="100%" cy="100%" r="95%">
+                  <stop offset="0%"  stop-color="#c175ff"/>
+                  <stop offset="46%" stop-color="#c175ff"/>
+                  <stop offset="52%" stop-color="#6c5ce7"/>
+                  <stop offset="60%" stop-color="#1e90ff"/>
+                  <stop offset="68%" stop-color="#2ed573"/>
+                  <stop offset="80%" stop-color="#ffe53b"/>
+                  <stop offset="100%" stop-color="#ff4757"/>
+                </radialGradient>
+              </defs>
+              <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
+            </svg>
+          </div>
+		<div id="stock-2" class="stock-star">
+            <svg viewBox="0 0 85 85">
+              <defs>
+                <radialGradient id="rbArcGrad2" cx="100%" cy="100%" r="95%">
+                  <stop offset="0%"  stop-color="#c175ff"/>
+                  <stop offset="46%" stop-color="#c175ff"/>
+                  <stop offset="52%" stop-color="#6c5ce7"/>
+                  <stop offset="60%" stop-color="#1e90ff"/>
+                  <stop offset="68%" stop-color="#2ed573"/>
+                  <stop offset="80%" stop-color="#ffe53b"/>
+                  <stop offset="100%" stop-color="#ff4757"/>
+                </radialGradient>
+              </defs>
+              <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
+            </svg>
+          </div>
+		<div id="stock-3" class="stock-star">
+            <svg viewBox="0 0 85 85">
+              <defs>
+                <radialGradient id="rbArcGrad3" cx="100%" cy="100%" r="95%">
+                  <stop offset="0%"  stop-color="#c175ff"/>
+                  <stop offset="46%" stop-color="#c175ff"/>
+                  <stop offset="52%" stop-color="#6c5ce7"/>
+                  <stop offset="60%" stop-color="#1e90ff"/>
+                  <stop offset="68%" stop-color="#2ed573"/>
+                  <stop offset="80%" stop-color="#ffe53b"/>
+                  <stop offset="100%" stop-color="#ff4757"/>
+                </radialGradient>
+              </defs>
+              <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
+            </svg>
+          </div>
+			
         </div>
+		  
         <button id="skill-btn" onclick="triggerSkillWithEffects()" disabled>RAINBOW<br>
         BURST!</button>
       </div>
@@ -912,9 +968,10 @@ canvas {
 <div class="reset-btn-spacer"></div>
 <button id="reset-btn" onclick="openResetModal()" class="reset-btn-mobile">ゲームをリセットする</button>
 <!-- ゲームの説明文 -->
-<div class="description">3手以内に同じ色のパネルを<br>  縦横3つ繋げて消してハイスコアを目指そう！<br>
-  連鎖すると虹色ゲージが貯まって<br>
-  BURSTカウンター（★）が増えるよ<br>
+<div class="description">3手以内に同じ色のパネルを<br>
+  縦横3つ繋げて消してハイスコアを目指そう！<br>
+  連鎖するとレインボーゲージが貯まって<br>
+  BURSTカウンター(🌈)が増えるよ<br>
   <hr class="desc-divider">
   《<span class="mini-dark-img"></span>闇玉・ <span class="mini-rainbow-img"></span>虹玉・<span class="mini-allclear-img">
   <svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600">
@@ -946,7 +1003,7 @@ canvas {
       </tr>
       <tr>
         <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-rainbow-img"></span></td>
-        <td style="padding: 2px 0;">虹玉：隣接したパネルを消すとBURSTカウンター（★）が増える</td>
+        <td style="padding: 2px 0;">虹玉：隣接したパネルを消すとBURSTカウンター(🌈)が増える</td>
       </tr>
       <tr>
         <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-allclear-img">
@@ -1092,8 +1149,8 @@ const CONFIG = {
             RAINY_INTERVAL:   5000,  // 以降の雨玉出現間隔
             RAINY_COUNT_MIN:     7,  // 雨玉の効果の青パネル出現数（最低値）
             RAINY_COUNT_MAX:     9,  // 雨玉の効果の青パネル出現数（最高値）
-			SNOW_START:      22000,  // 雪玉が初めて出現するスコア
-            SNOW_INTERVAL:    2500,  // 以降の雪玉出現間隔
+			SNOW_START:      20000,  // 雪玉が初めて出現するスコア
+            SNOW_INTERVAL:    2480,  // 以降の雪玉出現間隔
 
         },
 
