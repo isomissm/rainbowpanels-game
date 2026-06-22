@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3つ並べパズル - Rainbow Panels (ver6.0.0)</title>
+<title>3つ並べパズル - Rainbow Panels (ver6.1.0)</title>
 <style>
 body {
     background-color: #CAF5FF;
@@ -170,12 +170,11 @@ canvas {
 .mini-rainbow-img {
     width: 16px;
     height: 16px;
-    background: radial-gradient(circle, #ff4757 0%, #ffe53b 25%, #2ed573 50%, #1e90ff 75%, #c175ff 100%);
+    background: radial-gradient(circle, #c175ff 0%, #1e90ff 25%, #2ed573 40%, #ffe53b 55%, #ff4757 70%, #ff4757 100%);
     border-radius: 50%;
     display: inline-flex;
     vertical-align: middle;
     margin: 0 2px 3px 2px;
-    border: 1px solid #fff;
 }
 /* 説明文用のミニ雷玉画像（丸型） */
 .mini-allclear-img {
@@ -188,7 +187,6 @@ canvas {
     justify-content: center;
     vertical-align: middle;
     margin: 0 2px 3px 2px;
-    border: 1px solid #fff;
 }
 /* 説明文用のミニオールマイティ画像（角丸四角型） */
 .mini-almighty-img {
@@ -344,24 +342,25 @@ background-position: -200% 0%;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
     position: relative;
 }
-/* BURSTカウンターの星（★） */
+/* BURSTカウンター（形を★→🌈に変更した） */
 .stock-container {
     display: flex;
     gap: 8px;
     justify-content: center;
 }
 .stock-star {
-    width: 34px;
-    height: 34px;
+    width: 34px;  /* BURSTカウンターアイコン サイズの幅 */
+    height: 34px; /* BURSTカウンターアイコン サイズの高さ */
     display: inline-flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* ⚠️ transform: scale(1); と transform-origin: center; をここから削除 */
+    /* 通常時は変形を「一切行わない」状態にすることで、ブラウザの計算バグを排除します */
 }
 .stock-star svg {
-    width: 100%;
-    height: 100%;
+    width: 100%;  /* BURSTカウンター親要素（.stock-star {width:）に対して100%の幅で表示 */
+    height: 100%; /* BURSTカウンター親要素（.stock-star {height:）に対して100%の高さで表示 */
     display: block;
 }
 /* BURSTカウンター未獲得時（グレー） */
@@ -372,12 +371,14 @@ background-position: -200% 0%;
 .stock-star.active .rb-arc {
     filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.15));
 }
-#stock-1.active .rb-arc { fill: url(#rbArcGrad1); }
-#stock-2.active .rb-arc { fill: url(#rbArcGrad2); }
-#stock-3.active .rb-arc { fill: url(#rbArcGrad3); }
+.stock-star.active .rb-arc { fill: url(#rbArcGrad); }
+
+/* アクティブ時（カウンター獲得時）だけ、変形の基準点とアニメーションを適用する */
 .stock-star.active {
+    transform-origin: center;
     animation: starPopStyle 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
+/* BURSTカウンターが増えた時のサイズエフェクト */
 @keyframes starPopStyle {
 0% {
 transform: scale(1);
@@ -389,6 +390,8 @@ transform: scale(1.4);
 transform: scale(1);
 }
 }
+/* BURSTカウンターここまで */
+
 /* ボタン背後で広がるパステルカラー波紋 */
 .shockwave-ring {
     position: absolute;
@@ -905,56 +908,36 @@ canvas {
         <div id="gauge-fill" class="gauge-bar-fill"></div>
       </div>
       <div class="skill-combined-box" id="skill-box">
-        <div class="stock-container" id="stars-container-row">
+<div class="stock-container" id="stars-container-row">
+        <!-- 共有グラデーション定義（非表示SVG） -->
+        <svg width="0" height="0" style="position:absolute">
+          <defs>
+            <radialGradient id="rbArcGrad" cx="100%" cy="100%" r="95%">
+              <stop offset="0%"  stop-color="#c175ff"/>
+              <stop offset="46%" stop-color="#c175ff"/>
+              <stop offset="52%" stop-color="#6c5ce7"/>
+              <stop offset="60%" stop-color="#1e90ff"/>
+              <stop offset="68%" stop-color="#2ed573"/>
+              <stop offset="80%" stop-color="#ffe53b"/>
+              <stop offset="100%" stop-color="#ff4757"/>
+            </radialGradient>
+          </defs>
+        </svg>
 		<div id="stock-1" class="stock-star">
             <svg viewBox="0 0 85 85">
-              <defs>
-                <radialGradient id="rbArcGrad1" cx="100%" cy="100%" r="95%">
-                  <stop offset="0%"  stop-color="#c175ff"/>
-                  <stop offset="46%" stop-color="#c175ff"/>
-                  <stop offset="52%" stop-color="#6c5ce7"/>
-                  <stop offset="60%" stop-color="#1e90ff"/>
-                  <stop offset="68%" stop-color="#2ed573"/>
-                  <stop offset="80%" stop-color="#ffe53b"/>
-                  <stop offset="100%" stop-color="#ff4757"/>
-                </radialGradient>
-              </defs>
               <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
             </svg>
           </div>
 		<div id="stock-2" class="stock-star">
             <svg viewBox="0 0 85 85">
-              <defs>
-                <radialGradient id="rbArcGrad2" cx="100%" cy="100%" r="95%">
-                  <stop offset="0%"  stop-color="#c175ff"/>
-                  <stop offset="46%" stop-color="#c175ff"/>
-                  <stop offset="52%" stop-color="#6c5ce7"/>
-                  <stop offset="60%" stop-color="#1e90ff"/>
-                  <stop offset="68%" stop-color="#2ed573"/>
-                  <stop offset="80%" stop-color="#ffe53b"/>
-                  <stop offset="100%" stop-color="#ff4757"/>
-                </radialGradient>
-              </defs>
               <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
             </svg>
           </div>
 		<div id="stock-3" class="stock-star">
             <svg viewBox="0 0 85 85">
-              <defs>
-                <radialGradient id="rbArcGrad3" cx="100%" cy="100%" r="95%">
-                  <stop offset="0%"  stop-color="#c175ff"/>
-                  <stop offset="46%" stop-color="#c175ff"/>
-                  <stop offset="52%" stop-color="#6c5ce7"/>
-                  <stop offset="60%" stop-color="#1e90ff"/>
-                  <stop offset="68%" stop-color="#2ed573"/>
-                  <stop offset="80%" stop-color="#ffe53b"/>
-                  <stop offset="100%" stop-color="#ff4757"/>
-                </radialGradient>
-              </defs>
               <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
             </svg>
           </div>
-			
         </div>
 		  
         <button id="skill-btn" onclick="triggerSkillWithEffects()" disabled>RAINBOW<br>
@@ -2149,12 +2132,13 @@ update() {
                 if (type === CONFIG.PANEL_TYPE.RAINBOW) {
                     ctx.save();
                     let grad = ctx.createRadialGradient(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, 1, x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4);
-                    grad.addColorStop(0, '#ff4757');   
-                    grad.addColorStop(0.25, '#ffe53b'); 
-                    grad.addColorStop(0.5, '#2ed573');  
-                    grad.addColorStop(0.7, '#1e90ff');  
-                    grad.addColorStop(0.9, '#c175ff');  
-                    grad.addColorStop(1.0, '#d63031');  
+					/* 虹玉のグラデーション 色順の設定 */
+					grad.addColorStop(0, '#c175ff');   
+					grad.addColorStop(0.2, '#1e90ff'); 
+					grad.addColorStop(0.45, '#2ed573');  
+					grad.addColorStop(0.65, '#ffe53b');  
+					grad.addColorStop(0.85, '#ff4757');  
+					grad.addColorStop(1.0, '#c82333'); 
                     ctx.fillStyle = grad;
                     ctx.beginPath(); ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2); ctx.fill();
                     ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
@@ -2862,10 +2846,12 @@ update() {
             star.classList.remove('charging-flash');
         }
 		const fill = document.getElementById('gauge-fill');
-        if (fill.style.opacity !== '0' && fill.dataset.locked !== "true") {
-			const remainPercent = 100 - ((skillGauge / CONFIG.GAUGE_MAX) * 100);
-			fill.style.clipPath = `inset(0px ${remainPercent}% 0px 0px)`;
-		}
+        if (skillStock >= CONFIG.SKILL_STOCK_MAX) {
+            fill.style.clipPath = 'inset(0px 100% 0px 0px)';
+        } else if (fill.style.opacity !== '0' && fill.dataset.locked !== "true") {
+            const remainPercent = 100 - ((skillGauge / CONFIG.GAUGE_MAX) * 100);
+            fill.style.clipPath = `inset(0px ${remainPercent}% 0px 0px)`;
+        }
         
 		const isTargetSelected = selected && (board[selected.r][selected.c] === CONFIG.PANEL_TYPE.OBSTACLE || board[selected.r][selected.c] === CONFIG.PANEL_TYPE.DARK || board[selected.r][selected.c] === CONFIG.PANEL_TYPE.ALLCLEAR || board[selected.r][selected.c] === CONFIG.PANEL_TYPE.SUNNY || board[selected.r][selected.c] === CONFIG.PANEL_TYPE.RAINY || board[selected.r][selected.c] === CONFIG.PANEL_TYPE.SNOW);
         const btn = document.getElementById('skill-btn');
@@ -2920,14 +2906,10 @@ update() {
                     requestAnimationFrame(frame);
                 } else {
                     p.remove();
-                    skillStock++; 
-                    updateSkillUI(); 
-
-                    targetStar.style.transform = "scale(1.5)";
-                    setTimeout(() => {
-                        targetStar.style.transform = "scale(1.15)";
-                    }, 150);
-
+                    if (skillStock < CONFIG.SKILL_STOCK_MAX) {
+                        skillStock++;
+                        updateSkillUI();
+                    } 
                     resolve();
                 }
             }
@@ -2981,7 +2963,9 @@ update() {
 		// 5. インラインの transition を消して CSS 側に戻す
 		fill.style.transition = '';
 
-		await animateCurveChargeParticle();
+		if (skillStock < CONFIG.SKILL_STOCK_MAX) {
+            await animateCurveChargeParticle();
+        }
 }
 	
 	function checkMatches() {
