@@ -912,6 +912,7 @@ canvas {
         <!-- 共有グラデーション定義（非表示SVG） -->
         <svg width="0" height="0" style="position:absolute">
           <defs>
+			<!-- BURSTカウンターの虹色グラデーション設定 -->
             <radialGradient id="rbArcGrad" cx="100%" cy="100%" r="95%">
               <stop offset="0%"  stop-color="#c175ff"/>
               <stop offset="46%" stop-color="#c175ff"/>
@@ -2134,14 +2135,13 @@ update() {
                     let grad = ctx.createRadialGradient(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, 1, x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4);
 					/* 虹玉のグラデーション 色順の設定 */
 					grad.addColorStop(0, '#c175ff');   
-					grad.addColorStop(0.2, '#1e90ff'); 
+					grad.addColorStop(0.3, '#1e90ff'); 
 					grad.addColorStop(0.45, '#2ed573');  
 					grad.addColorStop(0.65, '#ffe53b');  
-					grad.addColorStop(0.85, '#ff4757');  
+					grad.addColorStop(0.9, '#FF6A39');  
 					grad.addColorStop(1.0, '#c82333'); 
                     ctx.fillStyle = grad;
                     ctx.beginPath(); ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2); ctx.fill();
-                    ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
                     
 					// ▼虹玉のキラキラエフェクト出現位置と周期をランダム化
                     let rbSeed = r * 928371 + c * 137 + 17; // セル位置から固定の種を作る
