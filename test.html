@@ -1073,15 +1073,15 @@ const CONFIG = {
         // 🟦 パネル種類数（スコアで解放）
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         BASE_TYPE_COUNT:        5,     // 開始時のパネル種類数（赤〜紫）
-        ORANGE_UNLOCK_SCORE: 4500,     // 橙パネルが追加されるスコア
-        INDIGO_UNLOCK_SCORE: 6000,     // 藍パネルが追加されるスコア
+        ORANGE_UNLOCK_SCORE: 5500,     // 橙パネルが追加されるスコア
+        INDIGO_UNLOCK_SCORE: 7500,     // 藍パネルが追加されるスコア
 	
 	     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🏆 スコア・コンボ設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         SCORE: {
-            BASE:        { 3: 30, 4: 60, 5: 100, 6: 180 }, // 同時消し数ごとの基本スコア（6以上は180）
-            COMBO_BONUS: { 1: 30, 2: 30, 3:  40, 4:  60, 5: 100 }, // コンボ数ごとの加算ボーナス（5以上は100）
+            BASE:        { 3: 30, 4: 70, 5: 120, 6: 200 }, // 同時消し数ごとの基本スコア（6以上は180）
+            COMBO_BONUS: { 1: 30, 2: 40, 3:  60, 4:  90, 5: 150 }, // コンボ数ごとの加算ボーナス（5以上は150）
         },
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1111,7 +1111,7 @@ const CONFIG = {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🟣 闇玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        DARK_PANEL_INIT_COUNT: 9,   // 通常闇玉の初期カウントダウン
+        DARK_PANEL_INIT_COUNT: 7,   // 通常闇玉の初期カウントダウン
         DARK_PANEL_FAST_COUNT: 5,   // 高速闇玉の初期カウントダウン
 
 		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1132,7 +1132,7 @@ const CONFIG = {
 		SNOW_FREEZE_TARGET_MAX: 5,  // 一度に凍結させるパネル枚数（最大）
 		SNOWY_EFFECT_DURATION: 700,  // 白いオーバーレイの表示時間（ms）
 		SNOWY_FRAME_DURATION:  150,  // 雪エフェクトの表示時間（フレーム数）※雨より長め
-		SNOWY_FLAKE_COUNT:      40,  // 雪片の生成数
+		SNOWY_FLAKE_COUNT:      10,  // 雪片の生成数
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌈 SEVEN COLORS設定
@@ -1141,15 +1141,15 @@ const CONFIG = {
         RAINBOW_BALL_THRESHOLD_ORANGE: 15,  // 橙玉の初回出現閾値（初回のみ低め）
         RAINBOW_BALL_THRESHOLD_INDIGO: 10,  // 藍玉の初回出現閾値（初回のみ低め）
         LEVEL_RAINBOW_DURATION:        20,  // SEVEN COLORS中の継続手数
-        ALLCLEAR_SPAWN_COUNT_MIN:       8,  // 雷玉が出現する残り手数の最小値
+        ALLCLEAR_SPAWN_COUNT_MIN:      10,  // 雷玉が出現する残り手数の最小値
         ALLCLEAR_SPAWN_COUNT_RANGE:     5,  // 雷玉出現タイミングのランダム幅（min〜min+range）
 	
 	    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌙 夜モード設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        NIGHT_BASE_SCORE:    30000,  // 夜モード発動の基準スコア
+        NIGHT_BASE_SCORE:    25000,  // 夜モード発動の基準スコア
         NIGHT_DARK_PENALTY:   1000,  // 闇玉発動1回あたりのペナルティ（減算）
-        NIGHT_DARK_INIT_COUNT:    7, // 夜中の通常闇玉カウント（通常9）
+        NIGHT_DARK_INIT_COUNT:    5, // 夜中の通常闇玉カウント（通常7）
         NIGHT_DARK_FAST_COUNT:    3, // 夜中の高速闇玉カウント（通常5）
         NIGHT_STAR_NEEDED:        3, // 昼に戻るために必要な星の数
         NIGHT_STAR_SCORE:      1000, // 星玉1個消去時の加算スコア
@@ -1159,22 +1159,22 @@ const CONFIG = {
         // 🟥 特殊パネルの出現スコア閾値
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         THRESHOLD: {
-            LIGHT_START:      8000,  // 虹玉が初めて出現するスコア
+            LIGHT_START:      6000,  // 虹玉が初めて出現するスコア
             LIGHT_INTERVAL:   1040,  // 以降の虹玉出現間隔
-            DARK_START:       9200,  // 闇玉が初めて出現するスコア
-            DARK_INTERVAL:    1120,  // 以降の闇玉出現間隔
-            ALMIGHTY_START:  12000,  // プリズムが初めて出現するスコア
-            ALMIGHTY_INTERVAL: 1500, // 以降のプリズム出現間隔
-            DARK_FAST_START: 13000,  // 高速闇玉が初めて出現するスコア
-            DARK_FAST_INTERVAL: 3050, // 以降の高速闇玉出現間隔
-            SUNNY_START:     16000,  // 晴玉が初めて出現するスコア
+            DARK_START:       7500,  // 闇玉が初めて出現するスコア
+            DARK_INTERVAL:    1150,  // 以降の闇玉出現間隔
+            ALMIGHTY_START:  9000,  // プリズムが初めて出現するスコア
+            ALMIGHTY_INTERVAL: 1530, // 以降のプリズム出現間隔
+            DARK_FAST_START: 12000,  // 高速闇玉が初めて出現するスコア
+            DARK_FAST_INTERVAL: 2980, // 以降の高速闇玉出現間隔
+            SUNNY_START:     14000,  // 晴玉が初めて出現するスコア
             SUNNY_INTERVAL:   5000,  // 以降の晴玉出現間隔
-            RAINY_START:     18500,  // 雨玉が初めて出現するスコア
+            RAINY_START:     15500,  // 雨玉が初めて出現するスコア
             RAINY_INTERVAL:   5000,  // 以降の雨玉出現間隔
             RAINY_COUNT_MIN:     7,  // 雨玉の効果の青パネル出現数（最低値）
             RAINY_COUNT_MAX:     9,  // 雨玉の効果の青パネル出現数（最高値）
-			SNOW_START:      20000,  // 雪玉が初めて出現するスコア
-            SNOW_INTERVAL:    2480,  // 以降の雪玉出現間隔
+			SNOW_START:      18000,  // 雪玉が初めて出現するスコア
+            SNOW_INTERVAL:    1920,  // 以降の雪玉出現間隔
 
         },
 
