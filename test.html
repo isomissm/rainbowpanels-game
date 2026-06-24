@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3つ並べパズル - Rainbow Panels (ver7.1.0)</title>
+<title>3つ並べパズル - Rainbow Panels (ver7.1.1)</title>
 <style>
 body {
     background-color: #CAF5FF;
@@ -1150,7 +1150,7 @@ const CONFIG = {
         // 🌙 夜モード設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         NIGHT_BASE_SCORE:    25000,  // 夜モード初回発動の基準スコア
-		NIGHT_STAR_DELAY_SCORE: 2500, // // 夜モード突入後、流れ星発生までの必要追加スコア
+		NIGHT_STAR_DELAY_SCORE: 2500, // 夜モード突入後、流れ星発生までの必要追加スコア
         NIGHT_INTERVAL_SCORE: 10000, // 2回目以降の夜モード発動間隔
         NIGHT_DARK_PENALTY:   1000,  // 闇玉発動1回あたりのペナルティ（サイクルごとにリセット）
         NIGHT_DARK_INIT_COUNT:    5, // 夜中の通常闇玉カウント（通常7）
@@ -2805,7 +2805,15 @@ update() {
             specialEffects.push(new ShootingStarEffect());
         }
         await new Promise(r => setTimeout(r, 1200));
-        /* 星玉を3個スポーン（ランダム配置） */
+        if (!isNightMode) { isReplenishingStars = false; return; }
+        /* await中に状態が変わった場合のためneededを再計算 */
+        let starsOnBoard2 = 0;
+        for (let r = 0; r < CONFIG.BOARD_SIZE; r++)
+            for (let c = 0; c < CONFIG.BOARD_SIZE; c++)
+                if (board[r][c] === CONFIG.PANEL_TYPE.STAR) starsOnBoard2++;
+        const actualNeeded = CONFIG.NIGHT_STAR_NEEDED - nightStarCount - starsOnBoard2;
+        if (actualNeeded <= 0) { isReplenishingStars = false; return; }
+        /* ランダムな位置に星を配置 */
         const allCells = [];
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
             for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
@@ -2838,6 +2846,14 @@ update() {
         nightCycleDarkCount = 0;      // 🌙 サイクル内闇玉カウントをリセット
         nightModeEntryScore = 0;      // 🌙 夜突入スコアリセット
         nightStarSpawned = false;     // 🌙 星スポーン済みフラグリセット
+        isReplenishingStars = false;  // 🌙 補充フラグをリセット
+
+        // 🌙 夜中に蓄積したスコア分の閾値を昼復帰時に現在スコアへ追いつかせる
+        while (rainyThreshold <= score) rainyThreshold += CONFIG.THRESHOLD.RAINY_INTERVAL;
+        while (lightPanelThreshold <= score) lightPanelThreshold += (isLevelRainbow ? CONFIG.THRESHOLD.LIGHT_INTERVAL / 2 : CONFIG.THRESHOLD.LIGHT_INTERVAL);
+        while (almightyThreshold <= score) almightyThreshold += CONFIG.THRESHOLD.ALMIGHTY_INTERVAL;
+        while (sunnyThreshold <= score) sunnyThreshold += CONFIG.THRESHOLD.SUNNY_INTERVAL;
+        while (snowThreshold <= score) snowThreshold += CONFIG.THRESHOLD.SNOW_INTERVAL;
 
         // 背景を昼色にゆっくりフェード
         document.body.style.transition = 'background-color 2.5s ease';
@@ -2969,41 +2985,52 @@ update() {
         draw();
     }
 
-    /* 🌙 夜モード中に星が全消えした場合、流れ星演出で補充する */
+    /* 🌙 盤面+スロットの合計がNIGHT_STAR_NEEDEDを下回った時に補充する */
     async function checkStarReplenish() {
-		if (!isNightMode) return;
-		if (isReplenishingStars) return; // 🌙 補充中の重複実行をガード
-		isReplenishingStars = true;
-		/* 盤面の星の数を数える */
+        if (!isNightMode) return;
+        if (!nightStarSpawned) return;       // 🌙 初回スポーン前は補充しない
+        if (isReplenishingStars) return;     // 🌙 補充中の重複実行をガード
+
+        /* 補充数を計算（盤面+収集済みの合計で判断） */
         let starsOnBoard = 0;
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++)
             for (let c = 0; c < CONFIG.BOARD_SIZE; c++)
                 if (board[r][c] === CONFIG.PANEL_TYPE.STAR) starsOnBoard++;
-        /* 盤面＋収集済みが3未満なら不足分を補充 */
         const needed = CONFIG.NIGHT_STAR_NEEDED - nightStarCount - starsOnBoard;
-        if (needed <= 0) return;
+        if (needed <= 0) return;             // 🌙 合計3つあれば補充不要
+
+        isReplenishingStars = true;
+
         /* 流れ星演出 */
         for (let i = 0; i < needed; i++) {
             await new Promise(r => setTimeout(r, i * 300));
+            if (!isNightMode) { isReplenishingStars = false; return; }
             specialEffects.push(new ShootingStarEffect());
         }
         await new Promise(r => setTimeout(r, 1200));
+        if (!isNightMode) { isReplenishingStars = false; return; }
+
+        /* await中に状態が変わった場合のため補充数を再計算 */
+        let starsOnBoard2 = 0;
+        for (let r = 0; r < CONFIG.BOARD_SIZE; r++)
+            for (let c = 0; c < CONFIG.BOARD_SIZE; c++)
+                if (board[r][c] === CONFIG.PANEL_TYPE.STAR) starsOnBoard2++;
+        const actualNeeded = CONFIG.NIGHT_STAR_NEEDED - nightStarCount - starsOnBoard2;
+        if (actualNeeded <= 0) { isReplenishingStars = false; return; }
+
         /* ランダムな位置に星を配置 */
         const allCells = [];
-        for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
-            for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
-                if (board[r][c] === -1 || (board[r][c] >= 0 && board[r][c] < CONFIG.PANEL_TYPE.OBSTACLE)) {
+        for (let r = 0; r < CONFIG.BOARD_SIZE; r++)
+            for (let c = 0; c < CONFIG.BOARD_SIZE; c++)
+                if (board[r][c] === -1 || (board[r][c] >= 0 && board[r][c] < CONFIG.PANEL_TYPE.OBSTACLE))
                     allCells.push({r, c});
-                }
-            }
-        }
         for (let i = allCells.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [allCells[i], allCells[j]] = [allCells[j], allCells[i]];
         }
         let spawned = 0;
         for (const cell of allCells) {
-            if (spawned >= needed) break;
+            if (spawned >= actualNeeded) break;
             board[cell.r][cell.c] = CONFIG.PANEL_TYPE.STAR;
             specialEffects.push(new StarSpawnEffect(cell.c, cell.r));
             spawned++;
@@ -3056,12 +3083,14 @@ update() {
             /* 全マスまとめて1つのsetTimeoutで変換・draw・補充チェック */
             setTimeout(() => {
                 if (!isGameOver) {
+                    let starLost = false;
                     cellsToTurn.forEach(cell => {
+                        if (board[cell.r][cell.c] === CONFIG.PANEL_TYPE.STAR) starLost = true;
                         board[cell.r][cell.c] = CONFIG.PANEL_TYPE.OBSTACLE;
                     });
                     cleanUpDangerCountsData();
                     draw();
-                    checkStarReplenish();
+                    if (starLost) checkStarReplenish(); // 🌙 星が消えた時のみ補充チェック
                 }
             }, 500);
         }
@@ -3256,6 +3285,7 @@ update() {
 					const canvasRect = canvas.getBoundingClientRect();
 					const fx = canvasRect.left + (selected.c + 0.5) * (canvasRect.width  / CONFIG.BOARD_SIZE);
 					const fy = canvasRect.top  + (selected.r + 0.5) * (canvasRect.height / CONFIG.BOARD_SIZE);
+					board[selected.r][selected.c] = -1; // 🌙 アニメ前に盤面を更新
 					animateStarToSlot(slotIdx, fx, fy, () => {
 						updateNightStarUI();
 						if (nightStarCount >= CONFIG.NIGHT_STAR_NEEDED) {
