@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3つ並べパズル - Rainbow Panels (ver7.0.0)</title>
+<title>3つ並べパズル - Rainbow Panels (ver7.1.0)</title>
 <style>
 body {
     background-color: #CAF5FF;
@@ -712,6 +712,8 @@ canvas {
 }
 #rainbow-collection-ui {
     padding: 6px 14px;
+    height: 48px; /* 星スロット(32px)＋上下padding分で固定 */
+    box-sizing: border-box;
 }
 #level-status-bar {
     padding: 10px 14px;
@@ -845,7 +847,6 @@ canvas {
     <div class="debug-row"> <span>SKILL:</span>
       <div class="debug-btns">
         <button onclick="addDebugSkillStock()">BURSTカウント+1</button>
-        <button onclick="debugClearRanking()" style="background:#c0392b; margin-left: 120px;">ランキング初期化</button>
       </div>
     </div>
   </div>
@@ -859,13 +860,14 @@ canvas {
     <div id="dbg-prog-5" style="color:#ff9300;">橙   0 / 30</div>
     <div id="dbg-prog-6" style="color:#a29bfe;">藍   0 / 20</div>
   </div>
-  <div id="debug-dark-stats" style="display:flex; flex-direction:column; gap:3px; font-size:14px; font-family:monospace; border-left: 1px solid #4e6a85; padding-left:10px; width: 90px;">
+  <div id="debug-dark-stats" style="display:flex; flex-direction:column; gap:3px; font-size:14px; font-family:monospace; border-left: 1px solid #4e6a85; padding-left:10px; width: 120px;">
     <div style="font-weight:bold; margin-bottom:3px; color:#94a3b8;">闇玉統計</div>
     <div id="dbg-dark-spawn"  style="color:#b2bec3;">出現  0</div>
     <div id="dbg-dark-fired"  style="color:#e17055;">発動  0</div>
     <div id="dbg-dark-killed" style="color:#55efc4;">消去  0</div>
     <div id="dbg-dark-rate"   style="color:#fdcb6e;">発動率 --%</div>
-	<div id="debug-time" style="margin-top:22px;">TIME: 00:00:00</div>
+	<div id="dbg-dark-cycle"  style="color:#a29bfe; margin-top:6px;">夜スコア補正 0</div>
+	<div id="debug-time" style="margin-top:20px;">TIME: 00:00:00</div>
   </div>
   </div>
 <div id="main-layout">
@@ -1147,12 +1149,13 @@ const CONFIG = {
 	    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌙 夜モード設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        NIGHT_BASE_SCORE:    25000,  // 夜モード発動の基準スコア
-        NIGHT_DARK_PENALTY:   1000,  // 闇玉発動1回あたりのペナルティ（減算）
+        NIGHT_BASE_SCORE:    25000,  // 夜モード初回発動の基準スコア
+		NIGHT_STAR_DELAY_SCORE: 2500, // 夜突入後、星玉が降るまでの必要追加スコア
+        NIGHT_INTERVAL_SCORE: 10000, // 2回目以降の夜モード発動間隔
+        NIGHT_DARK_PENALTY:   1000,  // 闇玉発動1回あたりのペナルティ（サイクルごとにリセット）
         NIGHT_DARK_INIT_COUNT:    5, // 夜中の通常闇玉カウント（通常7）
         NIGHT_DARK_FAST_COUNT:    3, // 夜中の高速闇玉カウント（通常5）
         NIGHT_STAR_NEEDED:        3, // 昼に戻るために必要な星の数
-        NIGHT_STAR_SCORE:      1000, // 星玉1個消去時の加算スコア
 		NIGHT_COLOR_BOOST:      5, // 夜中の青・藍・紫の出現率ボーナス（0=均等 数値を増やすほど青・藍・紫が出やすくなる）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1275,6 +1278,10 @@ const CONFIG = {
     let nightStarCount = 0;       // 集めた星の数
     let nightTriggered = false;   // 現在の夜サイクルが発動済みか
     let nightNextThreshold = 0;   // 次の夜モード発動スコアしきい値（昼復帰後に更新）
+	let isReplenishingStars = false;   // 🌙 星補充アニメ実行中フラグ
+	let nightCycleDarkCount = 0;       // 🌙 現サイクルの闇玉発動数（夜終了でリセット）
+	let nightModeEntryScore = 0;       // 🌙 夜突入時のスコア（星スポーン遅延用）
+	let nightStarSpawned = false;      // 🌙 今サイクルで星スポーン済みか
     
     let lightPanelThreshold = CONFIG.THRESHOLD.LIGHT_START; 
     let darkPanelThreshold = CONFIG.THRESHOLD.DARK_START;
@@ -1375,8 +1382,8 @@ const CONFIG = {
 		constructor(x, y) {
 			this.x = x; this.y = y;
 			this.blobs = [];
-			// 中心から8〜12個のもわもわを不規則に飛ばす
-			const count = 8 + Math.floor(Math.random() * 5);
+			// 中心から5〜7個のもわもわを不規則に飛ばす
+			const count = 5 + Math.floor(Math.random() * 3);
 			for (let i = 0; i < count; i++) {
 				const angle = Math.random() * Math.PI * 2;
 				const speed = 0.8 + Math.random() * 1.6;
@@ -1385,19 +1392,25 @@ const CONFIG = {
 					x: this.x, y: this.y,
 					vx: Math.cos(angle) * speed,
 					vy: Math.sin(angle) * speed,
-					size: size,
-					maxSize: size,
+					size: size * 0.3,    // 🌙 小さく始まって ※闇玉もわもわエフェクトの開始サイズ
+					maxSize: size,       // 🌙 ここまで膨らむ
 					alpha: 0.85 + Math.random() * 0.15,
-					decay: 0.018 + Math.random() * 0.015
+					decay: 0.010 + Math.random() * 0.004, //闇玉もわもわエフェクトの表示時間（減らすとゆっくりになる）
+					grad: null,
 				});
 			}
+			/* グラデーションはサイズ変化に合わせてdraw()で毎フレーム生成 */
 		}
 		update() {
 			this.blobs.forEach(b => {
 				b.x += b.vx;
 				b.y += b.vy;
-				b.vx *= 0.94; // 徐々に減速
+				b.vx *= 0.94;
 				b.vy *= 0.94;
+				/* サイズをmaxSizeまで膨張させてからフェード */
+				if (b.size < b.maxSize) {
+					b.size = Math.min(b.size * 1.18, b.maxSize); //闇玉もわもわエフェクトの膨張速度
+				}
 				b.alpha -= b.decay;
 			});
 		}
@@ -1406,12 +1419,13 @@ const CONFIG = {
 				if (b.alpha <= 0) return;
 				ctx.save();
 				ctx.globalAlpha = b.alpha;
-				let grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.size);
-				grad.addColorStop(0, "rgba(15, 0, 14, 1.0)");
-				grad.addColorStop(0.4, "rgba(74, 20, 71, 0.9)");
-				grad.addColorStop(0.8, "rgba(109, 28, 100, 0.5)");
-				grad.addColorStop(1.0, "rgba(44, 62, 80, 0.0)");
-				ctx.fillStyle = grad;
+				/* サイズが変わるのでグラデーションは毎フレーム生成 */
+				const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.size);
+				g.addColorStop(0,   "rgba(15, 0, 14, 1.0)");
+				g.addColorStop(0.4, "rgba(74, 20, 71, 0.9)");
+				g.addColorStop(0.8, "rgba(109, 28, 100, 0.5)");
+				g.addColorStop(1.0, "rgba(44, 62, 80, 0.0)");
+				ctx.fillStyle = g;
 				ctx.beginPath();
 				ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
 				ctx.fill();
@@ -2222,7 +2236,11 @@ update() {
         isNightMode = false;
         nightStarCount = 0;
         nightTriggered = false;
-		nightNextThreshold = 0;
+        nightNextThreshold = 0;
+        isReplenishingStars = false;  // 🌙 補充フラグリセット
+        nightCycleDarkCount = 0;      // 🌙 サイクル闇玉カウントリセット
+        nightModeEntryScore = 0;      // 🌙 夜突入スコアリセット
+        nightStarSpawned = false;     // 🌙 星スポーン済みフラグリセット
         document.body.style.backgroundColor = '#CAF5FF';
         const gc = document.getElementById('game-container');
         if (gc) { gc.style.transition = 'none'; gc.style.backgroundColor = '#ffffff'; }
@@ -2770,16 +2788,24 @@ update() {
         const gc = document.getElementById('game-container');
         if (gc) { gc.style.transition = 'background-color 2.5s ease'; gc.style.backgroundColor = '#3E3E78'; } //夜モード背景色（左枠内）
 
-        // 流れ星を3本スポーン（時間差）
+        // 夜突入スコアを記録（星スポーンはDELAY_SCORE分後）
+        nightModeEntryScore = score;
+        nightStarSpawned = false;
+
+        updateNightStarUI();
+        draw();
+    }
+	
+	async function spawnNightStars() {
+        if (!isNightMode || nightStarSpawned) return;
+        nightStarSpawned = true;
+        /* 流れ星を3本スポーン（時間差） */
         for (let i = 0; i < 3; i++) {
             await new Promise(r => setTimeout(r, i * 300));
             specialEffects.push(new ShootingStarEffect());
         }
-
-        // 流れ星が飛び終わるのを少し待ってから星玉スポーン
         await new Promise(r => setTimeout(r, 1200));
-
-        // 星玉を3個スポーン（ランダム配置）
+        /* 星玉を3個スポーン（ランダム配置） */
         const allCells = [];
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
             for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
@@ -2788,7 +2814,6 @@ update() {
                 }
             }
         }
-        // シャッフル
         for (let i = allCells.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [allCells[i], allCells[j]] = [allCells[j], allCells[i]];
@@ -2800,7 +2825,6 @@ update() {
             specialEffects.push(new StarSpawnEffect(cell.c, cell.r));
             spawned++;
         }
-
         updateNightStarUI();
         draw();
     }
@@ -2810,8 +2834,10 @@ update() {
         isNightMode = false;
         nightStarCount = 0;
         nightTriggered = false;
-        /* 次の夜は現在スコアからNIGHT_BASE_SCORE分上乗せしたところで発動 */
-        nightNextThreshold = score + CONFIG.NIGHT_BASE_SCORE;
+        nightNextThreshold = score;   // 🌙 昼復帰時のスコアを記録（次回発動計算の基点）
+        nightCycleDarkCount = 0;      // 🌙 サイクル内闇玉カウントをリセット
+        nightModeEntryScore = 0;      // 🌙 夜突入スコアリセット
+        nightStarSpawned = false;     // 🌙 星スポーン済みフラグリセット
 
         // 背景を昼色にゆっくりフェード
         document.body.style.transition = 'background-color 2.5s ease';
@@ -2849,7 +2875,20 @@ update() {
             }
         }
         const wrap = document.getElementById('night-star-slot');
-        if (wrap) wrap.style.display = isNightMode ? 'flex' : 'none';
+        if (wrap) {
+            if (isNightMode) {
+                wrap.style.transition = 'opacity 3.5s ease';
+                wrap.style.opacity = '0';
+                wrap.style.display = 'flex';
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => { wrap.style.opacity = '1'; });
+                });
+            } else {
+                wrap.style.transition = '';
+                wrap.style.opacity = '';
+                wrap.style.display = 'none';
+            }
+        }
     }
 
 	// 🌙 星玉出現エフェクト（白く発光＋星型フレア）
@@ -2932,9 +2971,10 @@ update() {
 
     /* 🌙 夜モード中に星が全消えした場合、流れ星演出で補充する */
     async function checkStarReplenish() {
-        if (!isNightMode) return;
-        isReplenishingStars = true;
-        /* 盤面の星の数を数える */
+		if (!isNightMode) return;
+		if (isReplenishingStars) return; // 🌙 補充中の重複実行をガード
+		isReplenishingStars = true;
+		/* 盤面の星の数を数える */
         let starsOnBoard = 0;
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++)
             for (let c = 0; c < CONFIG.BOARD_SIZE; c++)
@@ -2969,15 +3009,17 @@ update() {
             spawned++;
         }
         draw();
+        isReplenishingStars = false; // 🌙 補充完了
     }
 
     function checkNightModeEntry() {
         if (nightTriggered) return;
-        /* 初回：基準スコアから闇玉ペナルティを引いたしきい値 */
-        /* 2回目以降：nightNextThreshold（昼復帰時のスコア + NIGHT_BASE_SCORE）*/
-        const threshold = nightNextThreshold > 0
-            ? nightNextThreshold - (darkActivatedCount * CONFIG.NIGHT_DARK_PENALTY)
-            : CONFIG.NIGHT_BASE_SCORE - (darkActivatedCount * CONFIG.NIGHT_DARK_PENALTY);
+        /* 初回：NIGHT_BASE_SCORE - サイクル内闇玉発動数×ペナルティ */
+        /* 2回目以降：前回発動スコア + NIGHT_INTERVAL_SCORE - サイクル内闇玉発動数×ペナルティ */
+        const base = nightNextThreshold > 0
+            ? nightNextThreshold + CONFIG.NIGHT_INTERVAL_SCORE
+            : CONFIG.NIGHT_BASE_SCORE;
+        const threshold = base - (nightCycleDarkCount * CONFIG.NIGHT_DARK_PENALTY);
         if (score >= threshold) {
             enterNightMode();
         }
@@ -2993,7 +3035,9 @@ update() {
                 let r = parseInt(parts[0]); let c = parseInt(parts[1]);
                 if (board[r][c] === CONFIG.PANEL_TYPE.DARK) {
                     exploded = true;
-                    darkActivatedCount++; // 🌙 発動カウント
+                    darkActivatedCount++;    // 🌙 発動カウント（累計）
+                    nightCycleDarkCount++;   // 🌙 発動カウント（サイクル内）
+                    updateRainbowUI();
                     cellsToTurn.push({r, c});
                     if (r > 0) cellsToTurn.push({r: r-1, c});
                     if (r < CONFIG.BOARD_SIZE-1) cellsToTurn.push({r: r+1, c});
@@ -3008,13 +3052,18 @@ update() {
                 const targetX = cell.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
                 const targetY = cell.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
                 specialEffects.push(new DarkExplosionEffect(targetX, targetY));
-
-                setTimeout(() => {
-                    if (!isGameOver) { board[cell.r][cell.c] = CONFIG.PANEL_TYPE.OBSTACLE; cleanUpDangerCountsData(); draw(); }
-                }, 500); 
             });
-            /* 全マス変換後に星の補充チェック */
-            setTimeout(() => { checkStarReplenish(); }, 600);
+            /* 全マスまとめて1つのsetTimeoutで変換・draw・補充チェック */
+            setTimeout(() => {
+                if (!isGameOver) {
+                    cellsToTurn.forEach(cell => {
+                        board[cell.r][cell.c] = CONFIG.PANEL_TYPE.OBSTACLE;
+                    });
+                    cleanUpDangerCountsData();
+                    draw();
+                    checkStarReplenish();
+                }
+            }, 500);
         }
         return exploded;
     }
@@ -3202,7 +3251,6 @@ update() {
 			} else {
 				if (type === CONFIG.PANEL_TYPE.DARK) darkClearedCount++; // 🌙 BURST消去カウント
 				if (type === CONFIG.PANEL_TYPE.STAR) {  // 🌙 BURST星玉消去
-					score += CONFIG.NIGHT_STAR_SCORE;
 					const slotIdx = nightStarCount;
 					nightStarCount++;
 					const canvasRect = canvas.getBoundingClientRect();
@@ -3499,7 +3547,6 @@ update() {
 				if (board[s.r][s.c] === CONFIG.PANEL_TYPE.STAR) {
 					// 🌙 星玉消去
 					spawnRainbowParticles(s.c, s.r);
-					score += CONFIG.NIGHT_STAR_SCORE;
 					const slotIdx = nightStarCount;
 					nightStarCount++;
 					board[s.r][s.c] = -1;
@@ -3593,45 +3640,57 @@ update() {
             movesUntilNextObstacle = getCurrentObstaclePace();
         }
 		if (score >= CONFIG.THRESHOLD.RAINY_START && score >= rainyThreshold) {
-			if (!isNightMode) await addSingleSpecialPanel(CONFIG.PANEL_TYPE.RAINY); // 🌙 夜中は出さない
-			rainyThreshold += CONFIG.THRESHOLD.RAINY_INTERVAL;
+			if (!isNightMode) {
+				await addSingleSpecialPanel(CONFIG.PANEL_TYPE.RAINY);
+				rainyThreshold += CONFIG.THRESHOLD.RAINY_INTERVAL; // 🌙 昼のみ閾値を進める
+			}
 		}
         
         if (score >= CONFIG.THRESHOLD.LIGHT_START && score >= lightPanelThreshold) {
-            if (!isNightMode) { // 🌙 夜中は出さない
+            if (!isNightMode) {
                 await addSingleSpecialPanel(CONFIG.PANEL_TYPE.RAINBOW);
+                let interval = isLevelRainbow ? CONFIG.THRESHOLD.LIGHT_INTERVAL / 2 : CONFIG.THRESHOLD.LIGHT_INTERVAL;
+                lightPanelThreshold += interval; // 🌙 昼のみ閾値を進める
             }
-            let interval = isLevelRainbow ? CONFIG.THRESHOLD.LIGHT_INTERVAL / 2 : CONFIG.THRESHOLD.LIGHT_INTERVAL;
-            lightPanelThreshold += interval; 
         }
 
         if (score >= CONFIG.THRESHOLD.DARK_START && score >= darkPanelThreshold) {
-            // 🌙 夜中は短縮カウントで追加
+            // 🌙 闇玉は夜中も出す、閾値は常に進める
             const darkCount = isNightMode ? CONFIG.NIGHT_DARK_INIT_COUNT : CONFIG.DARK_PANEL_INIT_COUNT;
             await addSingleSpecialPanel(CONFIG.PANEL_TYPE.DARK, darkCount);
-            darkPanelThreshold += CONFIG.THRESHOLD.DARK_INTERVAL; 
+            darkPanelThreshold += CONFIG.THRESHOLD.DARK_INTERVAL;
         }
 		if (score >= CONFIG.THRESHOLD.ALMIGHTY_START && score >= almightyThreshold) {
-			if (!isNightMode) await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALMIGHTY); // 🌙 夜中は出さない
-			almightyThreshold += CONFIG.THRESHOLD.ALMIGHTY_INTERVAL;
+			if (!isNightMode) {
+				await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALMIGHTY);
+				almightyThreshold += CONFIG.THRESHOLD.ALMIGHTY_INTERVAL; // 🌙 昼のみ閾値を進める
+			}
 		}
 		if (score >= CONFIG.THRESHOLD.DARK_FAST_START && score >= darkFastThreshold) {
-			// 🌙 夜中は短縮カウントで追加
+			// 🌙 高速闇玉は夜中も出す、閾値は常に進める
 			const fastCount = isNightMode ? CONFIG.NIGHT_DARK_FAST_COUNT : CONFIG.DARK_PANEL_FAST_COUNT;
 			await addSingleSpecialPanel(CONFIG.PANEL_TYPE.DARK, fastCount);
 			darkFastThreshold += CONFIG.THRESHOLD.DARK_FAST_INTERVAL;
 		}
 		if (score >= CONFIG.THRESHOLD.SUNNY_START && score >= sunnyThreshold) {
-			if (!isNightMode) await addSingleSpecialPanel(CONFIG.PANEL_TYPE.SUNNY); // 🌙 夜中は出さない
-			sunnyThreshold += CONFIG.THRESHOLD.SUNNY_INTERVAL;
+			if (!isNightMode) {
+				await addSingleSpecialPanel(CONFIG.PANEL_TYPE.SUNNY);
+				sunnyThreshold += CONFIG.THRESHOLD.SUNNY_INTERVAL; // 🌙 昼のみ閾値を進める
+			}
 		}
 		if (score >= CONFIG.THRESHOLD.SNOW_START && score >= snowThreshold) {
-			if (!isNightMode) await addSingleSpecialPanel(CONFIG.PANEL_TYPE.SNOW); // 🌙 夜中は出さない
-			snowThreshold += CONFIG.THRESHOLD.SNOW_INTERVAL;
+			if (!isNightMode) {
+				await addSingleSpecialPanel(CONFIG.PANEL_TYPE.SNOW);
+				snowThreshold += CONFIG.THRESHOLD.SNOW_INTERVAL; // 🌙 昼のみ閾値を進める
+			}
 		}
 
         // 🌙 夜モード突入チェック
         checkNightModeEntry();
+        // 🌙 夜モード中の星スポーンチェック
+        if (isNightMode && !nightStarSpawned && score >= nightModeEntryScore + CONFIG.NIGHT_STAR_DELAY_SCORE) {
+            spawnNightStars();
+        }
     }
 
 	/* 🌙 夜モード中の重み付きカラー選択（青=3・紫=4・藍=6 が出やすい） */
@@ -3742,8 +3801,9 @@ update() {
 					specialEffects.push(new SpecialSpawnEffect(targetX, targetY, CONFIG.PANEL_TYPE.RAINBOW));
 				}
 				draw();
-				await new Promise(res => setTimeout(res, 500)); // 特殊パネル出現後に少し待つ
-				break;
+			updateRainbowUI();
+			await new Promise(res => setTimeout(res, 500)); // 特殊パネル出現後に少し待つ
+			break;
 			}
 			tries++;
 		}
@@ -3800,8 +3860,11 @@ update() {
 				const tc = col + dc;
 				if (tr < 0 || tr >= CONFIG.BOARD_SIZE || tc < 0 || tc >= CONFIG.BOARD_SIZE) continue;
 				const t = board[tr][tc];
-				if (t === CONFIG.PANEL_TYPE.OBSTACLE || (CONFIG.SUNNY_CONVERT_NORMAL && t >= 0 && t < CONFIG.PANEL_TYPE.OBSTACLE)) {
-					targets.push({tr, tc});
+				const isFrozen = frozenCells[`${tr},${tc}`] !== undefined;
+				if (isFrozen) {
+					targets.push({tr, tc, frozenOnly: true}); // 解凍のみ、色変換しない
+				} else if (t === CONFIG.PANEL_TYPE.OBSTACLE || (CONFIG.SUNNY_CONVERT_NORMAL && t >= 0 && t < CONFIG.PANEL_TYPE.OBSTACLE)) {
+					targets.push({tr, tc, frozenOnly: false});
 				}
 			}
 		}
@@ -3819,14 +3882,18 @@ update() {
 		draw();
 		await new Promise(res => setTimeout(res, 400));  // 雨玉の薄青色エフェクトの時間
 
-		// 2. 赤に変換
+		// 2. 赤に変換（凍結中のパネルは解凍のみ、色変換しない）
 		flashingCells = new Set();
-		targets.forEach(({tr, tc}) => {
-			board[tr][tc] = 0;
-			const px = tc * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
-			const py = tr * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
-			for (let i = 0; i < CONFIG.PARTICLE_COUNT_NORMAL; i++) {
-				particles.push(new Particle(px, py, CONFIG.COLORS[0], "star"));
+		targets.forEach(({tr, tc, frozenOnly}) => {
+			if (frozenOnly) {
+				unfreezeCell(tr, tc); // 解凍のみ
+			} else {
+				board[tr][tc] = 0;
+				const px = tc * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
+				const py = tr * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
+				for (let i = 0; i < CONFIG.PARTICLE_COUNT_NORMAL; i++) {
+					particles.push(new Particle(px, py, CONFIG.COLORS[0], "star"));
+				}
 			}
 		});
 		cleanUpDangerCountsData();
@@ -4194,11 +4261,12 @@ update() {
 		const elFired  = document.getElementById('dbg-dark-fired');
 		const elKilled = document.getElementById('dbg-dark-killed');
 		const elRate   = document.getElementById('dbg-dark-rate');
+		const elCycle  = document.getElementById('dbg-dark-cycle');
 		if (elSpawn)  elSpawn.textContent  = `出現  ${darkSpawnCount}`;
-		if (elFired)  elFired.textContent  = `発動  ${darkActivatedCount}`;
-		if (elKilled) elKilled.textContent = `消去  ${darkClearedCount}`;
-		if (elRate)   elRate.textContent   = `発動率 ${rate !== null ? rate + '%' : '--'}`;
-	}
+        if (elFired)  elFired.textContent  = `発動  ${darkActivatedCount}`;
+        if (elKilled) elKilled.textContent = `消去  ${darkClearedCount}`;
+        if (elRate)   elRate.textContent   = `発動率 ${rate !== null ? rate + '%' : '--'}`;
+        if (elCycle)  elCycle.textContent  = `夜スコア補正 ${nightCycleDarkCount}`;	}
 
     // ゲーム開始時と、玉を回収した時に自動でUIが新しくなるようにします
     const originalInitGame = initGame;
