@@ -3,8 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3つ並べパズル - Rainbow Panels (ver7.1.1)</title>
+<title>3つ並べパズル - Rainbow Panels (ver7.3.0)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
 <style>
+:root {
+--font-main-ui: 'Nunito', sans-serif; /* メインUIフォント：ここを変更するとUI全体に反映 */
+}
 body {
     background-color: #CAF5FF;
     display: flex;
@@ -18,6 +24,10 @@ body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     color: #2c3e50;
     user-select: none;
+}
+/* メインUI：Nunitoフォント適用（英語表示のみ） */
+.score-val, .moves-val, .ui-section-title, .best-score-label, .best-score-label-mobile, .status-level-val, .status-moves-val, .status-next-label {
+    font-family: var(--font-main-ui);
 }
 /* スマホのタップ時の青いハイライトを無効化 */
 * {
@@ -313,11 +323,11 @@ canvas {
     background-size: 200% 100%;
     opacity: 1;
     animation: rainbowFlow 8s linear infinite;
-	transition: clip-path 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: clip-path 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     clip-path: inset(0px 100% 0px 0px);
 }
 .gauge-bar-fill.no-clip-transition {
-transition: none !important;
+    transition: none !important;
 }
 @keyframes rainbowFlow {
 0% {
@@ -354,9 +364,7 @@ background-position: -200% 0%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    /* ⚠️ transform: scale(1); と transform-origin: center; をここから削除 */
-    /* 通常時は変形を「一切行わない」状態にすることで、ブラウザの計算バグを排除します */
+    position: relative;/* ⚠️ transform: scale(1); と transform-origin: center; をここから削除 *//* 通常時は変形を「一切行わない」状態にすることで、ブラウザの計算バグを排除します */
 }
 .stock-star svg {
     width: 100%;  /* BURSTカウンター親要素（.stock-star {width:）に対して100%の幅で表示 */
@@ -371,8 +379,9 @@ background-position: -200% 0%;
 .stock-star.active .rb-arc {
     filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.15));
 }
-.stock-star.active .rb-arc { fill: url(#rbArcGrad); }
-
+.stock-star.active .rb-arc {
+    fill: url(#rbArcGrad);
+}
 /* アクティブ時（カウンター獲得時）だけ、変形の基準点とアニメーションを適用する */
 .stock-star.active {
     transform-origin: center;
@@ -456,7 +465,7 @@ opacity: 0;
     border-radius: 20px;
     font-size: 15px;
     font-weight: 900;
-    font-family: 'Arial Black', Impact, sans-serif;
+    font-family: var(--font-main-ui);
     line-height: 1.2;
     letter-spacing: 0.03em;
     cursor: pointer;
@@ -575,6 +584,12 @@ opacity: 0;
 }
 #reset-btn:active {
     transform: scale(0.97);
+}
+#reset-btn:disabled {
+    background: #b2bec3;
+    cursor: default;
+    opacity: 1;
+    transform: none;
 }
 .reset-btn-spacer {
     height: 36px; /*リセットボタン上のスペース（PCブラウザレイアウト）*/
@@ -775,15 +790,18 @@ canvas {
 /* @mediaここまで */
 	
 /* 🌙 夜モード星スロット */
-    .night-star-slot-item {
-        width: 32px; height: 32px; //星スロットのサイズ
-        display: flex; align-items: center; justify-content: center;
-        transition: transform 0.15s ease-out;
-    }
-    .night-star-slot-item svg {
-        width: 100%; height: 100%;
-    }
-
+.night-star-slot-item {
+    width: 32px;
+    height: 32px;
+//星スロットのサイズ display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease-out;
+}
+.night-star-slot-item svg {
+    width: 100%;
+    height: 100%;
+}
 </style>
 </head>
 
@@ -821,7 +839,7 @@ canvas {
         <button onclick="addSingleSpecialPanel(CONFIG.PANEL_TYPE.SNOW)" style="color:#0984e3;">雪玉</button>
       </div>
     </div>
-	<div class="debug-row">
+    <div class="debug-row">
       <div class="debug-btns">
         <button onclick="enterNightMode()" style="color:#a29bfe;">夜モード発動</button>
         <button onclick="returnToDay()" style="color:#FFAA1E;">昼に戻す</button>
@@ -866,10 +884,10 @@ canvas {
     <div id="dbg-dark-fired"  style="color:#e17055;">発動  0</div>
     <div id="dbg-dark-killed" style="color:#55efc4;">消去  0</div>
     <div id="dbg-dark-rate"   style="color:#fdcb6e;">発動率 --%</div>
-	<div id="dbg-dark-cycle"  style="color:#a29bfe; margin-top:6px;">夜スコア補正 0</div>
-	<div id="debug-time" style="margin-top:20px;">TIME: 00:00:00</div>
+    <div id="dbg-dark-cycle"  style="color:#a29bfe; margin-top:6px;">夜スコア補正 0</div>
+    <div id="debug-time" style="margin-top:20px;">TIME: 00:00:00</div>
   </div>
-  </div>
+</div>
 <div id="main-layout">
   <div id="left-area">
     <div id="game-container">
@@ -899,17 +917,17 @@ canvas {
       </div>
       <canvas id="stage"></canvas>
       <div id="allclear-overlay"></div>
-      <div id="overlay">
-        <h2 style="font-size:26px; margin: 5px 0 2px 0; letter-spacing: 0.05em; color: #ff7675;">GAME OVER</h2>
-        <div id="final-score" style="font-size:28px; font-weight: 900; margin-bottom: 10px; color: #fff;"></div>
-        <div id="name-input-box" style="margin-bottom: 12px; display: none; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 12px;"> <span style="font-size:11px; font-weight:bold; color:#ffe53b; display:block; margin-bottom:4px;">🎉 ランクイン！ 名前を入力してね</span>
-          <input type="text" id="player-name-field" maxlength="8" value="Player" style="padding:4px 8px; width:100px; border-radius:6px; border:none; outline:none; font-weight:bold; font-size:12px; margin-right:5px; text-align:center;">
-          <button onclick="saveRankedScore()" style="padding:5px 12px; border-radius:12px; border:none; background: linear-gradient(90deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff4757); background-size: 200% 100%; animation: rainbowFlow 4s linear infinite; color:white; font-size:12px; font-weight:900; cursor:pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.2);">登録する</button>
+      <div id="overlay" style="padding-top: 12px;">
+        <h2 style="font-size:26px; margin: 0 0 2px 0; letter-spacing: 0.05em; color: #ff7675;">GAME OVER</h2>
+        <div id="final-score" style="font-size:28px; font-weight: 900; margin-bottom: 6px; color: #fff;"></div>
+        <div id="name-input-box" style="margin-top: 4px; margin-bottom: 6px; display: none; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 12px;"> <span style="font-size:14px; font-weight:bold; color:#ffe53b; display:block; margin-bottom:4px;">🎉 ランクイン！ 名前を入力してね</span>
+          <input type="text" id="player-name-field" maxlength="8" value="Player" style="padding:6px 10px; width:120px; border-radius:6px; border:none; outline:none; font-weight:bold; font-size:14px; margin-right:6px; text-align:center;">
+          <button onclick="saveRankedScore()" style="padding:6px 14px; border-radius:12px; border:none; background: linear-gradient(90deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff4757); background-size: 200% 100%; animation: rainbowFlow 4s linear infinite; color:white; font-size:14px; font-weight:900; cursor:pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.2);">登録する</button>
         </div>
         <div style="font-size:11px; font-weight:900; margin-bottom:4px; color:#cbd5e1; text-align:left; width:85%; max-width:270px; letter-spacing: 0.05em;">🌈 TOP 10 RANKING</div>
-        <div id="ranking-box"> </div>
+        <div id="ranking-box" style="width: 85%; max-width: 270px; height: auto; overflow: hidden; margin-bottom: 12px; display: flex; flex-direction: column; gap: 2px;"> </div>
         <button id="retry-btn" onclick="initGame()" style="padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:13px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">もう一度プレイする</button>
-        <button id="reset-ranking-btn" onclick="confirmResetRanking()" style="margin-top:8px; padding:6px 16px; border-radius:20px; border:1.5px solid rgba(255,255,255,0.3); cursor:pointer; font-weight:700; font-size:11px; background:transparent; color:#cbd5e1;">ランキングをリセットする</button>
+        <button id="reset-ranking-btn" onclick="confirmResetRanking()" style="margin-top:12px; margin-bottom:10px; padding:6px 16px; border-radius:20px; border:1.5px solid rgba(255,255,255,0.3); cursor:pointer; font-weight:700; font-size:11px; background:transparent; color:#cbd5e1;">ランキングをリセットする</button>
         <button id="back-to-game-btn" onclick="closeRankingScreen()" style="display:none; padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:13px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">ゲームに戻る</button>
       </div>
     </div>
@@ -940,38 +958,37 @@ canvas {
         <div id="gauge-fill" class="gauge-bar-fill"></div>
       </div>
       <div class="skill-combined-box" id="skill-box">
-<div class="stock-container" id="stars-container-row">
-        <!-- 共有グラデーション定義（非表示SVG） -->
-        <svg width="0" height="0" style="position:absolute">
-          <defs>
-            <radialGradient id="rbArcGrad" cx="100%" cy="100%" r="95%">
-              <stop offset="0%"  stop-color="#c175ff"/>
-              <stop offset="46%" stop-color="#c175ff"/>
-              <stop offset="52%" stop-color="#6c5ce7"/>
-              <stop offset="60%" stop-color="#1e90ff"/>
-              <stop offset="68%" stop-color="#2ed573"/>
-              <stop offset="80%" stop-color="#ffe53b"/>
-              <stop offset="100%" stop-color="#ff4757"/>
-            </radialGradient>
-          </defs>
-        </svg>
-		<div id="stock-1" class="stock-star">
+        <div class="stock-container" id="stars-container-row"> 
+          <!-- 共有グラデーション定義（非表示SVG） -->
+          <svg width="0" height="0" style="position:absolute">
+            <defs>
+              <radialGradient id="rbArcGrad" cx="100%" cy="100%" r="95%">
+                <stop offset="0%"  stop-color="#c175ff"/>
+                <stop offset="46%" stop-color="#c175ff"/>
+                <stop offset="52%" stop-color="#6c5ce7"/>
+                <stop offset="60%" stop-color="#1e90ff"/>
+                <stop offset="68%" stop-color="#2ed573"/>
+                <stop offset="80%" stop-color="#ffe53b"/>
+                <stop offset="100%" stop-color="#ff4757"/>
+              </radialGradient>
+            </defs>
+          </svg>
+          <div id="stock-1" class="stock-star">
             <svg viewBox="0 0 85 85">
               <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
             </svg>
           </div>
-		<div id="stock-2" class="stock-star">
+          <div id="stock-2" class="stock-star">
             <svg viewBox="0 0 85 85">
               <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
             </svg>
           </div>
-		<div id="stock-3" class="stock-star">
+          <div id="stock-3" class="stock-star">
             <svg viewBox="0 0 85 85">
               <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
             </svg>
           </div>
         </div>
-		  
         <button id="skill-btn" onclick="triggerSkillWithEffects()" disabled>RAINBOW<br>
         BURST!</button>
       </div>
@@ -1039,6 +1056,21 @@ canvas {
     </table>
   </div>
 </div>
+<!-- ランキングをリセットするダイアログ -->
+<div id="ranking-reset-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
+  <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="ranking-reset-modal-content">
+    <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">ランキングをリセットする？</h3>
+    <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: bold; line-height: 1.5;">これまでのスコア記録を消して全部0に戻します。<br>
+      本当に消していいですか？</p>
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <button onclick="closeRankingResetModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer;">やっぱりまだ<br>
+      記録消さない！</button>
+      <button onclick="executeRankingReset()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #ff7675; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">全部0に<br>
+      戻しちゃう！</button>
+    </div>
+  </div>
+</div>
+<!-- ゲームリセットのダイアログ -->
 <div id="reset-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="reset-modal-content">
     <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">最初からやりなおす？</h3>
@@ -1907,23 +1939,33 @@ update() {
             }
             ctx.restore();
         }
-    }    class TextEffect {
-        constructor(x, y, text, color, isBold = true) {
-            this.x = x; this.y = y; this.text = text; this.color = color; this.isBold = isBold;
-            this.alpha = 1.0; this.life = 45; this.maxLife = 45;
-        }
-        update() {
-            this.life--; this.y -= 0.5;
-            if (this.life < 15) this.alpha = this.life / 15;
-        }
-        draw() {
-            ctx.save(); ctx.globalAlpha = this.alpha; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 6;
-            ctx.font = `900 24px 'Arial Black', Impact, sans-serif`;
-            ctx.strokeText(this.text, this.x, this.y);
-            ctx.fillStyle = this.color; ctx.fillText(this.text, this.x, this.y);
-            ctx.restore();
-        }
+    }
+
+	/* パネル消去時の得点表示エフェクト */
+	class TextEffect {
+	  constructor(x, y, text, color, isBold = true) {
+		this.x = x;
+		this.y = y;
+		this.text = text;
+		this.color = color;
+		this.isBold = isBold;
+		this.alpha = 1.0;
+		this.life = 80;    // 表示時間
+		this.maxLife = 80; // ↑この数値に合わせて変更
+	  }
+	  update() {
+		this.life--;
+		this.y -= 0.6;     // 得点が上に昇るスピード
+		if (this.life < 20) this.alpha = this.life / 20; // 得点が消える間際のフワッとした余韻
+	  }
+			draw() {
+				ctx.save(); ctx.globalAlpha = this.alpha; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+				ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 6;
+				ctx.font = `900 24px 'Arial Black', Impact, sans-serif`;
+				ctx.strokeText(this.text, this.x, this.y);
+				ctx.fillStyle = this.color; ctx.fillText(this.text, this.x, this.y);
+				ctx.restore();
+			}
     }
 
     function spawnParticles(cellX, cellY, color) {
@@ -2065,16 +2107,6 @@ update() {
     const cloudImage = new Image(); cloudImage.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(CLOUD_ICON_SVG);
     cloudImage.onload = () => draw(); cloudImage.onerror = () => draw();
 
-    function debugClearRanking() {
-        if (confirm("ハイスコアを初期化しますか？")) {
-            localStorage.removeItem('rainbow_puzzle_ranking');
-            updateBestScoreDisplay();
-            if (document.getElementById('overlay').style.display === 'flex') {
-                renderRankingList();
-            }
-        }
-    }
-
     /* LOCAL STORAGE ハイスコアシステムの実装 */
     function loadRanking() {
         let ranking = localStorage.getItem('rainbow_puzzle_ranking');
@@ -2115,6 +2147,7 @@ update() {
 
         renderRankingList();
         document.getElementById('overlay').style.display = 'flex';
+        document.getElementById('reset-btn').disabled = true;
     }
 
     function renderRankingList() {
@@ -2168,14 +2201,27 @@ update() {
         document.getElementById('final-score').style.display = 'block';
     }
 
-    function confirmResetRanking() {
-        if (confirm("これまでのスコア記録を消して全部0に戻します。\n本当に消していいですか？")) {
-            localStorage.removeItem('rainbow_puzzle_ranking');
-            updateBestScoreDisplay();
-            renderRankingList();
-        }
-    }
-
+	function confirmResetRanking() {
+		const modal = document.getElementById('ranking-reset-modal');
+		modal.style.display = 'flex';
+		requestAnimationFrame(() => {
+			modal.style.opacity = '1';
+			document.getElementById('ranking-reset-modal-content').style.transform = 'scale(1)';
+		});
+	}
+	function closeRankingResetModal() {
+		const modal = document.getElementById('ranking-reset-modal');
+		modal.style.opacity = '0';
+		document.getElementById('ranking-reset-modal-content').style.transform = 'scale(0.9)';
+		setTimeout(() => { modal.style.display = 'none'; }, 200);
+	}
+	function executeRankingReset() {
+		closeRankingResetModal();
+		localStorage.removeItem('rainbow_puzzle_ranking');
+		updateBestScoreDisplay();
+		renderRankingList();
+	}
+	
     function saveRankedScore() {
         let nameField = document.getElementById('player-name-field');
         let name = nameField.value.trim();
@@ -2208,6 +2254,7 @@ update() {
 		almightyThreshold = CONFIG.THRESHOLD.ALMIGHTY_START;
 		darkFastThreshold = CONFIG.THRESHOLD.DARK_FAST_START;
         isGameOver = false;
+		document.getElementById('reset-btn').disabled = false;
 		gameElapsedTime = 0;
         gameStartTime = null;
         document.getElementById('debug-time').textContent = `TIME: ${formatTime(0)}`;
@@ -4213,7 +4260,7 @@ update() {
      * 🖥️ カスタムリセット確認ウィンドウの制御ロジック
      ************************************************************/
     function openResetModal() {
-        if (isGameOver) { initGame(); return; }
+	    if (isGameOver) return;
         
         const modal = document.getElementById('reset-confirm-modal');
         const content = document.getElementById('reset-modal-content');
