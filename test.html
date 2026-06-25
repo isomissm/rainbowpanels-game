@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3つ並べパズル - Rainbow Panels (ver7.3.0)</title>
+<title>3つ並べパズル - Rainbow Panels (ver7.4.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
@@ -26,7 +26,10 @@ body {
     user-select: none;
 }
 /* メインUI：Nunitoフォント適用（英語表示のみ） */
-.score-val, .moves-val, .ui-section-title, .best-score-label, .best-score-label-mobile, .status-level-val, .status-moves-val, .status-next-label {
+.score-val, .moves-val, .ui-section-title,
+.best-score-label, .best-score-label-mobile,
+.status-level-val, .status-moves-val, .status-next-label,
+#overlay h2, #final-score {
     font-family: var(--font-main-ui);
 }
 /* スマホのタップ時の青いハイライトを無効化 */
@@ -886,6 +889,7 @@ canvas {
     <div id="dbg-dark-rate"   style="color:#fdcb6e;">発動率 --%</div>
     <div id="dbg-dark-cycle"  style="color:#a29bfe; margin-top:6px;">夜スコア補正 0</div>
     <div id="debug-time" style="margin-top:20px;">TIME: 00:00:00</div>
+    <div id="dbg-dpr">DPR: -</div>
   </div>
 </div>
 <div id="main-layout">
@@ -1281,8 +1285,14 @@ const CONFIG = {
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d');
     
-    canvas.width = CONFIG.BOARD_SIZE * CONFIG.CELL_SIZE;
-    canvas.height = CONFIG.BOARD_SIZE * CONFIG.CELL_SIZE;
+    const dpr = window.devicePixelRatio || 1;
+    document.getElementById('dbg-dpr').textContent = `DPR: ${dpr}`;
+    const logicalSize = CONFIG.BOARD_SIZE * CONFIG.CELL_SIZE;
+    canvas.width = logicalSize * dpr;
+    canvas.height = logicalSize * dpr;
+    canvas.style.width = logicalSize + 'px';
+    canvas.style.height = logicalSize + 'px';
+    ctx.scale(dpr, dpr);
     ctx.imageSmoothingEnabled = false;
 
     let board = [];
