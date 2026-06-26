@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3つ並べパズル - Rainbow Panels (ver7.4.0)</title>
+<title>3つ並べパズル - Rainbow Panels (ver7.5.1)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
@@ -488,6 +488,14 @@ height: 130%;
 opacity: 0;
 border-width: 1px;
 }
+}
+.night-star-bg {
+    position: fixed;
+    border-radius: 50%;
+    background: white;
+    pointer-events: none;
+    z-index: -1;
+    transition: opacity 1.5s ease;
 }
 /* 虹玉とゲージ貯まった時に飛んでいく●のグラフィック */
 .charge-particle {
@@ -1171,7 +1179,9 @@ canvas {
   </div>
 </div>
 <p style="text-align: center; color: #64748b; font-size: 14px; margin-top: 16px;"> © 2026 Rainbow Panels by isomi_ssm </p>
+	
 <script>
+
 	/************************************************************
 	 * 📝 命名メモ
 	 * 「LEVEL RAINBOW」→「SEVEN COLORS」に表示名を変更済み
@@ -1309,11 +1319,11 @@ const CONFIG = {
         COLORS: [
             "#ff7675", // 0: 赤
             "#ffe53b", // 1: 黄
-            "#55efc4", // 2: 緑
-            "#74b9ff", // 3: 青
+            "#55EFCB", // 2: 緑
+            "#66B5FF", // 3: 青
             "#c175ff", // 4: 紫
             "#ff9300", // 5: オレンジ
-            "#6c5ce7", // 6: 藍色
+            "#6962FC", // 6: 藍色
         ],
         SYMBOLS: [
             "☀", // 0: 赤
@@ -2933,8 +2943,38 @@ update() {
 
         updateNightStarUI();
         draw();
+        spawnNightBgStars();
     }
 	
+	function spawnNightBgStars() {
+        const total = 70;
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < total; i++) {
+            const el = document.createElement('div');
+            el.className = 'night-star-bg';
+            const size = Math.random() * 2 + 1.5; // 1.5〜3.5px
+            // 上1/3に多く、中1/3に少し、下1/3はなし
+            const zone = Math.random();
+            let yMax, yMin;
+            if (zone < 0.72) {
+                yMin = 0; yMax = 33; // 上ゾーン（72%の星）
+            } else {
+                yMin = 33; yMax = 60; // 中ゾーン（28%の星）
+            }
+            const x = Math.random() * 100;
+            const y = yMin + Math.random() * (yMax - yMin);
+            el.style.cssText = `
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}vw;
+                top: ${y}vh;
+                opacity: ${(Math.random() * 0.5 + 0.3).toFixed(2)};
+            `;
+            fragment.appendChild(el);
+        }
+        document.body.appendChild(fragment);
+    }
+
 	async function spawnNightStars() {
         if (!isNightMode || nightStarSpawned) return;
         nightStarSpawned = true;
@@ -2993,6 +3033,12 @@ update() {
         while (almightyThreshold <= score) almightyThreshold += CONFIG.THRESHOLD.ALMIGHTY_INTERVAL;
         while (sunnyThreshold <= score) sunnyThreshold += CONFIG.THRESHOLD.SUNNY_INTERVAL;
         while (snowThreshold <= score) snowThreshold += CONFIG.THRESHOLD.SNOW_INTERVAL;
+
+        // 背景の星を消す
+        document.querySelectorAll('.night-star-bg').forEach(el => {
+            el.style.opacity = '0';
+            setTimeout(() => el.remove(), 1500);
+        });
 
         // 背景を昼色にゆっくりフェード
         document.body.style.transition = 'background-color 2.5s ease';
