@@ -1287,14 +1287,14 @@ const CONFIG = {
     
     const dpr = window.devicePixelRatio || 1;
     document.getElementById('dbg-dpr').textContent = `DPR: ${dpr}`;
-    const logicalSize = CONFIG.BOARD_SIZE * CONFIG.CELL_SIZE;
+    let logicalSize = CONFIG.BOARD_SIZE * CONFIG.CELL_SIZE;
     canvas.width = logicalSize * dpr;
     canvas.height = logicalSize * dpr;
     canvas.style.width = logicalSize + 'px';
     canvas.style.height = logicalSize + 'px';
     ctx.scale(dpr, dpr);
     ctx.imageSmoothingEnabled = false;
-
+	
     let board = [];
     let selected = null;
     let score = 0;
@@ -3667,10 +3667,8 @@ update() {
 				} else if (board[s.r][s.c] >= CONFIG.PANEL_TYPE.BALL_MIN && board[s.r][s.c] <= CONFIG.PANEL_TYPE.BALL_MAX) {
 					spawnRainbowParticles(s.c, s.r);
 					const canvasRect = canvas.getBoundingClientRect();
-					const scaleX = canvasRect.width / canvas.width;
-					const scaleY = canvasRect.height / canvas.height;
-					const ballFromX = canvasRect.left + (s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * scaleX;
-					const ballFromY = canvasRect.top  + (s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * scaleY;
+					const ballFromX = canvasRect.left + (s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.width / logicalSize);
+                    const ballFromY = canvasRect.top  + (s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.height / logicalSize);
 					collectRainbowBall(board[s.r][s.c] - 102, ballFromX, ballFromY);
 				} else if (board[s.r][s.c] === CONFIG.PANEL_TYPE.ALLCLEAR) {
 					board[s.r][s.c] = -1;
