@@ -3653,10 +3653,8 @@ update() {
 					spawnRainbowParticles(s.c, s.r);
 					if (skillStock < CONFIG.SKILL_STOCK_MAX) {
 						const canvasRect = canvas.getBoundingClientRect();
-						const scaleX = canvasRect.width / canvas.width;
-						const scaleY = canvasRect.height / canvas.height;
-						const panelX = canvasRect.left + (s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * scaleX + window.scrollX;
-						const panelY = canvasRect.top + (s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * scaleY + window.scrollY;
+						const panelX = canvasRect.left + (s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.width / logicalSize) + window.scrollX;
+                    const panelY = canvasRect.top + (s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.height / logicalSize) + window.scrollY;
 						setTimeout(() => {
 							if (!isGameOver) animateCurveChargeParticle(panelX, panelY);
 						}, 500);
