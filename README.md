@@ -1,4 +1,4 @@
-# ナナイロパネル - RainbowPanels
+# ナナイロパネル - Rainbow Panels
 パネルを3つ並べて消すカラフルパズルゲーム
 
 [▶ ゲームを遊ぶ](https://isomissm.github.io/rainbowpanels-game/rainbowpanels.html)
