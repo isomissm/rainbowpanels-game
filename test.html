@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3つ並べパズル - Rainbow Panels (ver7.5.1)</title>
+<title>ナナイロパネル／Rainbow Panels (ver7.6.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
@@ -287,7 +287,7 @@ canvas {
     align-items: center;
     background: #ffffff;
     padding: 0;
-    border-radius: 24px;
+    border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.04);
     border: 4px solid #fff;
     min-width: 240px; /* 左枠の横幅サイズ */
@@ -474,6 +474,44 @@ transform: scale(1);
     filter: blur(4px);
     /* RAINBOW BURSTボタンのエフェクト設定 ※別の行も数値を合わせる→setTimeout(() => ring.remove(), */
     animation: waveExpand 1.8s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+}	
+.rainbow-shockwave-wrap {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 60;
+    filter: blur(10px);
+}
+/* SEVEN COLORS開始時：左枠中心から広がる虹色波紋 */
+.rainbow-shockwave-ring {
+    position: absolute;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff7675, #ff4757);
+    padding: 40px; /* SEVEN COLORS発動時：開始時の枠の太さ（旧border-widthに相当） */
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0.9;
+    pointer-events: none;
+    box-sizing: border-box;
+    filter: blur(10px); /* SEVEN COLORS の 虹色波紋のぼかし */
+    z-index: 60;
+    animation: rainbowWaveExpand 7.0s cubic-bezier(0.1, 0.8, 0.2, 1) forwards; /* SEVEN COLORS虹色波紋の速度 */
+}
+@keyframes rainbowWaveExpand {
+0% {
+width: 100%;
+height: 100%;
+opacity: 0.9;
+padding: 40px; /* SEVEN COLORS発動時：開始時の枠の太さ */
+}
+100% {
+width: 115%;
+height: 115%;
+opacity: 0;
+padding: 1px;
+}
 }
 @keyframes waveExpand {
 0% {
@@ -689,6 +727,19 @@ background: #ffd6d6;
 }
 #game-container.rainbow-bg {
     animation: rainbowBg 4s linear infinite;
+}
+#rainbow-flash-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff7675, #ff4757);
+    background-size: 150% 150%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 50;
+    mix-blend-mode: hard-light;
+    transition: opacity 0.6s ease; /* SEVEN COLORS 切り替わりの長さ*/
+    animation: rainbowFlashShift 2s linear infinite;
 }
 .rainbow-moves {
     background: linear-gradient(90deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff4757);
@@ -1099,11 +1150,11 @@ canvas {
       <!-- 説明文白枠内の行間*/ -->
       <tr>
         <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-dark-img"></span></td>
-        <td style="padding: 2px 0;">闇玉：カウントが0になると周囲を <span class="mini-obstacle-img">
+        <td style="padding: 2px 0;">闇玉：カウントが0になると周囲を<span class="mini-obstacle-img">
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
           </svg>
-          </span> お邪魔パネルに変えてしまう </td>
+          </span>お邪魔パネルに変えてしまう </td>
       </tr>
       <tr>
         <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-rainbow-img"></span></td>
@@ -1115,12 +1166,21 @@ canvas {
             <polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/>
           </svg>
           </span></td>
-        <td style="padding: 2px 0;">雷玉：お邪魔パネルと闇玉を一気に消せる！</td>
+        <td style="padding: 2px 0;">雷玉：
+<span class="mini-obstacle-img">
+          <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
+            <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
+          </svg>
+          </span>お邪魔パネルと<span class="mini-dark-img"></span>闇玉を一気に消せる！</td>
       </tr>
       
       <tr>
         <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-sunny-img"></span></td>
-        <td style="padding: 2px 0;">晴玉：周囲5×5マスのお邪魔パネルを🟥赤パネルに変える</td>
+        <td style="padding: 2px 0;">晴玉：周囲5×5マスの<span class="mini-obstacle-img">
+          <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
+            <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
+          </svg>
+          </span>お邪魔パネルを🟥赤パネルに変える<br>凍っているパネルが解ける</td>
       </tr>
       <tr>
         <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-rainy-img"></span></td>
@@ -1128,8 +1188,8 @@ canvas {
       </tr>
       <tr>
         <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-snow-img"></span></td>
-        <td style="padding: 2px 0;">雪玉：カウントが0になるとランダムにパネルが凍ってしまう<br>
-		（凍ったパネルは移動できない。隣接で解ける）</td>
+        <td style="padding: 2px 0;">雪玉：カウントが0になるとパネルがランダムに凍ってしまう<br>
+		（凍ったパネルは移動できない・隣接で解ける）</td>
       </tr>
 		
 		<tr>
@@ -1144,7 +1204,7 @@ canvas {
   </div>
 	<br>
   <div class="special-panel-box" style="margin-top: 8px;">
-    <strong>《昼モード・夜モード》</strong><br>
+    <strong>《昼モード／夜モード》</strong><br>
     スコアが上がると夜モードが発動！<br>
     流れ星<span class="mini-star-img"></span>を3つ集めると昼モードに戻るよ<br>
     夜モード中は七色の玉、虹玉、プリズムパネルが出現しなくなるので注意！
@@ -1178,7 +1238,7 @@ canvas {
     </div>
   </div>
 </div>
-<p style="text-align: center; color: #64748b; font-size: 14px; margin-top: 16px;"> © 2026 Rainbow Panels by isomi_ssm </p>
+<p style="text-align: center; color: #64748b; font-size: 14px; margin-top: 16px;"> © 2026 ナナイロパネル／Rainbow Panels by isomi_ssm </p>
 	
 <script>
 
@@ -1392,6 +1452,7 @@ const CONFIG = {
     let score = 0;
     let moves = CONFIG.INITIAL_MOVES;
     let isAnimating = false;
+	let isStarEffectActive = false; // 🌙 星玉出現演出中の操作ロック専用フラグ
     let isGameOver = false;
 
     let gameStartTime = null;
@@ -2287,6 +2348,7 @@ update() {
             document.getElementById('back-to-game-btn').style.display = 'inline-block';
             document.querySelector('#overlay h2').style.display = 'none';
             document.getElementById('final-score').style.display = 'none';
+            document.getElementById('reset-btn').disabled = true;
         }
         renderRankingList();
         document.getElementById('overlay').style.display = 'flex';
@@ -2301,6 +2363,7 @@ update() {
         document.getElementById('reset-ranking-btn').style.display = 'inline-block';
         document.querySelector('#overlay h2').style.display = 'block';
         document.getElementById('final-score').style.display = 'block';
+        document.getElementById('reset-btn').disabled = false;
     }
 
 	function confirmResetRanking() {
@@ -2393,6 +2456,7 @@ update() {
         document.body.style.backgroundColor = '#CAF5FF';
         const gc = document.getElementById('game-container');
         if (gc) { gc.style.transition = 'none'; gc.style.backgroundColor = '#ffffff'; }
+        document.querySelectorAll('.night-star-bg').forEach(el => el.remove()); // 🌙 リトライ時に夜空の星を確実に除去
         updateNightStarUI();
 
         document.getElementById('score').innerText = score;
@@ -2818,7 +2882,7 @@ update() {
     }
 
     canvas.addEventListener('click', async (e) => {
-        if (isAnimating || isGameOver || isPaused) return;document.getElementById('debug-time')
+        if (isAnimating || isGameOver || isPaused || isStarEffectActive) return;document.getElementById('debug-time')
         const rect = canvas.getBoundingClientRect();
         const c = Math.floor((e.clientX - rect.left) / (rect.width / CONFIG.BOARD_SIZE));
         const r = Math.floor((e.clientY - rect.top) / (rect.height / CONFIG.BOARD_SIZE));
@@ -2978,20 +3042,21 @@ update() {
 	async function spawnNightStars() {
         if (!isNightMode || nightStarSpawned) return;
         nightStarSpawned = true;
+        isStarEffectActive = true; // 🌙 流れ星演出中は操作ロック
         /* 流れ星を3本スポーン（時間差） */
         for (let i = 0; i < 3; i++) {
             await new Promise(r => setTimeout(r, i * 300));
             specialEffects.push(new ShootingStarEffect());
         }
         await new Promise(r => setTimeout(r, 1200));
-        if (!isNightMode) { isReplenishingStars = false; return; }
+        if (!isNightMode) { isReplenishingStars = false; isStarEffectActive = false; return; }
         /* await中に状態が変わった場合のためneededを再計算 */
         let starsOnBoard2 = 0;
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++)
             for (let c = 0; c < CONFIG.BOARD_SIZE; c++)
                 if (board[r][c] === CONFIG.PANEL_TYPE.STAR) starsOnBoard2++;
         const actualNeeded = CONFIG.NIGHT_STAR_NEEDED - nightStarCount - starsOnBoard2;
-        if (actualNeeded <= 0) { isReplenishingStars = false; return; }
+        if (actualNeeded <= 0) { isReplenishingStars = false; isStarEffectActive = false; return; }
         /* ランダムな位置に星を配置 */
         const allCells = [];
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
@@ -3014,6 +3079,8 @@ update() {
         }
         updateNightStarUI();
         draw();
+        await new Promise(r => setTimeout(r, 700)); // 🌙 StarSpawnEffectの寿命(約0.6〜0.7秒)分待機
+        isStarEffectActive = false; // 🌙 演出終了、操作ロック解除
     }
 
     function returnToDay() {
@@ -3185,15 +3252,16 @@ update() {
         if (needed <= 0) return;             // 🌙 合計3つあれば補充不要
 
         isReplenishingStars = true;
+        isAnimating = true; // 🌙 流れ星演出中は操作ロック
 
         /* 流れ星演出 */
         for (let i = 0; i < needed; i++) {
             await new Promise(r => setTimeout(r, i * 300));
-            if (!isNightMode) { isReplenishingStars = false; return; }
+            if (!isNightMode) { isReplenishingStars = false; isAnimating = false; return; }
             specialEffects.push(new ShootingStarEffect());
         }
         await new Promise(r => setTimeout(r, 1200));
-        if (!isNightMode) { isReplenishingStars = false; return; }
+        if (!isNightMode) { isReplenishingStars = false; isAnimating = false; return; }
 
         /* await中に状態が変わった場合のため補充数を再計算 */
         let starsOnBoard2 = 0;
@@ -3201,7 +3269,7 @@ update() {
             for (let c = 0; c < CONFIG.BOARD_SIZE; c++)
                 if (board[r][c] === CONFIG.PANEL_TYPE.STAR) starsOnBoard2++;
         const actualNeeded = CONFIG.NIGHT_STAR_NEEDED - nightStarCount - starsOnBoard2;
-        if (actualNeeded <= 0) { isReplenishingStars = false; return; }
+        if (actualNeeded <= 0) { isReplenishingStars = false; isAnimating = false; return; }
 
         /* ランダムな位置に星を配置 */
         const allCells = [];
@@ -3221,7 +3289,9 @@ update() {
             spawned++;
         }
         draw();
+        await new Promise(r => setTimeout(r, 700)); // 🌙 StarSpawnEffectの寿命(約0.6〜0.7秒)分待機
         isReplenishingStars = false; // 🌙 補充完了
+        isAnimating = false; // 🌙 演出終了、操作ロック解除
     }
 
     function checkNightModeEntry() {
@@ -3369,6 +3439,25 @@ update() {
         }
 
         useSkill();
+    }
+
+	function createRainbowShockwaveEffect() {
+        const gameContainer = document.getElementById('game-container');
+        if (!gameContainer) return;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'rainbow-shockwave-wrap';
+
+        const ring = document.createElement('div');
+        ring.className = 'rainbow-shockwave-ring';
+        ring.style.left = '50%';
+        ring.style.top = '50%';
+        ring.style.transform = 'translate(-50%, -50%)';
+
+        wrap.appendChild(ring);
+        gameContainer.appendChild(wrap);
+        const duration = parseFloat(getComputedStyle(ring).animationDuration) * 1000 || 5000;
+        setTimeout(() => wrap.remove(), duration);
     }
 
     function createShockwaveRingEffect() {
@@ -4057,6 +4146,8 @@ update() {
 			rainbowBallProgress.fill(0);
 			// 中間あたり（残り8〜12手のタイミング）でランダム出現
 			allClearSpawnCount = CONFIG.ALLCLEAR_SPAWN_COUNT_MIN + Math.floor(Math.random() * CONFIG.ALLCLEAR_SPAWN_COUNT_RANGE);
+
+			createRainbowShockwaveEffect();
 
 			updateRainbowUI();
 		}
