@@ -1005,8 +1005,10 @@ canvas {
     <div id="dbg-dpr">DPR: -</div>
   </div>
 </div>
-<!-- ⚙️ オプションボタン（画面右上に固定表示） -->
-<button id="options-open-btn" onclick="openOptionsModal()" aria-label="オプション" style="position: fixed; top: 12px; right: 12px; z-index: 600; width: 44px; height: 44px; border-radius: 50%; border: 3px solid #fff; background: #ffffff; box-shadow: 0 6px 16px rgba(0,0,0,0.12); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">⚙️</button>
+<!-- ⚙️ ゲーム画面の外、デバッグパネルの下に置く専用のボタン行（後々ここにボタンが増える予定） -->
+<div id="top-button-row" style="width: 100%; display: flex; justify-content: flex-end; gap: 8px; box-sizing: border-box; margin-bottom: 10px;">
+  <button id="options-open-btn" onclick="openOptionsModal()" aria-label="オプション" style="border: none; border-radius: 14px; background: #3D9DFF; color: #ffffff; box-shadow: 0 3px 8px rgba(61,157,255,0.35); font-size: 14px; font-weight: 900; padding: 6px 10px; cursor: pointer; white-space: nowrap; font-family: var(--font-main-ui);">⚙️ OPTION</button>
+</div>
 <div id="main-layout">
   <div id="left-area">
     <div id="game-container">
@@ -1061,7 +1063,7 @@ canvas {
   <div id="right-ui">
     <div id="right-ui-top">
       <button id="view-ranking-btn" onclick="showRankingScreen()" class="view-ranking-btn view-ranking-btn-pc">🏆 ランキングを見る</button>
-      <div id="best-score" class="best-score-label">BEST: 0000</div>
+		<div id="best-score" class="best-score-label">BEST: 0000</div>
       <div class="score-group">
         <div class="ui-section-title">SCORE</div>
         <div id="score" class="score-val">0</div>
@@ -1238,13 +1240,13 @@ canvas {
 <!-- ⚙️ オプションモーダル -->
 <div id="options-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; padding: 28px 24px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 380px; width: 88%; max-height: 85vh; overflow-y: auto; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box;" id="options-modal-content">
-    <h3 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">⚙️ オプション</h3>
+    <h3 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 18px; font-weight: 900; font-family: var(--font-main-ui);">⚙️ OPTION</h3>
 
     <div style="text-align: left; margin-bottom: 20px;">
       <div style="font-size: 13px; font-weight: 900; color: #475569; margin-bottom: 8px;">アニメーション速度</div>
       <div style="display: flex; gap: 6px;">
-        <button id="opt-speed-slow" onclick="setAnimSpeed('slow')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">ゆっくり</button>
-        <button id="opt-speed-normal" onclick="setAnimSpeed('normal')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">標準</button>
+        <button id="opt-speed-none" onclick="setAnimSpeed('none')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">なし</button>
+        <button id="opt-speed-normal" onclick="setAnimSpeed('normal')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">ふつう</button>
         <button id="opt-speed-fast" onclick="setAnimSpeed('fast')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">はやい</button>
       </div>
     </div>
@@ -1252,7 +1254,7 @@ canvas {
     <div style="text-align: left; margin-bottom: 20px;">
       <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
         <input type="checkbox" id="opt-reduce-motion" onchange="toggleReduceMotion()" style="width: 18px; height: 18px; cursor: pointer;">
-        <span style="font-size: 13px; font-weight: 900; color: #475569;">モーション減少（揺れ・アニメを抑える）</span>
+        <span style="font-size: 13px; font-weight: 900; color: #475569;">モーション減少（お邪魔パネルの震えなど、追加の演出を抑える）</span>
       </label>
     </div>
 
@@ -1492,17 +1494,18 @@ const CONFIG = {
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     const SETTINGS_STORAGE_KEY = 'nanairoPanelUserSettings';
 
-    const DEFAULT_SETTINGS = {
-        animSpeed:    'normal', // 'slow' | 'normal' | 'fast'
+	const DEFAULT_SETTINGS = {
+        animSpeed:    'normal', // 'none'（アニメなし） | 'normal'（ふつう） | 'fast'（はやい）
         bgmVolume:    80,       // 0-100（音源実装後に接続予定。現状は値の保持のみ）
         seVolume:     80,       // 0-100（同上）
-        reduceMotion: false,    // trueで入れ替え・落下アニメをほぼ瞬時にする
+        reduceMotion: false,    // trueで、お邪魔パネル出現時の震え等「追加の演出」を抑える（パネル移動アニメの速度とは別軸）
         ballShape:    'circle'  // 'circle' | 'magatama' | 'hexagon'
     };
 
     // アニメ速度プリセットの倍率（1.0が標準。大きいほどゆっくり、小さいほど速い）
-    const ANIM_SPEED_PRESETS = { slow: 1.5, normal: 1.0, fast: 0.6 };
-
+    // 'none' は倍率ではなく特別扱い（ほぼ瞬時にする）
+    const ANIM_SPEED_PRESETS = { normal: 1.0, fast: 0.6 };
+	
     // CONFIGのベース値（速度プリセットを切り替えるたびに、ここから再計算する）
     const BASE_SWAP_ANIM_DURATION        = CONFIG.SWAP_ANIM_DURATION;
     const BASE_FALL_ANIM_DURATION_PER_ROW = CONFIG.FALL_ANIM_DURATION_PER_ROW;
@@ -1531,19 +1534,20 @@ const CONFIG = {
 
     // 現在のuserSettingsをゲームの動作に反映する
     function applyUserSettings() {
-        const speedMul = ANIM_SPEED_PRESETS[userSettings.animSpeed] ?? 1.0;
-        if (userSettings.reduceMotion) {
-            // モーション減少：入れ替え・落下をほぼ瞬時にする
+        if (userSettings.animSpeed === 'none') {
+            // 「なし」：入れ替え・落下アニメをほぼ瞬時にする
             CONFIG.SWAP_ANIM_DURATION = 1;
             CONFIG.FALL_ANIM_DURATION_PER_ROW = 1;
             CONFIG.FALL_ANIM_DURATION_MAX = 1;
         } else {
+            const speedMul = ANIM_SPEED_PRESETS[userSettings.animSpeed] ?? 1.0;
             CONFIG.SWAP_ANIM_DURATION = Math.round(BASE_SWAP_ANIM_DURATION * speedMul);
             CONFIG.FALL_ANIM_DURATION_PER_ROW = Math.round(BASE_FALL_ANIM_DURATION_PER_ROW * speedMul);
             CONFIG.FALL_ANIM_DURATION_MAX = Math.round(BASE_FALL_ANIM_DURATION_MAX * speedMul);
         }
         applyBallShape(userSettings.ballShape);
-        // 🔊 BGM/SE音量：音源実装後にここへ接続予定（現状は値の保持のみ）
+        // BGM/SE音量：音源実装後にここへ接続予定（現状は値の保持のみ）
+        // reduceMotion：お邪魔パネルの震えなど「追加の演出」の抑制に使用（addObstacle()等で直接参照）
     }
 
     // ────────────────────────────────────────────────────
@@ -2390,7 +2394,10 @@ update() {
 	function applyBallShape(key) {
 		if (!BALL_SHAPES[key]) key = 'circle';
 		BALL_SHAPE = new Path2D(BALL_SHAPES[key]);
--		draw();
+		// draw()は呼ばない：常時稼働中のsetInterval(draw, 16)が次のフレームで自動的に反映する。
+		// ここで直接draw()を呼ぶと、boardがまだ初期化されていない起動直後のタイミング
+		// （initGame()実行前にapplyUserSettings()が呼ばれる場合）に例外が発生し、
+		// 以降の初期化処理が止まって盤面が表示されなくなるバグの原因になっていた。
 	}
 
     const sunnyImage = new Image(); sunnyImage.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(SUNNY_ICON_SVG);
@@ -2402,18 +2409,24 @@ update() {
 
     /* LOCAL STORAGE ハイスコアシステムの実装 */
     function loadRanking() {
-        let ranking = localStorage.getItem('rainbow_puzzle_ranking');
-        if (ranking) {
-            return JSON.parse(ranking);
-        } else {
-            let defaultRanking = [
-                {name: "------", score: 0}, {name: "------", score: 0},
-                {name: "------", score: 0}, {name: "------", score: 0},
-                {name: "------", score: 0}, {name: "------", score: 0},
-                {name: "------", score: 0}, {name: "------", score: 0},
-                {name: "------", score: 0}, {name: "------", score: 0}
-            ];
-            localStorage.setItem('rainbow_puzzle_ranking', JSON.stringify(defaultRanking));
+        let defaultRanking = [
+            {name: "------", score: 0}, {name: "------", score: 0},
+            {name: "------", score: 0}, {name: "------", score: 0},
+            {name: "------", score: 0}, {name: "------", score: 0},
+            {name: "------", score: 0}, {name: "------", score: 0},
+            {name: "------", score: 0}, {name: "------", score: 0}
+        ];
+        try {
+            let ranking = localStorage.getItem('rainbow_puzzle_ranking');
+            if (ranking) {
+                return JSON.parse(ranking);
+            } else {
+                localStorage.setItem('rainbow_puzzle_ranking', JSON.stringify(defaultRanking));
+                return defaultRanking;
+            }
+        } catch (e) {
+            // 🛡️ localStorageが使えない環境（セキュリティ制限等）でもゲーム進行を止めないためのフォールバック
+            console.warn('ランキングの読み込みに失敗しました。デフォルト値を使用します。', e);
             return defaultRanking;
         }
     }
@@ -2498,7 +2511,7 @@ update() {
 
 	// ⚙️ オプションモーダルの表示内容を、現在のuserSettingsに合わせて更新する
 	function updateOptionsUI() {
-		['slow', 'normal', 'fast'].forEach(key => {
+		['none', 'normal', 'fast'].forEach(key => {
 			const btn = document.getElementById('opt-speed-' + key);
 			if (!btn) return;
 			const active = userSettings.animSpeed === key;
@@ -2595,7 +2608,8 @@ update() {
 	}
 	function executeRankingReset() {
 		closeRankingResetModal();
-		localStorage.removeItem('rainbow_puzzle_ranking');
+		try { localStorage.removeItem('rainbow_puzzle_ranking'); }
+		catch (e) { console.warn('ランキングのリセットに失敗しました。', e); }
 		updateBestScoreDisplay();
 		renderRankingList();
 	}
@@ -2610,7 +2624,8 @@ update() {
         ranking.sort((a, b) => b.score - a.score);
         ranking = ranking.slice(0, 10);
         
-        localStorage.setItem('rainbow_puzzle_ranking', JSON.stringify(ranking));
+        try { localStorage.setItem('rainbow_puzzle_ranking', JSON.stringify(ranking)); }
+        catch (e) { console.warn('ランキングの保存に失敗しました。', e); }
         
         document.getElementById('name-input-box').style.display = 'none';
         renderRankingList();
@@ -3620,6 +3635,14 @@ update() {
                     cellsToTurn.forEach(cell => {
                         if (board[cell.r][cell.c] === CONFIG.PANEL_TYPE.STAR) starLost = true;
                         board[cell.r][cell.c] = CONFIG.PANEL_TYPE.OBSTACLE;
+                        if (!userSettings.reduceMotion) { // モーション減少ONなら震え演出をスキップ
+                            particles.push(new Particle(cell.c * CONFIG.CELL_SIZE, cell.r * CONFIG.CELL_SIZE, CONFIG.THEME_COLORS.OBSTACLE, "shake"));
+                            shakingCells.add(`${cell.r},${cell.c}`);
+                            setTimeout(() => {
+                                shakingCells.delete(`${cell.r},${cell.c}`);
+                                if (!isGameOver) draw();
+                            }, 500);
+                        }
                     });
                     cleanUpDangerCountsData();
                     draw();
@@ -4361,14 +4384,16 @@ update() {
             if (board[r][c] < CONFIG.PANEL_TYPE.OBSTACLE && board[r][c] !== -1 && frozenCells[`${r},${c}`] === undefined && !(lastMovedCell && lastMovedCell.some(cell => cell.r === r && cell.c === c))) { 
 				board[r][c] = CONFIG.PANEL_TYPE.OBSTACLE;
 				cleanUpDangerCountsData();
-				particles.push(new Particle(c * CONFIG.CELL_SIZE, r * CONFIG.CELL_SIZE, CONFIG.THEME_COLORS.OBSTACLE, "shake"));
-				shakingCells.add(`${r},${c}`);
-				setTimeout(() => {
-					shakingCells.delete(`${r},${c}`);
-					if (!isGameOver) { 
-						draw(); 
-					}
-				}, 500);
+				if (!userSettings.reduceMotion) { // モーション減少ONなら震え演出をスキップ
+					particles.push(new Particle(c * CONFIG.CELL_SIZE, r * CONFIG.CELL_SIZE, CONFIG.THEME_COLORS.OBSTACLE, "shake"));
+					shakingCells.add(`${r},${c}`);
+					setTimeout(() => {
+						shakingCells.delete(`${r},${c}`);
+						if (!isGameOver) { 
+							draw(); 
+						}
+					}, 500);
+				}
             break; 
             } tries++;
         }
@@ -4883,6 +4908,19 @@ update() {
     applyUserSettings();
 
     initGame();
+			
+    // ⚙️ #top-button-row の右端を、#right-ui（スコア等が入ってる枠）の右端に揃える
+    function alignTopButtonRow() {
+        const rightUiTop = document.getElementById('right-ui-top');
+        const row = document.getElementById('top-button-row');
+        if (!rightUiTop || !row) return;
+        const rect = rightUiTop.getBoundingClientRect();
+        const gap = window.innerWidth - rect.right - 20; // ⚙️ OPTION オプションボタンの位置調整
+        row.style.paddingRight = Math.max(gap, 0) + 'px';
+    }
+    window.addEventListener('resize', alignTopButtonRow);
+    window.addEventListener('load', alignTopButtonRow);
+    setTimeout(alignTopButtonRow, 0); // 初回描画直後にも一度実行
 	
 </script>
 </body>
