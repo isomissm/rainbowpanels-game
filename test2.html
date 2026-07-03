@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver8.1.1)</title>
+<title>ナナイロパネル／Rainbow Panels (ver8.1.2)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
@@ -1319,6 +1319,8 @@ const CONFIG = {
 		SWAP_ANIM_DURATION:          240,  // パネル入れ替えアニメの所要時間（ms）
 		FALL_ANIM_DURATION_PER_ROW:   90,  // 落下アニメ：1マス分落ちるのにかかる時間（ms）
 		FALL_ANIM_DURATION_MAX:     1000,  // 落下アニメの最大所要時間（ms）※大きく落ちても間延びしないよう上限を設ける
+		LAND_ANIM_DURATION:          300,  // 着地バウンドの長さ（ms）
+		LAND_BOUNCE_HEIGHT:            4,  // バウンドの高さ（px）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🟦 パネル種類数（スコアで解放）
@@ -1582,6 +1584,7 @@ const CONFIG = {
     let selected = null;
     let swapAnim = null;   // 🎬 入れ替えアニメ状態 { r1, c1, r2, c2, startTime, duration }
     let fallAnims = {};    // 🎬 落下アニメ状態 { "r,c": { startTime, duration, dropDistance } }
+    let landAnims = {};    // 🎬 着地バウンド演出 { "r,c": { startTime, duration } }
     let score = 0;
     let moves = CONFIG.INITIAL_MOVES;
     let isAnimating = false;
@@ -2752,7 +2755,18 @@ update() {
             dy += -fa.dropDistance * remaining; // 開始時は上方向にズレていて、着地位置(0)へ収束していく
         }
 
+        dy += getLandBounceOffset(r, c);
+
         return { dx, dy };
+    }
+
+    // 🎬 着地バウンドのオフセット量を計算する（減衰しながら1回跳ねて収束）
+    function getLandBounceOffset(r, c) {
+        const la = landAnims[`${r},${c}`];
+        if (!la) return 0;
+        const t = Math.min(1, (performance.now() - la.startTime) / la.duration);
+        const decay = 1 - t;
+        return -Math.sin(t * Math.PI * 2) * CONFIG.LAND_BOUNCE_HEIGHT * decay * decay;
     }
 
     // 🎬 期限が切れたアニメーションを掃除する(draw()の毎フレーム冒頭で呼ぶ)
@@ -2760,7 +2774,15 @@ update() {
         const now = performance.now();
         if (swapAnim && now - swapAnim.startTime >= swapAnim.duration) swapAnim = null;
         for (const key in fallAnims) {
-            if (now - fallAnims[key].startTime >= fallAnims[key].duration) delete fallAnims[key];
+            if (now - fallAnims[key].startTime >= fallAnims[key].duration) {
+                delete fallAnims[key];
+                if (!userSettings.reduceMotion) { // モーション減少ONなら着地バウンドをスキップ
+                    landAnims[key] = { startTime: now, duration: CONFIG.LAND_ANIM_DURATION };
+                }
+            }
+        }
+        for (const key in landAnims) {
+            if (now - landAnims[key].startTime >= landAnims[key].duration) delete landAnims[key];
         }
     }
 
@@ -3898,7 +3920,7 @@ update() {
     }
 
     async function processRefillOnly() {
-        isAnimating = true; draw(); await new Promise(res => setTimeout(res, userSettings.animSpeed === 'none' ? 220 : 150));
+        isAnimating = true; draw(); await new Promise(res => setTimeout(res, userSettings.animSpeed === 'none' ? 400 : 150)); // パネルアニメーション速さ 右の数値がオプション「なし」の時の数値
         refillBoard();
         await waitForFallAnimations(250); // 🎬 パネルが上から落ちてくるアニメーション
         if (checkMatches().length > 0) await processMatches(true);
@@ -4232,7 +4254,7 @@ update() {
 
             updateSkillUI();
             
-            draw(); await new Promise(res => setTimeout(res, userSettings.animSpeed === 'none' ? 220 : 150)); 
+            draw(); await new Promise(res => setTimeout(res, userSettings.animSpeed === 'none' ? 400 : 150)); // パネルアニメーション速さ 右の数値がオプション「なし」の時の数値
             refillBoard();
             await waitForFallAnimations(200); // 🎬 パネルが上から落ちてくるアニメーション
             matches = checkMatches();
