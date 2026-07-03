@@ -1238,8 +1238,8 @@ canvas {
 <script>
 
 	/************************************************************
-	 * 📝 命名メモ
-	 * 「LEVEL RAINBOW」→「SEVEN COLORS」に表示名を変更済み
+	 * 📝 モードの名称メモ
+	 * 初期でLEVEL RAINBOWと記述していたモードは、SEVEN COLORSモード ＝ 『ナナイロモード』 とする
 	 * 変数名（isLevelRainbow, levelRainbowCount, LEVEL_RAINBOW_DURATIONなど）は
 	 * 変更リスクを避けるため内部処理上はそのまま維持している
 	 ************************************************************/
@@ -1271,25 +1271,25 @@ const CONFIG = {
 	     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🏆 スコア・コンボ設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-	SCORE: {
-		BASE:        { 3: 30, 4: 70, 5: 120, 6: 200 }, // 同時消し数ごとの基本スコア（6以上は180）
-		COMBO_BONUS: { 1: 30, 2: 40, 3:  60, 4:  90, 5: 150 }, // コンボ数ごとの加算ボーナス（5以上は150）
-	},
+		SCORE: {
+			BASE:        { 3: 30, 4: 70, 5: 120, 6: 200 }, // 同時消し数ごとの基本スコア（6以上は180）
+			COMBO_BONUS: { 1: 30, 2: 40, 3:  60, 4:  90, 5: 150 }, // コンボ数ごとの加算ボーナス（5以上は150）
+		},
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 📈 レベル・お邪魔パネル出現設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // threshold: お邪魔パネルの累計ドロップ数がこの値を超えるとレベルアップ
         // pace:      お邪魔パネルが出現するまでの手数間隔
-	LEVELS: [
-        	{ threshold:  0, pace: 12 }, // レベル1
-		{ threshold:  3, pace: 10 }, // レベル2
-		{ threshold:  6, pace:  9 }, // レベル3
-		{ threshold: 10, pace:  8 }, // レベル4
-		{ threshold: 14, pace:  7 }, // レベル5
-		{ threshold: 19, pace:  6 }, // レベル6
-		{ threshold: 25, pace:  5 }, // レベル7
-	],
+		LEVELS: [
+			{ threshold:  0, pace: 12 }, // レベル1
+			{ threshold:  3, pace: 10 }, // レベル2
+			{ threshold:  6, pace:  9 }, // レベル3
+			{ threshold: 10, pace:  8 }, // レベル4
+			{ threshold: 14, pace:  7 }, // レベル5
+			{ threshold: 19, pace:  6 }, // レベル6
+			{ threshold: 25, pace:  5 }, // レベル7
+		],
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ⭐ RAINBOW BURSTスキル設定
@@ -1306,22 +1306,27 @@ const CONFIG = {
 		DARK_PANEL_INIT_COUNT: 7,   // 通常闇玉の初期カウントダウン
 		DARK_PANEL_FAST_COUNT: 5,   // 高速闇玉の初期カウントダウン
 
-	// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ☔ 雨玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		RAINY_EFFECT_DURATION:  700,  // 薄青エフェクトの表示時間（ms）
 		RAINY_DROP_COUNT:        30,  // 雨粒の生成数
 		RAINY_FRAME_DURATION:   90,  // 雨アニメの表示時間（フレーム数）
 		RAINY_LINE_WIDTH:         1.5,  // 雨粒の太さ
+	
+		RAINY_COUNT_MIN:     7,  // 雨玉の効果の青パネル出現数（最低値）
+		RAINY_COUNT_MAX:     9,  // 雨玉の効果の青パネル出現数（最高値）
 
-	// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ❄️ 雪玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SNOW_COUNT:        5,  // 雪玉の初期カウント
 		SNOW_FREEZE_MIN:   5,  // 凍結ターン数（最小）※自然解凍までのターン数
 		SNOW_FREEZE_MAX:   7,  // 凍結ターン数（最大）※自然解凍までのターン数
+	
 		SNOW_FREEZE_TARGET_MIN: 3,  // 一度に凍結させるパネル枚数（最小）
 		SNOW_FREEZE_TARGET_MAX: 5,  // 一度に凍結させるパネル枚数（最大）
+	
 		SNOWY_EFFECT_DURATION: 700,  // 白いオーバーレイの表示時間（ms）
 		SNOWY_FRAME_DURATION:  150,  // 雪エフェクトの表示時間（フレーム数）※雨より長め
 		SNOWY_FLAKE_COUNT:      10,  // 雪片の生成数
@@ -1352,22 +1357,20 @@ const CONFIG = {
         // 🟥 特殊パネルの出現スコア閾値
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		THRESHOLD: {
-		LIGHT_START:      6000,  // 虹玉が初めて出現するスコア
-		LIGHT_INTERVAL:   1040,  // 以降の虹玉出現間隔
-		DARK_START:       7500,  // 闇玉が初めて出現するスコア
-		DARK_INTERVAL:    1150,  // 以降の闇玉出現間隔
-		ALMIGHTY_START:  9000,  // プリズムが初めて出現するスコア
-		ALMIGHTY_INTERVAL: 1530, // 以降のプリズム出現間隔
-		DARK_FAST_START: 12000,  // 高速闇玉が初めて出現するスコア
-		DARK_FAST_INTERVAL: 2980, // 以降の高速闇玉出現間隔
-		SUNNY_START:     14000,  // 晴玉が初めて出現するスコア
-		SUNNY_INTERVAL:   5000,  // 以降の晴玉出現間隔
-		RAINY_START:     15500,  // 雨玉が初めて出現するスコア
-		RAINY_INTERVAL:   5000,  // 以降の雨玉出現間隔
-		RAINY_COUNT_MIN:     7,  // 雨玉の効果の青パネル出現数（最低値）
-		RAINY_COUNT_MAX:     9,  // 雨玉の効果の青パネル出現数（最高値）
-		SNOW_START:      18000,  // 雪玉が初めて出現するスコア
-		SNOW_INTERVAL:    1920,  // 以降の雪玉出現間隔
+		LIGHT_START:         6000,  // 虹玉が初めて出現するスコア
+		LIGHT_INTERVAL:      1040,  // 以降の虹玉出現間隔
+		DARK_START:          7500,  // 闇玉が初めて出現するスコア
+		DARK_INTERVAL:       1150,  // 以降の闇玉出現間隔
+		ALMIGHTY_START:      9000,  // プリズムが初めて出現するスコア
+		ALMIGHTY_INTERVAL:   1530,  // 以降のプリズム出現間隔
+		DARK_FAST_START:    12000,  // 高速闇玉が初めて出現するスコア
+		DARK_FAST_INTERVAL:  2980,  // 以降の高速闇玉出現間隔
+		SUNNY_START:        14000,  // 晴玉が初めて出現するスコア
+		SUNNY_INTERVAL:      5000,  // 以降の晴玉出現間隔
+		RAINY_START:        15500,  // 雨玉が初めて出現するスコア
+		RAINY_INTERVAL:      5000,  // 以降の雨玉出現間隔
+		SNOW_START:         18000,  // 雪玉が初めて出現するスコア
+		SNOW_INTERVAL:       1920,  // 以降の雪玉出現間隔
         },
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -4316,8 +4319,8 @@ update() {
 			}
 		}
 
-		// ランダムに5〜8枚選ぶ
-		const count = CONFIG.THRESHOLD.RAINY_COUNT_MIN + Math.floor(Math.random() * (CONFIG.THRESHOLD.RAINY_COUNT_MAX - CONFIG.THRESHOLD.RAINY_COUNT_MIN + 1));
+		// コンフィグの設定数だけランダムに選ぶ
+		const count = CONFIG.RAINY_COUNT_MIN + Math.floor(Math.random() * (CONFIG.RAINY_COUNT_MAX - CONFIG.RAINY_COUNT_MIN + 1));
 		for (let i = candidates.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
 			[candidates[i], candidates[j]] = [candidates[j], candidates[i]];
