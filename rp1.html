@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3つ並べパズル</title>
+    <style>
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+            color: #444;
+            user-select: none;
+        }
+
+        h1 { font-size: 24px; color: #555; margin: 10px 0; }
+        
+        .description {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        #game-container {
+            position: relative;
+            background: white;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        canvas {
+            display: block;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        #ui {
+            margin-top: 15px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .score { font-size: 20px; font-weight: bold; color: #ff99aa; }
+
+        #reset-btn {
+            padding: 8px 20px;
+            background: #666;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>3つ並べパズル</h1>
+    <div class="description">
+        パネルを入れ替えて同じ絵柄を3つ並べよう！<br>
+        （3つ揃わなくても動かせるよ）
+    </div>
+
+    <div id="game-container">
+        <canvas id="stage"></canvas>
+    </div>
+
+    <div id="ui">
+        <div class="score">SCORE: <span id="score">0</span></div>
+        <button id="reset-btn" onclick="initGame()">最初から遊ぶ</button>
+    </div>
+
+<script>
+    const canvas = document.getElementById('stage');
+    const ctx = canvas.getContext('2d');
+    const SIZE = 7;
+    const CELL = 55;
+    const TYPES = 5;
+    
+    // 落ち着いた濃いめのパステルカラー
+    const COLORS = ["#ff9aa2", "#ffb7b2", "#ffdac1", "#e2f0cb", "#b5ead7"];
+    const SYMBOLS = ["★", "●", "◆", "▲", "■"];
+    
+    canvas.width = SIZE * CELL;
+    canvas.height = SIZE * CELL;
+
+    let board = [];
+    let selected = null;
+    let score = 0;
+    let isAnimating = false;
+
+    // 画像の管理
+    const images = [];
+    let loadedCount = 0;
+
+    for (let i = 1; i <= TYPES; i++) {
+        const img = new Image();
+        img.src = `koma0${i}.png`;
+        img.onload = () => { loadedCount++; draw(); };
+        img.onerror = () => { draw(); }; // 読み込めなくても描画更新
+        images.push(img);
+    }
+
+    function initGame() {
+        score = 0;
+        document.getElementById('score').innerText = score;
+        selected = null;
+        
+        // 初期配置（3つ並ばないように生成）
+        do {
+            board = [];
+            for (let r = 0; r < SIZE; r++) {
+                board[r] = [];
+                for (let c = 0; c < SIZE; c++) {
+                    board[r][c] = Math.floor(Math.random() * TYPES);
+                }
+            }
+        } while (checkMatches().length > 0);
+        
+        draw();
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let r = 0; r < SIZE; r++) {
+            for (let c = 0; c < SIZE; c++) {
+                const type = board[r][c];
+                if (type === -1) continue;
+
+                const x = c * CELL;
+                const y = r * CELL;
+
+                // 1. パネル背景の描画
+                ctx.fillStyle = COLORS[type];
+                roundRect(x + 2, y + 2, CELL - 4, CELL - 4, 8);
+                ctx.fill();
+
+                // 2. 画像の描画（読み込み済みの場合のみ）
+                const img = images[type];
+                if (img.complete && img.naturalWidth !== 0) {
+                    ctx.drawImage(img, x + (CELL-32)/2, y + (CELL-32)/2, 32, 32);
+                } else {
+                    // 画像がない場合は記号を表示（文字のちらつきは発生しない）
+                    ctx.fillStyle = "rgba(0,0,0,0.2)";
+                    ctx.font = "bold 20px sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(SYMBOLS[type], x + CELL/2, y + CELL/2);
+                }
+
+                // 3. 選択中の枠線
+                if (selected && selected.r === r && selected.c === c) {
+                    ctx.strokeStyle = "white";
+                    ctx.lineWidth = 3;
+                    roundRect(x + 4, y + 4, CELL - 8, CELL - 8, 6);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    function roundRect(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x+r, y);
+        ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+        ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+        ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+        ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+        ctx.closePath();
+    }
+
+    canvas.addEventListener('click', (e) => {
+        if (isAnimating) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const c = Math.floor((e.clientX - rect.left) / (rect.width / SIZE));
+        const r = Math.floor((e.clientY - rect.top) / (rect.height / SIZE));
+
+        if (!selected) {
+            selected = {r, c};
+        } else {
+            const dr = Math.abs(r - selected.r);
+            const dc = Math.abs(c - selected.c);
+
+            if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
+                // 入れ替え実行
+                const temp = board[r][c];
+                board[r][c] = board[selected.r][selected.c];
+                board[selected.r][selected.c] = temp;
+                selected = null;
+                processMatches();
+            } else {
+                selected = {r, c};
+            }
+        }
+        draw();
+    });
+
+    function checkMatches() {
+        let matched = [];
+        // 横
+        for (let r = 0; r < SIZE; r++) {
+            for (let c = 0; c < SIZE - 2; c++) {
+                if (board[r][c] !== -1 && board[r][c] === board[r][c+1] && board[r][c] === board[r][c+2]) {
+                    matched.push({r, c}, {r, c:c+1}, {r, c:c+2});
+                }
+            }
+        }
+        // 縦
+        for (let c = 0; c < SIZE; c++) {
+            for (let r = 0; r < SIZE - 2; r++) {
+                if (board[r][c] !== -1 && board[r][c] === board[r+1][c] && board[r][c] === board[r+2][c]) {
+                    matched.push({r, c}, {r:r+1, c}, {r:r+2, c});
+                }
+            }
+        }
+        return matched;
+    }
+
+    async function processMatches() {
+        isAnimating = true;
+        let matches = checkMatches();
+
+        while (matches.length > 0) {
+            score += matches.length * 10;
+            document.getElementById('score').innerText = score;
+
+            // 消去
+            matches.forEach(m => board[m.r][m.c] = -1);
+            draw();
+            await new Promise(res => setTimeout(res, 200));
+
+            // 落下処理
+            for (let c = 0; c < SIZE; c++) {
+                let stack = [];
+                for (let r = SIZE - 1; r >= 0; r--) {
+                    if (board[r][c] !== -1) stack.push(board[r][c]);
+                }
+                for (let r = SIZE - 1; r >= 0; r--) {
+                    if (stack.length > 0) board[r][c] = stack.shift();
+                    else board[r][c] = Math.floor(Math.random() * TYPES);
+                }
+            }
+            draw();
+            await new Promise(res => setTimeout(res, 200));
+            matches = checkMatches();
+        }
+        isAnimating = false;
+        draw();
+    }
+
+    initGame();
+</script>
+</body>
+</html>
