@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver8.1.2)</title>
+<title>ナナイロパネル／Rainbow Panels (ver8.4.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
@@ -92,6 +92,7 @@ body {
 /* 左側：ゲーム盤面の白い枠 */
 #game-container {
     position: relative;
+	z-index: 0;
     background: white;
     padding: 12px;
     border-radius: 20px;
@@ -729,6 +730,21 @@ background: #c8e8ff;
 #game-container.rainbow-bg {
     animation: rainbowBg 4s linear infinite;
 }
+@keyframes sevenColorsEndFade {
+    0% { opacity: 0; }
+    60% { opacity: 0.9; }
+    75% { opacity: 0.9; }
+    100% { opacity: 0; }
+}
+.seven-colors-end-flash {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    animation: sevenColorsEndFade 2s ease forwards;
+}
 #rainbow-flash-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -1317,10 +1333,10 @@ const CONFIG = {
         // 🎬 パネル移動アニメーション設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SWAP_ANIM_DURATION:          240,  // パネル入れ替えアニメの所要時間（ms）
-		FALL_ANIM_DURATION_PER_ROW:   90,  // 落下アニメ：1マス分落ちるのにかかる時間（ms）
-		FALL_ANIM_DURATION_MAX:     1000,  // 落下アニメの最大所要時間（ms）※大きく落ちても間延びしないよう上限を設ける
-		LAND_ANIM_DURATION:          300,  // 着地バウンドの長さ（ms）
-		LAND_BOUNCE_HEIGHT:            4,  // バウンドの高さ（px）
+		FALL_ANIM_DURATION_PER_ROW:   65,  // パネル落下アニメ：1マス分落ちるのにかかる時間（ms）
+		FALL_ANIM_DURATION_MAX:      900,  // パネル落下アニメの最大所要時間（ms）※大きく落ちても間延びしないよう上限を設ける
+		LAND_ANIM_DURATION:          215,  // 着地バウンドの長さ（ms）
+		LAND_BOUNCE_HEIGHT:           16,  // バウンドの高さ（px）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🟦 パネル種類数（スコアで解放）
@@ -1645,6 +1661,7 @@ const CONFIG = {
     let flashAlpha = 0.9;
     let flashColor = '#ffe600';
     let isLevelRainbow = false;
+    let sevenColorsEndingTransition = false;  // 🌈 SEVEN COLORS終了フェード中、rainbow-bgクラスの着脱を一時凍結するフラグ
     let allClearSpawnCount = null;
     let levelRainbowCount = 0;
 
@@ -2120,12 +2137,12 @@ update() {
             
             if (this.type === CONFIG.PANEL_TYPE.DARK) {
                 this.suckers = [];
-                for (let i = 0; i < 18; i++) {
+                for (let i = 0; i < 7; i++) { /* 闇玉出現時のエフェクト パーティクル数 */
                     let angle = Math.random() * Math.PI * 2;
                     let dist = 35 + Math.random() * 55; 
                     this.suckers.push({
                         ox: Math.cos(angle) * dist, oy: Math.sin(angle) * dist,
-                        size: 3 + Math.random() * 3,
+                        size: 5 + Math.random() * 4, /* 闇玉出現時のエフェクト パーティクルサイズ （数値5と4なら、5〜9の範囲）*/
                         speedFactor: 0.92 + Math.random() * 0.02, 
                         color: Math.random() > 0.4 ? "#5c1d54" : "#120011"
                     });
@@ -2730,6 +2747,10 @@ update() {
 
     // 🎬 パネル移動アニメーション：イージング関数(減速しながら着地する動き)
     function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function easeInQuad(t) {
+        const startSpeed = 0.7; // パネル落下アニメ 開始時点の速度の割合(0=完全に静止スタート、1=等速そのまま)
+        return startSpeed * t + (1 - startSpeed) * t * t;
+    }
 
     // 🎬 指定セルの描画オフセット(入れ替え・落下アニメによる見た目のズレ)を計算
     function getCellRenderOffset(r, c) {
@@ -2751,7 +2772,7 @@ update() {
         const fa = fallAnims[`${r},${c}`];
         if (fa) {
             const t = Math.min(1, (now - fa.startTime) / fa.duration);
-            const remaining = 1 - easeOutCubic(t);
+            const remaining = 1 - easeInQuad(t); // 加速しながら落ちる(重力っぽい動き)
             dy += -fa.dropDistance * remaining; // 開始時は上方向にズレていて、着地位置(0)へ収束していく
         }
 
@@ -2766,7 +2787,7 @@ update() {
         if (!la) return 0;
         const t = Math.min(1, (performance.now() - la.startTime) / la.duration);
         const decay = 1 - t;
-        return -Math.sin(t * Math.PI * 2) * CONFIG.LAND_BOUNCE_HEIGHT * decay * decay;
+        return -Math.abs(Math.sin(t * Math.PI * 2)) * CONFIG.LAND_BOUNCE_HEIGHT * decay; // 常に上方向のみに跳ねる(着地位置より下に沈まない)
     }
 
     // 🎬 期限が切れたアニメーションを掃除する(draw()の毎フレーム冒頭で呼ぶ)
@@ -3240,7 +3261,9 @@ update() {
 					levelRainbowCount--;
 					if (levelRainbowCount <= 0) {
 						isLevelRainbow = false;
-						setTimeout(() => { updateRainbowUI(); }, 1500);
+						sevenColorsEndingTransition = true;
+						playSevenColorsEndFlash();
+						setTimeout(() => { sevenColorsEndingTransition = false; updateRainbowUI(); }, 1500);
 					} else {
 						// 全消しパネルの出現チェック
 						if (allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
@@ -3920,7 +3943,7 @@ update() {
     }
 
     async function processRefillOnly() {
-        isAnimating = true; draw(); await new Promise(res => setTimeout(res, userSettings.animSpeed === 'none' ? 400 : 150)); // パネルアニメーション速さ 右の数値がオプション「なし」の時の数値
+        isAnimating = true; draw(); await new Promise(res => setTimeout(res, userSettings.animSpeed === 'none' ? 280 : 150)); // パネルアニメーション速さ 右の数値がオプション「なし」の時の数値
         refillBoard();
         await waitForFallAnimations(250); // 🎬 パネルが上から落ちてくるアニメーション
         if (checkMatches().length > 0) await processMatches(true);
@@ -4254,7 +4277,7 @@ update() {
 
             updateSkillUI();
             
-            draw(); await new Promise(res => setTimeout(res, userSettings.animSpeed === 'none' ? 400 : 150)); // パネルアニメーション速さ 右の数値がオプション「なし」の時の数値
+            draw(); await new Promise(res => setTimeout(res, userSettings.animSpeed === 'none' ? 280 : 150)); // パネルアニメーション速さ 右の数値がオプション「なし」の時の数値
             refillBoard();
             await waitForFallAnimations(200); // 🎬 パネルが上から落ちてくるアニメーション
             matches = checkMatches();
@@ -4875,6 +4898,16 @@ update() {
         initGame();        
     }
 
+	function playSevenColorsEndFlash() {
+		const gc = document.getElementById('game-container');
+		if (!gc) return;
+		const flash = document.createElement('div');
+		flash.className = 'seven-colors-end-flash';
+		flash.style.background = isNightMode ? '#3E3E78' : '#ffffff';
+		gc.appendChild(flash);
+		setTimeout(() => flash.remove(), 2100);
+	}			
+
 	// UIの色や表示を更新する仕組み
 	function updateRainbowUI() {
 		let slots = document.querySelectorAll('.rb-slot');
@@ -4911,7 +4944,7 @@ update() {
 				movesEl.innerText = moves;
 				movesEl.classList.remove('rainbow-moves');
 			}
-			if (gameContainer) gameContainer.classList.remove('rainbow-bg');
+			if (gameContainer && !sevenColorsEndingTransition) gameContainer.classList.remove('rainbow-bg'); // 🌈 フェード演出中は着脱を凍結
 		}
 		// デバッグ進捗表示の更新
 		const colorNames = ['赤', '黄', '緑', '青', '紫', '橙', '藍'];
