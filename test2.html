@@ -1477,6 +1477,9 @@ const CONFIG = {
 			"✿", // 5: オレンジ
 			"☆", // 6: 藍色
 		],
+		
+		// ⭐ 星玉消去時の散る色（星パネルのグラデーションに合わせた色味）
+		STAR_PARTICLE_COLORS: ["#fffde7", "#ffe53b", "#ffc400", "#e6a800"], 
 
 		THEME_COLORS: {
 			OBSTACLE:    "#b2bec3", // お邪魔パネルの色
@@ -2070,6 +2073,9 @@ update() {
 		get isFinished() { return this.alpha <= 0; }
 	}
 	
+    const OBSTACLE_CLOUD_PATH = new Path2D("M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"); // 🐛 お邪魔パネルの雲模様（毎フレーム再生成しないようキャッシュ）
+	const STAR_ICON_PATH = new Path2D("M44.27,8.41l10.25,20.52,22.68,3.41c1.51.23,2.12,2.09,1.03,3.16l-16.34,16.09,3.77,22.62c.25,1.51-1.33,2.66-2.69,1.95l-20.35-10.57-20.35,10.57c-1.36.71-2.94-.44-2.69-1.95l3.77-22.62L6.99,35.5c-1.09-1.07-.49-2.93,1.03-3.16l22.68-3.41,10.25-20.52c.68-1.37,2.64-1.37,3.32,0Z"); // ⭐ 盤面上の星玉パネル用（毎フレーム再生成しないようキャッシュ）
+
     class Particle {
         constructor(x, y, color, type = "star") {
             this.x = x; this.y = y; this.color = color; this.type = type;
@@ -2116,8 +2122,7 @@ update() {
 				ctx.translate(cx - 42.5 * s, cy - 42.5 * s);
 				ctx.scale(s, s);
 				ctx.fillStyle = "#ffffff";
-				const cloudPath = new Path2D("M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z");
-				ctx.fill(cloudPath);
+				ctx.fill(OBSTACLE_CLOUD_PATH);
 				ctx.restore();
             } else {
                 ctx.fillStyle = this.color;
@@ -2290,11 +2295,11 @@ update() {
         for (let i = 0; i < CONFIG.PARTICLE_COUNT_NORMAL; i++) particles.push(new Particle(startX, startY, color, "star"));
     }
 
-    function spawnRainbowParticles(cellX, cellY, count = CONFIG.PARTICLE_COUNT_RAINBOW) {
+    function spawnRainbowParticles(cellX, cellY, count = CONFIG.PARTICLE_COUNT_RAINBOW, colors = CONFIG.COLORS) {
         const startX = cellX * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
         const startY = cellY * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
         for (let i = 0; i < count; i++) {
-            const randomColor = CONFIG.COLORS[Math.floor(Math.random() * CONFIG.COLORS.length)];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
             particles.push(new Particle(startX, startY, randomColor, "star"));
         }
     }
@@ -3032,9 +3037,8 @@ update() {
 					const oy = y + (CONFIG.CELL_SIZE - iconSize) / 2;
 					ctx.translate(ox, oy);
 					ctx.scale(scale, scale);
-					const starPath = new Path2D("M44.27,8.41l10.25,20.52,22.68,3.41c1.51.23,2.12,2.09,1.03,3.16l-16.34,16.09,3.77,22.62c.25,1.51-1.33,2.66-2.69,1.95l-20.35-10.57-20.35,10.57c-1.36.71-2.94-.44-2.69-1.95l3.77-22.62L6.99,35.5c-1.09-1.07-.49-2.93,1.03-3.16l22.68-3.41,10.25-20.52c.68-1.37,2.64-1.37,3.32,0Z");
 					// グロー
-					ctx.shadowBlur = (15 + Math.sin(selectionPulse * 1.5) * 6) / scale;
+					ctx.shadowBlur = (15 + Math.sin(selectionPulse * 1.5) * 3) / scale;
 					ctx.shadowColor = "#ffe600";
 					// グラデーション塗り
 					const starGrad = ctx.createRadialGradient(42, 42, 0, 42, 42, 42);
@@ -3042,7 +3046,7 @@ update() {
 					starGrad.addColorStop(0.5, "#ffe53b");
 					starGrad.addColorStop(1.0, "#e6a800");
 					ctx.fillStyle = starGrad;
-					ctx.fill(starPath);
+					ctx.fill(STAR_ICON_PATH);
 					ctx.restore();
 				} else if (type === CONFIG.PANEL_TYPE.SNOW) {
 					// ❄ 雪玉（カウント表示 + カウント3以下で色変化）
@@ -3537,7 +3541,7 @@ update() {
             if (flashAlpha > 0) {
                 ctx.globalAlpha = flashAlpha;
                 ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = 30;
+                ctx.shadowBlur = 12;
                 ctx.shadowColor = '#ffffff';
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, CONFIG.CELL_SIZE * 0.5 * (1 - t * 0.5), 0, Math.PI * 2);
@@ -3547,7 +3551,7 @@ update() {
             const flareScale = 0.8 + t * 1.5;
             const flareAlpha = this.life * 0.9;
             ctx.globalAlpha = flareAlpha;
-            ctx.shadowBlur = 20;
+            ctx.shadowBlur = 10;
             ctx.shadowColor = '#ffe600';
             const svgSize = 85;
             const iconSize = CONFIG.CELL_SIZE * flareScale;
@@ -3930,7 +3934,11 @@ update() {
 						}
 					});
 				}
-				spawnRainbowParticles(selected.c, selected.r);
+				if (type === CONFIG.PANEL_TYPE.STAR) {
+					spawnRainbowParticles(selected.c, selected.r, CONFIG.PARTICLE_COUNT_RAINBOW, CONFIG.STAR_PARTICLE_COLORS);
+				} else {
+					spawnRainbowParticles(selected.c, selected.r);
+				}
 			}
 			
 			board[selected.r][selected.c] = -1;
@@ -4211,7 +4219,7 @@ update() {
 			for (const s of specials) {
 				if (board[s.r][s.c] === CONFIG.PANEL_TYPE.STAR) {
 					// 🌙 星玉消去
-					spawnRainbowParticles(s.c, s.r);
+					spawnRainbowParticles(s.c, s.r, CONFIG.PARTICLE_COUNT_RAINBOW, CONFIG.STAR_PARTICLE_COLORS);
 					const slotIdx = nightStarCount;
 					nightStarCount++;
 					board[s.r][s.c] = -1;
