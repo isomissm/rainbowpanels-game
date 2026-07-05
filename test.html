@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver8.4.0)</title>
+<title>ナナイロパネル／Rainbow Panels (ver9.0.1)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
@@ -44,7 +44,7 @@ body {
     border-radius: 10px;
     margin-bottom: 25px;
     font-size: 12px;
-    display: none;  /* デバッグパネル表示flex・非表示none */
+    display: flex;  /* デバッグパネル表示flex・非表示none */
     align-items: flex-start;
     gap: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -3586,6 +3586,8 @@ update() {
 						
                         selected = null;
                         
+					await animateSwap(swapR1, swapC1, swapR2, swapC2); // 🎬 2つのパネルが入れ替わるアニメーション（雷玉出現などの処理より先に完了させる）
+                        
 				if (isLevelRainbow) {
 					levelRainbowCount--;
 					if (levelRainbowCount <= 0) {
@@ -3606,8 +3608,6 @@ update() {
 				}
 						totalSpentMoves++;
                         movesUntilNextObstacle--;
-                        
-                        await animateSwap(swapR1, swapC1, swapR2, swapC2); // 🎬 2つのパネルが入れ替わるアニメーション
                         
                         await processMatches();
                         
