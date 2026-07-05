@@ -44,7 +44,7 @@ body {
     border-radius: 10px;
     margin-bottom: 25px;
     font-size: 12px;
-    display: none;  /* デバッグパネル表示flex・非表示none */
+    display: flex;  /* デバッグパネル表示flex・非表示none */
     align-items: flex-start;
     gap: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -1477,14 +1477,15 @@ const CONFIG = {
 		CELL_SIZE:         55,   // 1マスのサイズ（ピクセル）
 		INITIAL_MOVES:      3,   // マッチ成立時に回復する手数
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🎬 パネル移動アニメーション設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SWAP_ANIM_DURATION:          240,  // パネル入れ替えアニメの所要時間（ms）
-		FALL_ANIM_DURATION_PER_ROW:   65,  // パネル落下アニメ：1マス分落ちるのにかかる時間（ms）
+		FALL_ANIM_DURATION_PER_ROW:   74,  // パネル落下アニメ：1マス分落ちるのにかかる時間（ms）
 		FALL_ANIM_DURATION_MAX:      900,  // パネル落下アニメの最大所要時間（ms）※大きく落ちても間延びしないよう上限を設ける
 		LAND_ANIM_DURATION:          215,  // 着地バウンドの長さ（ms）
 		LAND_BOUNCE_HEIGHT:           10,  // バウンドの高さ（px）
+		ANIM_SPEED_PRESETS: { normal: 1.0, fast: 0.65 },  // オプション「はやい」の倍率（SWAP/FALL系のみ対象）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🟦 パネル種類数（スコアで解放）
@@ -1681,10 +1682,6 @@ const CONFIG = {
         reduceMotion: false,    // trueで、お邪魔パネル出現時の震え等「追加の演出」を抑える（パネル移動アニメの速度とは別軸）
         ballShape:    'circle'  // 'circle' | 'magatama' | 'hexagon'
     };
-
-    // アニメ速度プリセットの倍率（1.0が標準。大きいほどゆっくり、小さいほど速い）
-    // 'none' は倍率ではなく特別扱い（ほぼ瞬時にする）
-    const ANIM_SPEED_PRESETS = { normal: 1.0, fast: 0.55 };
 	
     // CONFIGのベース値（速度プリセットを切り替えるたびに、ここから再計算する）
     const BASE_SWAP_ANIM_DURATION        = CONFIG.SWAP_ANIM_DURATION;
@@ -1720,7 +1717,7 @@ const CONFIG = {
             CONFIG.FALL_ANIM_DURATION_PER_ROW = 30;
             CONFIG.FALL_ANIM_DURATION_MAX = 200;
         } else {
-            const speedMul = ANIM_SPEED_PRESETS[userSettings.animSpeed] ?? 1.0;
+            const speedMul = CONFIG.ANIM_SPEED_PRESETS[userSettings.animSpeed] ?? 1.0;
             CONFIG.SWAP_ANIM_DURATION = Math.round(BASE_SWAP_ANIM_DURATION * speedMul);
             CONFIG.FALL_ANIM_DURATION_PER_ROW = Math.round(BASE_FALL_ANIM_DURATION_PER_ROW * speedMul);
             CONFIG.FALL_ANIM_DURATION_MAX = Math.round(BASE_FALL_ANIM_DURATION_MAX * speedMul);
