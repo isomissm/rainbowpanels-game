@@ -966,7 +966,7 @@ canvas {
     z-index: 200;
     justify-content: center;
     align-items: flex-start;
-    padding-top: 12px;
+    padding-top: 12px; /* 画像アップロードの白枠の上の隙間 */
     box-sizing: border-box;
 }
 #panel-image-modal-overlay.show {
@@ -978,15 +978,16 @@ canvas {
     padding: 24px;
     width: 90%;
     max-width: 420px;
-    max-height: 85vh;
+    max-height: 97vh; /*画像アップロード枠全体の縦長さ*/
     overflow-y: auto;
     box-sizing: border-box;
 }
 .panel-image-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 4px 0;
+    justify-content: center;
+    gap: 16px;
+    padding: 2px 0;
     border-bottom: 1px solid #f1f5f9;
 }
 .panel-image-row:last-of-type {
@@ -998,13 +999,14 @@ canvas {
     border-radius: 50%;
     flex-shrink: 0;
 }
+/* プレースホルダー画像(未設定時のグレーアイコン) */
 .panel-image-preview {
     width: 40px;
     height: 40px;
     border-radius: 8px;
     object-fit: cover;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
+    background: #e2e8f0;
+    border: 1px solid #94a3b8;
     flex-shrink: 0;
 }
 .panel-image-label {
@@ -1021,15 +1023,15 @@ canvas {
     color: #fff;
     font-size: 11px;
     font-weight: 900;
-    padding: 6px 10px;
+    padding: 6px 18px;
     cursor: pointer;
     white-space: nowrap;
 }
 .panel-image-remove-btn {
     border: none;
     border-radius: 10px;
-    background: #f1f5f9;
-    color: #94a3b8;
+    background: #e2e8f0;
+    color: #475569;
     font-size: 11px;
     font-weight: 900;
     padding: 6px 8px;
@@ -1048,7 +1050,7 @@ canvas {
     color: #fff;
     font-size: 14px;
     font-weight: 900;
-    padding: 12px;
+    padding: 8px 12px;
     cursor: pointer;
     margin-bottom: 6px;
 }
@@ -1279,11 +1281,12 @@ canvas {
 <!-- 🖼️ パネル画像差し替えモーダル -->
 <div id="panel-image-modal-overlay">
   <div id="panel-image-modal">
-    <h3 style="margin: 0 0 6px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">🖼️ パネル画像設定</h3>
-    <p style="margin: 0 0 16px 0; font-size: 14px; font-weight: bold; color: #4b5563;">好きなPNG画像をパネルの絵柄に差し替えられます<br>※透過PNGも使えるよ！</p>
+    <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">🖼️ パネル画像設定</h3>
+    <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: bold; color: #4b5563;">好きな画像をパネルの絵柄に差し替えられます<br>※透過PNGも使えるよ！</p>
+	<p style="margin: 0 0 16px 0; font-size: 12px; color: #D92929;">画像はご利用の端末（PC・スマホなど）のみで使用されます<br>インターネット上には送信されません</p>
 
     <input type="file" id="panel-image-bulk-input" accept="image/png,image/jpeg" multiple style="display:none;">
-    <button id="panel-image-bulk-btn" onclick="document.getElementById('panel-image-bulk-input').click()">📁 一括アップロード：各色に自動で割り当て</button>
+    <button id="panel-image-bulk-btn" onclick="document.getElementById('panel-image-bulk-input').click()">📁 一括アップロード<br>（各色に自動で割り当て）</button>
     <div id="panel-image-bulk-hint">💡複数選択のやり方<br>以下のキーを押しながらファイルを選択する<br>Windows：<b>Ctrl</b>キー／Mac：<b>Cmd</b>キー</div>
 
     <div id="panel-image-rows"></div>
@@ -2603,7 +2606,7 @@ update() {
     // 🖼️ パネル画像差し替え機能
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     const PANEL_IMAGE_STORAGE_KEY = 'rainbowpanels_custom_images';
-	const PANEL_IMAGE_PLACEHOLDER_ICON = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#f1f5f9"/><path d="M11 27l6-7 4 4 6-8 6 8" stroke="#cbd5e1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="15" r="2.5" fill="#cbd5e1"/></svg>');
+	const PANEL_IMAGE_PLACEHOLDER_ICON = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#e2e8f0"/><path d="M11 27l6-7 4 4 6-8 6 8" stroke="#94a3b8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="15" r="2.5" fill="#94a3b8"/></svg>');
     const PANEL_IMAGE_SIZE = 120; // 保存時のリサイズ後サイズ（px角）
     // 表示は虹色順（赤→橙→黄→緑→青→藍→紫）だが、内部のtype番号はCONFIG.COLORSの並びのまま
     const PANEL_IMAGE_DISPLAY_ORDER = [0, 5, 1, 2, 3, 6, 4];
