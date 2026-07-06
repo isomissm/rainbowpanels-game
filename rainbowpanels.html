@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver7.6.1)</title>
+<title>ナナイロパネル／Rainbow Panels (ver9.1.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
@@ -92,6 +92,7 @@ body {
 /* 左側：ゲーム盤面の白い枠 */
 #game-container {
     position: relative;
+	z-index: 0;
     background: white;
     padding: 12px;
     border-radius: 20px;
@@ -310,7 +311,7 @@ canvas {
     box-sizing: border-box;
 }
 .ui-section-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 900;
     color: #4b5563;
     letter-spacing: 0.08em;
@@ -485,6 +486,10 @@ transform: scale(1);
 /* SEVEN COLORS開始時：左枠中心から広がる虹色波紋 */
 .rainbow-shockwave-ring {
     position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 112%;
+    height: 112%;
     border-radius: 24px;
     background: linear-gradient(135deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff7675, #ff4757);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -499,8 +504,7 @@ transform: scale(1);
 }
 @keyframes rainbowWaveExpand {
 0% {
-width: 100%;
-height: 100%;
+transform: translate(-50%, -50%) scale(0.893); /* 112%基準で100%相当になる縮小率 */
 opacity: 0;
 padding: 40px; /* 虹色波紋 開始時の枠の太さ */
 }
@@ -508,8 +512,7 @@ padding: 40px; /* 虹色波紋 開始時の枠の太さ */
 opacity: 0.9; /* 虹色波紋の開始時不透明度 */
 }
 100% {
-width: 112%;
-height: 112%;
+transform: translate(-50%, -50%) scale(1);
 opacity: 0;
 padding: 1px;
 }
@@ -700,6 +703,25 @@ opacity: 0;
     opacity: 1;
     transform: none;
 }
+/* パネル画像差し替えボタン（リセットボタンと同デザイン、色違い） */
+#panel-image-open-btn {
+    margin-top: 16px;
+    padding: 16px 45px;
+    background: #3D9DFF;
+    color: #fff;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 900;
+    transition: opacity 0.1s, transform 0.1s;
+}
+#panel-image-open-btn:hover {
+    opacity: 0.9;
+}
+#panel-image-open-btn:active {
+    transform: scale(0.97);
+}
 .reset-btn-spacer {
     height: 36px; /*リセットボタン上のスペース（PCブラウザレイアウト）*/
 }
@@ -729,18 +751,20 @@ background: #c8e8ff;
 #game-container.rainbow-bg {
     animation: rainbowBg 4s linear infinite;
 }
-#rainbow-flash-overlay {
+@keyframes sevenColorsEndFade {
+    0% { opacity: 0; }
+    60% { opacity: 0.9; }
+    75% { opacity: 0.9; }
+    100% { opacity: 0; }
+}
+.seven-colors-end-flash {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    inset: 0;
     border-radius: 20px;
-    background: linear-gradient(135deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff7675, #ff4757);
-    background-size: 150% 150%;
-    opacity: 0;
+    z-index: -1;
     pointer-events: none;
-    z-index: 50;
-    mix-blend-mode: hard-light;
-    transition: opacity 0.6s ease; /* SEVEN COLORS 切り替わりの長さ*/
-    animation: rainbowFlashShift 2s linear infinite;
+    opacity: 0;
+    animation: sevenColorsEndFade 2s ease forwards;
 }
 .rainbow-moves {
     background: linear-gradient(90deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff4757);
@@ -899,6 +923,9 @@ canvas {
     padding: 3px 10px;
     cursor: pointer;
 }
+#panel-image-open-btn.reset-btn-mobile {
+    margin-top: 10px;
+}
 .reset-btn-spacer {
     height: 12px; /* リセットボタン上のスペース（スマホレイアウト） */
 }
@@ -918,6 +945,125 @@ canvas {
     width: 100%;
     height: 100%;
 }
+	
+/* 🖼️ パネル画像差し替えモーダル */
+#panel-image-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 12px; /* 画像アップロードの白枠の上の隙間 */
+    box-sizing: border-box;
+}
+#panel-image-modal-overlay.show {
+    display: flex;
+}
+#panel-image-modal {
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    width: 90%;
+    max-width: 420px;
+    max-height: 97vh; /*画像アップロード枠全体の縦長さ*/
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+.panel-image-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 2px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.panel-image-row:last-of-type {
+    border-bottom: none;
+}
+.panel-image-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+/* プレースホルダー画像(未設定時のグレーアイコン) */
+.panel-image-preview {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: #e2e8f0;
+    border: 1px solid #94a3b8;
+    flex-shrink: 0;
+}
+.panel-image-label {
+    font-size: 13px;
+    font-weight: 900;
+    color: #475569;
+    width: 28px;
+    flex-shrink: 0;
+}
+.panel-image-upload-btn {
+    border: none;
+    border-radius: 10px;
+    background: #3D9DFF;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 6px 18px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.panel-image-remove-btn {
+    border: none;
+    border-radius: 10px;
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 6px 8px;
+    cursor: pointer;
+}
+.panel-image-remove-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+#panel-image-bulk-btn {
+    display: block;
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    background: #3D9DFF;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+    padding: 8px 12px;
+    cursor: pointer;
+    margin-bottom: 6px;
+}
+#panel-image-bulk-hint {
+    font-size: 14px;
+    font-weight: bold;
+    color: #4b5563;
+    text-align: center;
+    margin-bottom: 16px;
+}
+#panel-image-remove-all-btn {
+    display: block;
+    width: 220px;
+    margin: 16px auto 0 auto;
+    border: none;
+    border-radius: 14px;
+    background: #ff7675;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 900;
+    padding: 10px 0;
+    cursor: pointer;
+}
+
 </style>
 </head>
 
@@ -1005,6 +1151,10 @@ canvas {
     <div id="dbg-dpr">DPR: -</div>
   </div>
 </div>
+<!-- ⚙️ ゲーム画面の外、デバッグパネルの下に置く専用のボタン行（後々ここにボタンが増える予定） -->
+<div id="top-button-row" style="width: 100%; display: flex; justify-content: flex-end; gap: 8px; box-sizing: border-box; margin-bottom: 10px;">
+  <button id="options-open-btn" onclick="openOptionsModal()" aria-label="オプション" style="border: none; border-radius: 14px; background: #3D9DFF; color: #ffffff; box-shadow: 0 3px 8px rgba(61,157,255,0.35); font-size: 14px; font-weight: 900; padding: 6px 10px; cursor: pointer; white-space: nowrap; font-family: var(--font-main-ui);">⚙️ OPTION</button>
+</div>
 <div id="main-layout">
   <div id="left-area">
     <div id="game-container">
@@ -1059,7 +1209,7 @@ canvas {
   <div id="right-ui">
     <div id="right-ui-top">
       <button id="view-ranking-btn" onclick="showRankingScreen()" class="view-ranking-btn view-ranking-btn-pc">🏆 ランキングを見る</button>
-      <div id="best-score" class="best-score-label">BEST: 0000</div>
+		<div id="best-score" class="best-score-label">BEST: 0000</div>
       <div class="score-group">
         <div class="ui-section-title">SCORE</div>
         <div id="score" class="score-val">0</div>
@@ -1116,6 +1266,24 @@ canvas {
 <button id="view-ranking-btn-mobile" onclick="showRankingScreen()" class="view-ranking-btn view-ranking-btn-mobile">🏆 ランキングを見る</button>
 <div class="reset-btn-spacer"></div>
 <button id="reset-btn" onclick="openResetModal()" class="reset-btn-mobile">ゲームをリセットする</button>
+<button id="panel-image-open-btn" onclick="openPanelImageModal()" class="reset-btn-mobile">パネルの画像を差し替える（png）</button>
+<!-- 🖼️ パネル画像差し替えモーダル -->
+<div id="panel-image-modal-overlay">
+  <div id="panel-image-modal">
+    <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">🖼️ パネル画像設定</h3>
+    <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: bold; color: #4b5563;">好きな画像をパネルの絵柄に差し替えられます<br>※透過PNGも使えるよ！</p>
+	<p style="margin: 0 0 16px 0; font-size: 12px; color: #D92929;">画像はご利用の端末（PC・スマホなど）のみで使用されます<br>インターネット上には送信されません</p>
+
+    <input type="file" id="panel-image-bulk-input" accept="image/png,image/jpeg" multiple style="display:none;">
+    <button id="panel-image-bulk-btn" onclick="document.getElementById('panel-image-bulk-input').click()">📁 一括アップロード<br>（各色に自動で割り当て）</button>
+    <div id="panel-image-bulk-hint">💡複数選択のやり方<br>以下のキーを押しながらファイルを選択する<br>Windows：<b>Ctrl</b>キー／Mac：<b>Cmd</b>キー</div>
+
+    <div id="panel-image-rows"></div>
+
+    <button id="panel-image-remove-all-btn" onclick="removeAllCustomPanelImages()">全ての画像を削除する</button>
+    <button onclick="closePanelImageModal()" style="display:block; width:220px; margin:10px auto 0 auto; border:none; border-radius:14px; background:#cbd5e1; color:#475569; font-size:13px; font-weight:900; padding:10px 0; cursor:pointer;">閉じる</button>
+  </div>
+</div>
 <!-- ゲームの説明文 -->
 <div class="description">
 	<strong>パネルをクリック／タップして<br>
@@ -1233,6 +1401,74 @@ canvas {
     </div>
   </div>
 </div>
+<!-- 💾 中断データ再開確認モーダル -->
+<div id="resume-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
+  <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="resume-modal-content">
+    <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">前回の続きがあるよ</h3>
+    <p id="resume-modal-detail" style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: bold; line-height: 1.5;">中断したところから再開する？</p>
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <button onclick="startNewGameFromModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #ff7675; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">最初から<br>
+      始める</button>
+      <button onclick="resumeGameFromModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #3D9DFF; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(61,157,255,0.3);">続きから<br>
+      再開する</button>
+    </div>
+  </div>
+</div>
+<!-- ⚙️ オプションモーダル -->
+<div id="options-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
+  <div style="background: white; padding: 28px 24px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 380px; width: 88%; max-height: 85vh; overflow-y: auto; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box;" id="options-modal-content">
+    <h3 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 18px; font-weight: 900; font-family: var(--font-main-ui);">⚙️ OPTION</h3>
+
+    <div style="text-align: left; margin-bottom: 20px;">
+      <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">アニメーション速度</div>
+      <div style="display: flex; gap: 6px;">
+        <button id="opt-speed-none" onclick="setAnimSpeed('none')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">なし</button>
+        <button id="opt-speed-normal" onclick="setAnimSpeed('normal')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">ふつう</button>
+        <button id="opt-speed-fast" onclick="setAnimSpeed('fast')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">はやい</button>
+      </div>
+    </div>
+
+    <div style="text-align: left; margin-bottom: 20px;">
+      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <input type="checkbox" id="opt-reduce-motion" onchange="toggleReduceMotion()" style="width: 18px; height: 18px; cursor: pointer;">
+        <span style="font-size: 12px; font-weight: 900; color: #475569;">
+          <span style="font-size: 14px;">モーション減少</span><br>
+          （お邪魔パネルの揺れ・パネルの跳ねを止める）
+        </span>
+      </label>
+    </div>
+
+    <div id="opt-sound-section" style="text-align: left; margin-bottom: 20px;">
+      <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">BGM音量 <span id="opt-bgm-volume-label" style="color: #3D9DFF;">80%</span></div>
+      <input type="range" id="opt-bgm-volume" min="0" max="100" step="5" oninput="onVolumeChange('bgm', this.value)" style="width: 100%; cursor: pointer;">
+      <div style="font-size: 14px; font-weight: 900; color: #475569; margin: 12px 0 8px 0;">SE音量 <span id="opt-se-volume-label" style="color: #3D9DFF;">80%</span></div>
+      <input type="range" id="opt-se-volume" min="0" max="100" step="5" oninput="onVolumeChange('se', this.value)" style="width: 100%; cursor: pointer;">
+    </div>
+
+    <div style="text-align: left; margin-bottom: 8px;">
+      <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">七色の玉の形</div>
+      <div style="display: flex; gap: 6px;">
+        <button id="opt-shape-circle" onclick="setBallShape('circle')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <svg width="22" height="22" viewBox="0 0 85 85"><path d="M 41, 42 m -35, 0 a 35,35 0 1,0 70,0 a 35,35 0 1,0 -70,0" fill="currentColor"/></svg>
+          通常玉
+        </button>
+        <button id="opt-shape-magatama" onclick="setBallShape('magatama')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <svg width="22" height="22" viewBox="0 0 85 85"><path d="M67.47,35.96c0-14.3-10.5-26.6-24.8-26.9s-26.5,10.1-26.9,24.8c-.2,7.2,1.6,11.3,4,14.5,2.8,3.8,7.67,6.61,11.19,8.41s5.72,5.11,5.12,9.51c-.7,5.1-1.88,7.28.62,9.18,4.2,3.1,30.82-9.73,30.77-39.49Z" fill="currentColor"/></svg>
+          勾玉
+        </button>
+        <button id="opt-shape-hexagon" onclick="setBallShape('hexagon')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <svg width="22" height="22" viewBox="0 0 85 85"><path d="M40.84,7.19 L70.86,24.52 L70.86,59.18 L40.84,76.51 L10.82,59.18 L10.82,24.52 Z" fill="currentColor"/></svg>
+          六角形
+        </button>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px;">
+      <button onclick="resetUserSettingsToDefault()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 12px; cursor: pointer;">初期設定に戻す</button>
+      <button onclick="closeOptionsModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #3D9DFF; color: white; font-weight: 900; font-size: 12px; cursor: pointer; box-shadow: 0 4px 10px rgba(61,157,255,0.3);">閉じる</button>
+    </div>
+  </div>
+</div>
 <p style="text-align: center; color: #64748b; font-size: 14px; margin-top: 16px;"> © 2026 ナナイロパネル／Rainbow Panels by isomi_ssm </p>
 	
 <script>
@@ -1250,71 +1486,86 @@ const CONFIG = {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🎮 盤面・基本ルール
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        BOARD_SIZE:         7,   // 盤面のマス数（縦横共通）
-        CELL_SIZE:         55,   // 1マスのサイズ（ピクセル）
-        INITIAL_MOVES:      3,   // マッチ成立時に回復する手数
+		BOARD_SIZE:         7,   // 盤面のマス数（縦横共通）
+		CELL_SIZE:         55,   // 1マスのサイズ（ピクセル）
+		INITIAL_MOVES:      3,   // マッチ成立時に回復する手数
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🎬 パネル移動アニメーション設定
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		SWAP_ANIM_DURATION:          240,  // パネル入れ替えアニメの所要時間（ms）
+		FALL_ANIM_DURATION_PER_ROW:   74,  // パネル落下アニメ：1マス分落ちるのにかかる時間（ms）
+		FALL_ANIM_DURATION_MAX:      900,  // パネル落下アニメの最大所要時間（ms）※大きく落ちても間延びしないよう上限を設ける
+		LAND_ANIM_DURATION:          215,  // 着地バウンドの長さ（ms）
+		LAND_BOUNCE_HEIGHT:           10,  // バウンドの高さ（px）
+		ANIM_SPEED_PRESETS: { normal: 1.0, fast: 0.65 },  // オプション「はやい」の倍率（SWAP/FALL系のみ対象）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🟦 パネル種類数（スコアで解放）
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        BASE_TYPE_COUNT:        5,     // 開始時のパネル種類数（赤〜紫）
-        ORANGE_UNLOCK_SCORE: 5500,     // 橙パネルが追加されるスコア
-        INDIGO_UNLOCK_SCORE: 7500,     // 藍パネルが追加されるスコア
+		BASE_TYPE_COUNT:        5,     // 開始時のパネル種類数（赤〜紫）
+		ORANGE_UNLOCK_SCORE: 5500,     // 橙パネルが追加されるスコア
+		INDIGO_UNLOCK_SCORE: 7500,     // 藍パネルが追加されるスコア
 	
 	     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🏆 スコア・コンボ設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        SCORE: {
-            BASE:        { 3: 30, 4: 70, 5: 120, 6: 200 }, // 同時消し数ごとの基本スコア（6以上は180）
-            COMBO_BONUS: { 1: 30, 2: 40, 3:  60, 4:  90, 5: 150 }, // コンボ数ごとの加算ボーナス（5以上は150）
-        },
+		SCORE: {
+			BASE:        { 3: 30, 4: 70, 5: 120, 6: 200 }, // 同時消し数ごとの基本スコア（6以上は180）
+			COMBO_BONUS: { 1: 30, 2: 40, 3:  60, 4:  90, 5: 150 }, // コンボ数ごとの加算ボーナス（5以上は150）
+		},
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 📈 レベル・お邪魔パネル出現設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // threshold: お邪魔パネルの累計ドロップ数がこの値を超えるとレベルアップ
         // pace:      お邪魔パネルが出現するまでの手数間隔
-        LEVELS: [
-            { threshold:  0, pace: 12 }, // レベル1
-            { threshold:  3, pace: 10 }, // レベル2
-            { threshold:  6, pace:  9 }, // レベル3
-            { threshold: 10, pace:  8 }, // レベル4
-            { threshold: 14, pace:  7 }, // レベル5
-            { threshold: 19, pace:  6 }, // レベル6
-            { threshold: 25, pace:  5 }, // レベル7
-        ],
+		LEVELS: [
+			{ threshold:  0, pace: 12 }, // レベル1
+			{ threshold:  3, pace: 10 }, // レベル2
+			{ threshold:  6, pace:  9 }, // レベル3
+			{ threshold: 10, pace:  8 }, // レベル4
+			{ threshold: 14, pace:  7 }, // レベル5
+			{ threshold: 19, pace:  6 }, // レベル6
+			{ threshold: 25, pace:  5 }, // レベル7
+		],
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ⭐ RAINBOW BURSTスキル設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        SKILL_STOCK_MAX:  3,   // BURSTカウンターの最大ストック数
-        GAUGE_MAX:        6,   // ゲージが満タンになるまでに必要な連鎖数
+		SKILL_STOCK_MAX:  3,   // BURSTカウンターの最大ストック数
+		GAUGE_MAX:        6,   // ゲージが満タンになるまでに必要な連鎖数
 
-        // コンボ数ごとのゲージ加算量（コンボ数: 加算値）
-        COMBO_GAUGE: { 2: 1.0, 3: 1.1, 4: 1.2, 5: 1.4, 6: 1.7 },
+		// コンボ数ごとのゲージ加算量（コンボ数: 加算値）
+		COMBO_GAUGE: { 2: 1.0, 3: 1.1, 4: 1.2, 5: 1.4, 6: 1.7 },
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🟣 闇玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        DARK_PANEL_INIT_COUNT: 7,   // 通常闇玉の初期カウントダウン
-        DARK_PANEL_FAST_COUNT: 5,   // 高速闇玉の初期カウントダウン
+		DARK_PANEL_INIT_COUNT:  7,   // 通常闇玉の初期カウントダウン
+		DARK_PANEL_FAST_COUNT:  5,   // 高速闇玉の初期カウントダウン
 
 		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ☔ 雨玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		RAINY_EFFECT_DURATION:  700,  // 薄青エフェクトの表示時間（ms）
 		RAINY_DROP_COUNT:        30,  // 雨粒の生成数
-		RAINY_FRAME_DURATION:   90,  // 雨アニメの表示時間（フレーム数）
-		RAINY_LINE_WIDTH:         1.5,  // 雨粒の太さ
+		RAINY_FRAME_DURATION:    90,  // 雨アニメの表示時間（フレーム数）
+		RAINY_LINE_WIDTH:       1.5,  // 雨粒の太さ
+	
+		RAINY_COUNT_MIN:  7,  // 雨玉の効果の青パネル出現数（最低値）
+		RAINY_COUNT_MAX:  9,  // 雨玉の効果の青パネル出現数（最高値）
 
 		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ❄️ 雪玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		SNOW_COUNT:        5,  // 雪玉の初期カウント
-		SNOW_FREEZE_MIN:   5,  // 凍結ターン数（最小）※自然解凍までのターン数
-		SNOW_FREEZE_MAX:   7,  // 凍結ターン数（最大）※自然解凍までのターン数
-		SNOW_FREEZE_TARGET_MIN: 3,  // 一度に凍結させるパネル枚数（最小）
-		SNOW_FREEZE_TARGET_MAX: 5,  // 一度に凍結させるパネル枚数（最大）
+		SNOW_COUNT:       5,  // 雪玉の初期カウント
+		SNOW_FREEZE_MIN:  5,  // 凍結ターン数（最小）※自然解凍までのターン数
+		SNOW_FREEZE_MAX:  7,  // 凍結ターン数（最大）※自然解凍までのターン数
+	
+		SNOW_FREEZE_TARGET_MIN:  3,  // 一度に凍結させるパネル枚数（最小）
+		SNOW_FREEZE_TARGET_MAX:  5,  // 一度に凍結させるパネル枚数（最大）
+	
 		SNOWY_EFFECT_DURATION: 700,  // 白いオーバーレイの表示時間（ms）
 		SNOWY_FRAME_DURATION:  150,  // 雪エフェクトの表示時間（フレーム数）※雨より長め
 		SNOWY_FLAKE_COUNT:      10,  // 雪片の生成数
@@ -1322,112 +1573,275 @@ const CONFIG = {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌈 SEVEN COLORS設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        RAINBOW_BALL_THRESHOLD:        35,  // 各色の玉が出現するまでに必要な消去数
-        RAINBOW_BALL_THRESHOLD_ORANGE: 15,  // 橙玉の初回出現閾値（初回のみ低め）
-        RAINBOW_BALL_THRESHOLD_INDIGO: 10,  // 藍玉の初回出現閾値（初回のみ低め）
-        LEVEL_RAINBOW_DURATION:        20,  // SEVEN COLORS中の継続手数
-        ALLCLEAR_SPAWN_COUNT_MIN:       7,  // 雷玉が出現する残り手数の最小値
-        ALLCLEAR_SPAWN_COUNT_RANGE:     5,  // 雷玉出現タイミングのランダム幅（min〜min+range）
+		RAINBOW_BALL_THRESHOLD:        35,  // 各色の玉が出現するまでに必要な消去数
+		RAINBOW_BALL_THRESHOLD_ORANGE: 15,  // 橙玉の初回出現閾値（初回のみ低め）
+		RAINBOW_BALL_THRESHOLD_INDIGO: 10,  // 藍玉の初回出現閾値（初回のみ低め）
+		LEVEL_RAINBOW_DURATION:        20,  // SEVEN COLORS中の継続手数
+		ALLCLEAR_SPAWN_COUNT_MIN:       7,  // 雷玉が出現する残り手数の最小値
+		ALLCLEAR_SPAWN_COUNT_RANGE:     5,  // 雷玉出現タイミングのランダム幅（min〜min+range）
 	
 	    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌙 夜モード設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        NIGHT_BASE_SCORE:    25000,  // 夜モード初回発動の基準スコア
-		NIGHT_STAR_DELAY_SCORE: 2500, // 夜モード突入後、流れ星発生までの必要追加スコア
-        NIGHT_INTERVAL_SCORE: 10000, // 2回目以降の夜モード発動間隔
-        NIGHT_DARK_PENALTY:   1000,  // 闇玉発動1回あたりのペナルティ（サイクルごとにリセット）
-        NIGHT_DARK_INIT_COUNT:    5, // 夜中の通常闇玉カウント（通常7）
-        NIGHT_DARK_FAST_COUNT:    3, // 夜中の高速闇玉カウント（通常5）
-        NIGHT_STAR_NEEDED:        3, // 昼に戻るために必要な星の数
-		NIGHT_COLOR_BOOST:      5, // 夜中の青・藍・紫の出現率ボーナス（0=均等 数値を増やすほど青・藍・紫が出やすくなる）
+		NIGHT_BASE_SCORE:       25000,  // 夜モード初回発動の基準スコア
+		NIGHT_STAR_DELAY_SCORE:  2500, // 夜モード突入後、流れ星発生までの必要追加スコア
+		NIGHT_INTERVAL_SCORE:   10000, // 2回目以降の夜モード発動間隔
+		NIGHT_DARK_PENALTY:      1000,  // 闇玉発動1回あたりのペナルティ（サイクルごとにリセット）
+		NIGHT_DARK_INIT_COUNT:      5, // 夜中の通常闇玉カウント（通常7）
+		NIGHT_DARK_FAST_COUNT:      3, // 夜中の高速闇玉カウント（通常5）
+		NIGHT_STAR_NEEDED:          3, // 昼に戻るために必要な星の数
+		NIGHT_COLOR_BOOST:          5, // 夜中の青・藍・紫の出現率ボーナス（0=均等 数値を増やすほど青・藍・紫が出やすくなる）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🟥 特殊パネルの出現スコア閾値
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        THRESHOLD: {
-            LIGHT_START:      6000,  // 虹玉が初めて出現するスコア
-            LIGHT_INTERVAL:   1040,  // 以降の虹玉出現間隔
-            DARK_START:       7500,  // 闇玉が初めて出現するスコア
-            DARK_INTERVAL:    1150,  // 以降の闇玉出現間隔
-            ALMIGHTY_START:  9000,  // プリズムが初めて出現するスコア
-            ALMIGHTY_INTERVAL: 1530, // 以降のプリズム出現間隔
-            DARK_FAST_START: 12000,  // 高速闇玉が初めて出現するスコア
-            DARK_FAST_INTERVAL: 2980, // 以降の高速闇玉出現間隔
-            SUNNY_START:     14000,  // 晴玉が初めて出現するスコア
-            SUNNY_INTERVAL:   5000,  // 以降の晴玉出現間隔
-            RAINY_START:     15500,  // 雨玉が初めて出現するスコア
-            RAINY_INTERVAL:   5000,  // 以降の雨玉出現間隔
-            RAINY_COUNT_MIN:     7,  // 雨玉の効果の青パネル出現数（最低値）
-            RAINY_COUNT_MAX:     9,  // 雨玉の効果の青パネル出現数（最高値）
-			SNOW_START:      18000,  // 雪玉が初めて出現するスコア
-            SNOW_INTERVAL:    1920,  // 以降の雪玉出現間隔
-
+		THRESHOLD: {
+		LIGHT_START:         6000,  // 虹玉が初めて出現するスコア
+		LIGHT_INTERVAL:      1040,  // 以降の虹玉出現間隔
+		DARK_START:          7500,  // 闇玉が初めて出現するスコア
+		DARK_INTERVAL:       1150,  // 以降の闇玉出現間隔
+		ALMIGHTY_START:      9000,  // プリズムが初めて出現するスコア
+		ALMIGHTY_INTERVAL:   1530,  // 以降のプリズム出現間隔
+		DARK_FAST_START:    12000,  // 高速闇玉が初めて出現するスコア
+		DARK_FAST_INTERVAL:  2980,  // 以降の高速闇玉出現間隔
+		SUNNY_START:        14000,  // 晴玉が初めて出現するスコア
+		SUNNY_INTERVAL:      5000,  // 以降の晴玉出現間隔
+		RAINY_START:        15500,  // 雨玉が初めて出現するスコア
+		RAINY_INTERVAL:      5000,  // 以降の雨玉出現間隔
+		SNOW_START:         18000,  // 雪玉が初めて出現するスコア
+		SNOW_INTERVAL:       1920,  // 以降の雪玉出現間隔
         },
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🖼️ ビジュアル設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        IMAGES: [
-            "koma01.png", "koma02.png", "koma03.png", "koma04.png",
-            "koma05.png", "koma06.png", "koma07.png"
-        ],
-        COLORS: [
-            "#ff7675", // 0: 赤
-            "#ffe53b", // 1: 黄
-            "#55EFCB", // 2: 緑
-            "#66B5FF", // 3: 青
-            "#c175ff", // 4: 紫
-            "#ff9300", // 5: オレンジ
-            "#6962FC", // 6: 藍色
-        ],
-        SYMBOLS: [
-            "☀", // 0: 赤
-            "★", // 1: 黄
-            "●", // 2: 緑
-            "◆", // 3: 青
-            "◈", // 4: 紫
-            "✿", // 5: オレンジ
-            "☆", // 6: 藍色
-        ],
-        THEME_COLORS: {
-            OBSTACLE:    "#b2bec3", // お邪魔パネルの色
-            TEXT_EFFECT: "#4a90e2", // スコアポップアップの色
-            RANK_1st:    "#ffe53b", // ランキング1位（金）
-            RANK_2nd:    "#b2bec3", // ランキング2位（銀）
-            RANK_3rd:    "#e17055", // ランキング3位（銅）
-        },
+		IMAGES: [
+			"koma01.png", "koma02.png", "koma03.png", "koma04.png",
+			"koma05.png", "koma06.png", "koma07.png"
+		],
+
+		COLORS: [
+			"#ff7675", // 0: 赤
+			"#ffe53b", // 1: 黄
+			"#55EFCB", // 2: 緑
+			"#66B5FF", // 3: 青
+			"#c175ff", // 4: 紫
+			"#ff9300", // 5: オレンジ
+			"#6962FC", // 6: 藍色
+		],
+
+		SYMBOLS: [
+			"☀", // 0: 赤
+			"★", // 1: 黄
+			"●", // 2: 緑
+			"◆", // 3: 青
+			"◈", // 4: 紫
+			"✿", // 5: オレンジ
+			"☆", // 6: 藍色
+		],
+		
+		// ⭐ 星玉消去時の散る色（星パネルのグラデーションに合わせた色味）
+		STAR_PARTICLE_COLORS: ["#fffde7", "#ffe53b", "#ffc400", "#e6a800"], 
+
+		THEME_COLORS: {
+			OBSTACLE:    "#b2bec3", // お邪魔パネルの色
+			TEXT_EFFECT: "#4a90e2", // スコアポップアップの色
+			RANK_1st:    "#ffe53b", // ランキング1位（金）
+			RANK_2nd:    "#b2bec3", // ランキング2位（銀）
+			RANK_3rd:    "#e17055", // ランキング3位（銅）
+		},
 	
-		PARTICLE_COUNT_NORMAL:  6,  // 通常パネル消去時のパーティクル数
+		PARTICLE_COUNT_NORMAL:   6,  // 通常パネル消去時のパーティクル数
 		PARTICLE_COUNT_RAINBOW: 12,  // 虹玉・七色玉消去時のパーティクル数
 		PARTICLE_COUNT_SKILL:   10,  // スキル発動時のパーティクル数
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🔊 オプション画面 表示切替設定
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		SHOW_SOUND_OPTIONS: false,  // trueにするとBGM/SE音量スライダーをオプション画面に表示（音源実装時にtrueへ）
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🔧 システム内部用（基本的に変更不要）
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        PANEL_TYPE: {
-            OBSTACLE: 99,
-            RAINBOW:  100,
-            DARK:     101,
-            BALL_0: 102, BALL_1: 103, BALL_2: 104, BALL_3: 105,
-            BALL_4: 106, BALL_5: 107, BALL_6: 108,
-            BALL_MIN: 102, // 七色玉IDの最小値（範囲チェック用）
-            BALL_MAX: 108, // 七色玉IDの最大値（範囲チェック用）
-            ALLCLEAR: 109,
-            ALMIGHTY: 110,
-            SUNNY:    111, // 晴玉：周辺パネルを赤に変換
+		PANEL_TYPE: {
+			OBSTACLE:  99,
+			RAINBOW:  100,
+			DARK:     101,
+			BALL_0:   102, BALL_1: 103, BALL_2: 104, BALL_3: 105,
+			BALL_4:   106, BALL_5: 107, BALL_6: 108,
+			BALL_MIN: 102, // 七色玉IDの最小値（範囲チェック用）
+			BALL_MAX: 108, // 七色玉IDの最大値（範囲チェック用）
+			ALLCLEAR: 109,
+			ALMIGHTY: 110,
+			SUNNY:    111, // 晴玉：周辺パネルを赤に変換
 			RAINY:    112, // 雨玉：ランダムに青パネルに変換
 			SNOW:     113, // 雪玉：カウント0で周囲が凍結
 			STAR:     114, // 星玉：夜モード中に出現、3つ集めると昼復帰
-        },
+		},
 
-        SUNNY_RADIUS: 2,  // 晴玉の効果範囲（中心から±2マス、計5×5）
-		SUNNY_CONVERT_NORMAL: false,  // trueにすると通常パネルも赤に変換
+			SUNNY_RADIUS: 2,  // 晴玉の効果範囲（中心から±2マス、計5×5）
+			SUNNY_CONVERT_NORMAL: false,  // trueにすると通常パネルも赤に変換
+		};
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ⚙️ プレイヤー設定（オプション画面）
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const SETTINGS_STORAGE_KEY = 'nanairoPanelUserSettings';
+
+	const DEFAULT_SETTINGS = {
+        animSpeed:    'normal', // 'none'（アニメなし） | 'normal'（ふつう） | 'fast'（はやい）
+        bgmVolume:    80,       // 0-100（音源実装後に接続予定。現状は値の保持のみ）
+        seVolume:     80,       // 0-100（同上）
+        reduceMotion: false,    // trueで、お邪魔パネル出現時の震え等「追加の演出」を抑える（パネル移動アニメの速度とは別軸）
+        ballShape:    'circle'  // 'circle' | 'magatama' | 'hexagon'
     };
+	
+    // CONFIGのベース値（速度プリセットを切り替えるたびに、ここから再計算する）
+    const BASE_SWAP_ANIM_DURATION        = CONFIG.SWAP_ANIM_DURATION;
+    const BASE_FALL_ANIM_DURATION_PER_ROW = CONFIG.FALL_ANIM_DURATION_PER_ROW;
+    const BASE_FALL_ANIM_DURATION_MAX     = CONFIG.FALL_ANIM_DURATION_MAX;
 
-    // ────────────────────────────────────────────────────────
+    let userSettings = { ...DEFAULT_SETTINGS };
+
+    // localStorageから設定を読み込む（保存データが無い/壊れている場合はデフォルトのまま）
+    function loadUserSettings() {
+        try {
+            const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+            if (raw) userSettings = { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+        } catch (e) {
+            console.warn('設定の読み込みに失敗しました。デフォルト設定を使用します。', e);
+            userSettings = { ...DEFAULT_SETTINGS };
+        }
+    }
+
+    function saveUserSettings() {
+        try {
+            localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(userSettings));
+        } catch (e) {
+            console.warn('設定の保存に失敗しました。', e);
+        }
+    }
+
+    // 現在のuserSettingsをゲームの動作に反映する
+    function applyUserSettings() {
+        if (userSettings.animSpeed === 'none') {
+            // 「なし」：入れ替え・落下アニメをほぼ瞬時にする
+            CONFIG.SWAP_ANIM_DURATION = 80;
+            CONFIG.FALL_ANIM_DURATION_PER_ROW = 30;
+            CONFIG.FALL_ANIM_DURATION_MAX = 200;
+        } else {
+            const speedMul = CONFIG.ANIM_SPEED_PRESETS[userSettings.animSpeed] ?? 1.0;
+            CONFIG.SWAP_ANIM_DURATION = Math.round(BASE_SWAP_ANIM_DURATION * speedMul);
+            CONFIG.FALL_ANIM_DURATION_PER_ROW = Math.round(BASE_FALL_ANIM_DURATION_PER_ROW * speedMul);
+            CONFIG.FALL_ANIM_DURATION_MAX = Math.round(BASE_FALL_ANIM_DURATION_MAX * speedMul);
+        }
+        applyBallShape(userSettings.ballShape);
+        // BGM/SE音量：音源実装後にここへ接続予定（現状は値の保持のみ）
+        // reduceMotion：お邪魔パネルの震えなど「追加の演出」の抑制に使用（addObstacle()等で直接参照）
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 💾 オートセーブ／レジューム機能
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const AUTOSAVE_STORAGE_KEY = 'nanairoPanelAutoSave';
+    const AUTOSAVE_VERSION = 1; // セーブ構造を変更したら数値を上げる（古いバージョンのデータは自動破棄）
+
+    // 現在のゲーム状態をセーブ用オブジェクトにまとめる
+    function buildSaveState() {
+        return {
+            board, score, moves, gameElapsedTime,
+            totalSpentMoves, obstacleDropCount, movesUntilNextObstacle,
+            darkSpawnCount, darkActivatedCount, darkClearedCount,
+            isNightMode, nightStarCount, nightTriggered, nightNextThreshold,
+            nightCycleDarkCount, nightModeEntryScore, nightStarSpawned,
+            lightPanelThreshold, darkPanelThreshold, almightyThreshold, darkFastThreshold,
+            sunnyThreshold, rainyThreshold, snowThreshold,
+            dangerCounts, frozenCells,
+            skillStock, skillGauge,
+            collectedRainbowBalls, everCollectedRainbowBalls, rainbowBallProgress,
+            isLevelRainbow, levelRainbowCount, allClearSpawnCount
+        };
+    }
+
+    // 1手ごとに呼び出す：現在の状態をlocalStorageへ保存
+    function autoSaveGame() {
+        try {
+            const payload = { version: AUTOSAVE_VERSION, savedAt: Date.now(), state: buildSaveState() };
+            localStorage.setItem(AUTOSAVE_STORAGE_KEY, JSON.stringify(payload));
+        } catch (e) {
+            console.warn('オートセーブに失敗しました。', e);
+        }
+    }
+
+    // 中断データを読み込む（存在しない/壊れている/バージョン不一致の場合はnullを返す）
+    function loadAutoSave() {
+        try {
+            const raw = localStorage.getItem(AUTOSAVE_STORAGE_KEY);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (!parsed || parsed.version !== AUTOSAVE_VERSION || !parsed.state) return null;
+            return parsed.state;
+        } catch (e) {
+            console.warn('中断データの読み込みに失敗しました。', e);
+            return null;
+        }
+    }
+
+    // 中断データを破棄する（ゲームオーバー時・リセット時・新規開始時に呼ぶ）
+    function clearAutoSave() {
+        try { localStorage.removeItem(AUTOSAVE_STORAGE_KEY); } catch (e) {}
+    }
+
+    // 保存済み状態を現在のゲーム変数へ復元する
+    function applySaveState(s) {
+        board = s.board;
+        score = s.score; moves = s.moves; gameElapsedTime = s.gameElapsedTime || 0;
+        totalSpentMoves = s.totalSpentMoves || 0;
+        obstacleDropCount = s.obstacleDropCount || 0;
+        movesUntilNextObstacle = s.movesUntilNextObstacle;
+        darkSpawnCount = s.darkSpawnCount || 0; darkActivatedCount = s.darkActivatedCount || 0; darkClearedCount = s.darkClearedCount || 0;
+        isNightMode = !!s.isNightMode; nightStarCount = s.nightStarCount || 0; nightTriggered = !!s.nightTriggered; nightNextThreshold = s.nightNextThreshold || 0;
+        nightCycleDarkCount = s.nightCycleDarkCount || 0; nightModeEntryScore = s.nightModeEntryScore || 0; nightStarSpawned = !!s.nightStarSpawned;
+        lightPanelThreshold = s.lightPanelThreshold; darkPanelThreshold = s.darkPanelThreshold; almightyThreshold = s.almightyThreshold; darkFastThreshold = s.darkFastThreshold;
+        sunnyThreshold = s.sunnyThreshold; rainyThreshold = s.rainyThreshold; snowThreshold = s.snowThreshold;
+        dangerCounts = s.dangerCounts || {}; frozenCells = s.frozenCells || {};
+        skillStock = s.skillStock || 0; skillGauge = s.skillGauge || 0;
+        collectedRainbowBalls = s.collectedRainbowBalls || [false, false, false, false, false, false, false];
+        everCollectedRainbowBalls = s.everCollectedRainbowBalls || [false, false, false, false, false, false, false];
+        rainbowBallProgress = s.rainbowBallProgress || [0, 0, 0, 0, 0, 0, 0];
+        isLevelRainbow = !!s.isLevelRainbow; levelRainbowCount = s.levelRainbowCount || 0; allClearSpawnCount = s.allClearSpawnCount ?? null;
+
+        isGameOver = false; isPaused = false; isAnimating = false; isStarEffectActive = false; isReplenishingStars = false;
+        selected = null; swapAnim = null; fallAnims = {}; landAnims = {}; particles = []; specialEffects = []; textEffects = [];
+        pendingRainbowBalls = []; lastMovedCell = null;
+
+        // 経過時間の計測を、保存時点の続きから再開する（すでに1手以上進んでいた場合のみ）
+        gameStartTime = totalSpentMoves > 0 ? Date.now() - gameElapsedTime : null;
+        document.getElementById('debug-time').textContent = `TIME: ${formatTime(gameElapsedTime)}`;
+
+        document.getElementById('reset-btn').disabled = false;
+        document.body.style.transition = 'none';
+        document.body.style.backgroundColor = isNightMode ? '#241E58' : '#CAF5FF';
+        const gc = document.getElementById('game-container');
+        if (gc) { gc.style.transition = 'none'; gc.style.backgroundColor = isNightMode ? '#3E3E78' : '#ffffff'; }
+        document.querySelectorAll('.night-star-bg').forEach(el => el.remove());
+        if (isNightMode) spawnNightBgStars();
+
+        document.getElementById('score').innerText = score;
+        document.getElementById('moves').innerText = moves;
+        document.getElementById('overlay').style.display = 'none';
+
+        updateBestScoreDisplay();
+        updateSkillUI();
+        updateLevelUI();
+        updateRainbowUI();
+        updateNightStarUI();
+        draw();
+    }
+
+    // ────────────────────────────────────────────────────
     // 以下、ゲームの制御ロジック
-    // ────────────────────────────────────────────────────────
+    // ────────────────────────────────────────────────────
 
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d');
@@ -1444,6 +1858,9 @@ const CONFIG = {
 	
     let board = [];
     let selected = null;
+    let swapAnim = null;   // 🎬 入れ替えアニメ状態 { r1, c1, r2, c2, startTime, duration }
+    let fallAnims = {};    // 🎬 落下アニメ状態 { "r,c": { startTime, duration, dropDistance } }
+    let landAnims = {};    // 🎬 着地バウンド演出 { "r,c": { startTime, duration } }
     let score = 0;
     let moves = CONFIG.INITIAL_MOVES;
     let isAnimating = false;
@@ -1468,18 +1885,18 @@ const CONFIG = {
     let nightStarCount = 0;       // 集めた星の数
     let nightTriggered = false;   // 現在の夜サイクルが発動済みか
     let nightNextThreshold = 0;   // 次の夜モード発動スコアしきい値（昼復帰後に更新）
-	let isReplenishingStars = false;   // 🌙 星補充アニメ実行中フラグ
-	let nightCycleDarkCount = 0;       // 🌙 現サイクルの闇玉発動数（夜終了でリセット）
-	let nightModeEntryScore = 0;       // 🌙 夜突入時のスコア（星スポーン遅延用）
-	let nightStarSpawned = false;      // 🌙 今サイクルで星スポーン済みか
+    let isReplenishingStars = false;   // 🌙 星補充アニメ実行中フラグ
+    let nightCycleDarkCount = 0;       // 🌙 現サイクルの闇玉発動数（夜終了でリセット）
+    let nightModeEntryScore = 0;       // 🌙 夜突入時のスコア（星スポーン遅延用）
+    let nightStarSpawned = false;      // 🌙 今サイクルで星スポーン済みか
     
     let lightPanelThreshold = CONFIG.THRESHOLD.LIGHT_START; 
     let darkPanelThreshold = CONFIG.THRESHOLD.DARK_START;
-	let almightyThreshold = CONFIG.THRESHOLD.ALMIGHTY_START;
-	let darkFastThreshold = CONFIG.THRESHOLD.DARK_FAST_START;
-	let sunnyThreshold = CONFIG.THRESHOLD.SUNNY_START;
-	let rainyThreshold = CONFIG.THRESHOLD.RAINY_START;
-	let snowThreshold = CONFIG.THRESHOLD.SNOW_START;
+    let almightyThreshold = CONFIG.THRESHOLD.ALMIGHTY_START;
+    let darkFastThreshold = CONFIG.THRESHOLD.DARK_FAST_START;
+    let sunnyThreshold = CONFIG.THRESHOLD.SUNNY_START;
+    let rainyThreshold = CONFIG.THRESHOLD.RAINY_START;
+    let snowThreshold = CONFIG.THRESHOLD.SNOW_START;
     let dangerCounts = {}; 
     
     let selectionPulse = 0;
@@ -1490,21 +1907,22 @@ const CONFIG = {
     let specialEffects = []; 
     let textEffects = []; 
     let collectedRainbowBalls = [false, false, false, false, false, false, false];
-	let everCollectedRainbowBalls = [false, false, false, false, false, false, false];
+    let everCollectedRainbowBalls = [false, false, false, false, false, false, false];
     let rainbowBallProgress = [0, 0, 0, 0, 0, 0, 0];
-	let pendingRainbowBalls = [];
-	let lastMovedCell = null;
-	let shakingCells = new Set();
-	let flashingCells = new Set();
-	let darkOverlayAlpha = 0;
-	let sunnyOverlayAlpha = 0;
-	let rainyOverlayAlpha = 0;
-	let snowyOverlayAlpha = 0;
-	let frozenCells = {}; // 凍結中のセル {"r,c": 残りターン数}
-	let flashAlpha = 0.9;
-	let flashColor = '#ffe600';
+    let pendingRainbowBalls = [];
+    let lastMovedCell = null;
+    let shakingCells = new Set();
+    let flashingCells = new Set();
+    let darkOverlayAlpha = 0;
+    let sunnyOverlayAlpha = 0;
+    let rainyOverlayAlpha = 0;
+    let snowyOverlayAlpha = 0;
+    let frozenCells = {}; // 凍結中のセル {"r,c": 残りターン数}
+    let flashAlpha = 0.9;
+    let flashColor = '#ffe600';
     let isLevelRainbow = false;
-	let allClearSpawnCount = null;
+    let sevenColorsEndingTransition = false;  // 🌈 SEVEN COLORS終了フェード中、rainbow-bgクラスの着脱を一時凍結するフラグ
+    let allClearSpawnCount = null;
     let levelRainbowCount = 0;
 
     // Canvas上の指定位置に✦キラキラの小片を生成するクラス
@@ -1531,8 +1949,8 @@ const CONFIG = {
         }
     }
 	
-		/*⚡️パネルで消したお邪魔パネル・闇玉パネルのエフェクト設定*/
-		class LightningParticle {
+	/*⚡️パネルで消したお邪魔パネル・闇玉パネルのエフェクト設定*/
+	class LightningParticle {
 	constructor(x, y, angle, speed) {
 		this.x = x; this.y = y;
 		this.size = 10 + Math.random() * 32;
@@ -1912,6 +2330,9 @@ update() {
 		get isFinished() { return this.alpha <= 0; }
 	}
 	
+    const OBSTACLE_CLOUD_PATH = new Path2D("M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"); // 🐛 お邪魔パネルの雲模様（毎フレーム再生成しないようキャッシュ）
+	const STAR_ICON_PATH = new Path2D("M44.27,8.41l10.25,20.52,22.68,3.41c1.51.23,2.12,2.09,1.03,3.16l-16.34,16.09,3.77,22.62c.25,1.51-1.33,2.66-2.69,1.95l-20.35-10.57-20.35,10.57c-1.36.71-2.94-.44-2.69-1.95l3.77-22.62L6.99,35.5c-1.09-1.07-.49-2.93,1.03-3.16l22.68-3.41,10.25-20.52c.68-1.37,2.64-1.37,3.32,0Z"); // ⭐ 盤面上の星玉パネル用（毎フレーム再生成しないようキャッシュ）
+
     class Particle {
         constructor(x, y, color, type = "star") {
             this.x = x; this.y = y; this.color = color; this.type = type;
@@ -1958,8 +2379,7 @@ update() {
 				ctx.translate(cx - 42.5 * s, cy - 42.5 * s);
 				ctx.scale(s, s);
 				ctx.fillStyle = "#ffffff";
-				const cloudPath = new Path2D("M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z");
-				ctx.fill(cloudPath);
+				ctx.fill(OBSTACLE_CLOUD_PATH);
 				ctx.restore();
             } else {
                 ctx.fillStyle = this.color;
@@ -1979,12 +2399,12 @@ update() {
             
             if (this.type === CONFIG.PANEL_TYPE.DARK) {
                 this.suckers = [];
-                for (let i = 0; i < 18; i++) {
+                for (let i = 0; i < 7; i++) { /* 闇玉出現時のエフェクト パーティクル数 */
                     let angle = Math.random() * Math.PI * 2;
                     let dist = 35 + Math.random() * 55; 
                     this.suckers.push({
                         ox: Math.cos(angle) * dist, oy: Math.sin(angle) * dist,
-                        size: 3 + Math.random() * 3,
+                        size: 5 + Math.random() * 4, /* 闇玉出現時のエフェクト パーティクルサイズ （数値5と4なら、5〜9の範囲）*/
                         speedFactor: 0.92 + Math.random() * 0.02, 
                         color: Math.random() > 0.4 ? "#5c1d54" : "#120011"
                     });
@@ -2132,11 +2552,11 @@ update() {
         for (let i = 0; i < CONFIG.PARTICLE_COUNT_NORMAL; i++) particles.push(new Particle(startX, startY, color, "star"));
     }
 
-    function spawnRainbowParticles(cellX, cellY, count = CONFIG.PARTICLE_COUNT_RAINBOW) {
+    function spawnRainbowParticles(cellX, cellY, count = CONFIG.PARTICLE_COUNT_RAINBOW, colors = CONFIG.COLORS) {
         const startX = cellX * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
         const startY = cellY * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
         for (let i = 0; i < count; i++) {
-            const randomColor = CONFIG.COLORS[Math.floor(Math.random() * CONFIG.COLORS.length)];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
             particles.push(new Particle(startX, startY, randomColor, "star"));
         }
     }
@@ -2251,12 +2671,27 @@ update() {
 
     const CLOUD_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path fill="#ffffff" d="M66.9,30.7c-3-14.5-26.9-17.2-33.9-4-8.3-3.3-18,3.2-18.4,10.9-15.3,2.9-13.7,23.1,3.8,21.5,3.5,6.6,16,9.3,22.7,4.5,6.3,6,20.9,4.4,24.5-2.7,18.7.3,23.2-26.5,1.3-30.2Z"/></svg>';
 	
-	// 七色の玉のシェイプ（SVG：通常玉／勾玉シェイプ）をPath2D化
-	const BALL_SHAPE_PATH_DATA = "M 41, 42 m -35, 0 a 35,35 0 1,0 70,0 a 35,35 0 1,0 -70,0";
-	const BALL_SHAPE = new Path2D(BALL_SHAPE_PATH_DATA);
-	// このパスのバウンディングボックスから求めた中心座標と縦幅（viewBox 0 0 85 85 基準）
+	// 七色の玉のシェイプ（SVG：通常玉／勾玉／六角形シェイプ）をPath2D化
+	// 🔧 オプション画面から選べるよう、複数のシェイプをレジストリにまとめている
+	const BALL_SHAPES = {
+		circle:   "M 41, 42 m -35, 0 a 35,35 0 1,0 70,0 a 35,35 0 1,0 -70,0",
+		magatama: "M67.47,35.96c0-14.3-10.5-26.6-24.8-26.9s-26.5,10.1-26.9,24.8c-.2,7.2,1.6,11.3,4,14.5,2.8,3.8,7.67,6.61,11.19,8.41s5.72,5.11,5.12,9.51c-.7,5.1-1.88,7.28.62,9.18,4.2,3.1,30.82-9.73,30.77-39.49Z",
+		hexagon:  "M40.84,7.19 L70.86,24.52 L70.86,59.18 L40.84,76.51 L10.82,59.18 L10.82,24.52 Z"
+	};
+	// どのシェイプも同じ中心座標・縦幅（viewBox 0 0 85 85 基準）に揃えてある
 	const BALL_SHAPE_CENTER = { x: 40.84, y: 41.85 };
 	const BALL_SHAPE_HEIGHT = 69.32;
+	let BALL_SHAPE = new Path2D(BALL_SHAPES.circle); // 🔧 現在選択中のシェイプ（オプションで切り替え可）
+
+	// 🔧 玉のシェイプを切り替える（オプション画面から呼ばれる）
+	function applyBallShape(key) {
+		if (!BALL_SHAPES[key]) key = 'circle';
+		BALL_SHAPE = new Path2D(BALL_SHAPES[key]);
+		// draw()は呼ばない：常時稼働中のsetInterval(draw, 16)が次のフレームで自動的に反映する。
+		// ここで直接draw()を呼ぶと、boardがまだ初期化されていない起動直後のタイミング
+		// （initGame()実行前にapplyUserSettings()が呼ばれる場合）に例外が発生し、
+		// 以降の初期化処理が止まって盤面が表示されなくなるバグの原因になっていた。
+	}
 
     const sunnyImage = new Image(); sunnyImage.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(SUNNY_ICON_SVG);
     sunnyImage.onload = () => draw(); sunnyImage.onerror = () => draw();
@@ -2265,20 +2700,192 @@ update() {
     const cloudImage = new Image(); cloudImage.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(CLOUD_ICON_SVG);
     cloudImage.onload = () => draw(); cloudImage.onerror = () => draw();
 
+	// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🖼️ パネル画像差し替え機能
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const PANEL_IMAGE_STORAGE_KEY = 'rainbowpanels_custom_images';
+	const PANEL_IMAGE_PLACEHOLDER_ICON = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#e2e8f0"/><path d="M11 27l6-7 4 4 6-8 6 8" stroke="#94a3b8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="15" r="2.5" fill="#94a3b8"/></svg>');
+    const PANEL_IMAGE_SIZE = 120; // 保存時のリサイズ後サイズ（px角）
+    // 表示は虹色順（赤→橙→黄→緑→青→藍→紫）だが、内部のtype番号はCONFIG.COLORSの並びのまま
+    const PANEL_IMAGE_DISPLAY_ORDER = [0, 5, 1, 2, 3, 6, 4];
+    const PANEL_IMAGE_DISPLAY_LABELS = ['赤', '橙', '黄', '緑', '青', '藍', '紫'];
+
+    let customPanelImages = loadCustomPanelImages(); // [type0, type1, ...] dataURL or null
+
+    function loadCustomPanelImages() {
+        try {
+            const raw = localStorage.getItem(PANEL_IMAGE_STORAGE_KEY);
+            if (!raw) return new Array(7).fill(null);
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed) || parsed.length !== 7) return new Array(7).fill(null);
+            return parsed;
+        } catch (e) {
+            return new Array(7).fill(null);
+        }
+    }
+
+    function saveCustomPanelImagesToStorage() {
+        try {
+            localStorage.setItem(PANEL_IMAGE_STORAGE_KEY, JSON.stringify(customPanelImages));
+        } catch (e) {
+            console.warn('パネル画像の保存に失敗しました（容量オーバーの可能性）', e);
+            alert('画像の保存に失敗しました。画像サイズが大きすぎるか、ブラウザの保存容量が上限に達している可能性があります。');
+        }
+    }
+
+    // 起動時：保存済みのカスタム画像があれば、通常の images[] に上書き適用する
+    function applyCustomPanelImagesToRuntime() {
+        customPanelImages.forEach((dataUrl, idx) => {
+            if (dataUrl && images[idx]) {
+                images[idx] = new Image();
+                images[idx].src = dataUrl;
+                images[idx].onload = () => draw();
+            }
+        });
+    }
+    applyCustomPanelImagesToRuntime();
+
+    // ファイルを読み込み、中央切り抜き＋リサイズしてdataURL化する
+    function resizeAndCropImageFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const side = Math.min(img.width, img.height);
+                    const sx = (img.width - side) / 2;
+                    const sy = (img.height - side) / 2;
+                    const cvs = document.createElement('canvas');
+                    cvs.width = PANEL_IMAGE_SIZE;
+                    cvs.height = PANEL_IMAGE_SIZE;
+                    const cctx = cvs.getContext('2d');
+                    cctx.drawImage(img, sx, sy, side, side, 0, 0, PANEL_IMAGE_SIZE, PANEL_IMAGE_SIZE);
+                    resolve(cvs.toDataURL('image/png'));
+                };
+                img.onerror = () => reject(new Error('画像の読み込みに失敗しました'));
+                img.src = e.target.result;
+            };
+            reader.onerror = () => reject(new Error('ファイルの読み込みに失敗しました'));
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // 1色分：個別アップロード
+    async function uploadSinglePanelImage(typeIdx, fileInput) {
+        const file = fileInput.files[0];
+        fileInput.value = ''; // 同じファイルを連続選択できるようにリセット
+        if (!file) return;
+        try {
+            const dataUrl = await resizeAndCropImageFile(file);
+            customPanelImages[typeIdx] = dataUrl;
+            saveCustomPanelImagesToStorage();
+            applyCustomPanelImagesToRuntime();
+            renderPanelImageRows();
+        } catch (err) {
+            alert('画像の読み込みに失敗しました。別の画像でお試しください。');
+        }
+    }
+
+    // 一括アップロード：ファイル名順に、虹色の表示順へ割り当てる
+    async function uploadBulkPanelImages(fileInput) {
+        const files = Array.from(fileInput.files).sort((a, b) => a.name.localeCompare(b.name));
+        fileInput.value = '';
+        for (let i = 0; i < files.length && i < 7; i++) {
+            const typeIdx = PANEL_IMAGE_DISPLAY_ORDER[i];
+            try {
+                const dataUrl = await resizeAndCropImageFile(files[i]);
+                customPanelImages[typeIdx] = dataUrl;
+            } catch (err) {
+                console.warn('一括アップロード中に読み込み失敗:', files[i].name);
+            }
+        }
+        saveCustomPanelImagesToStorage();
+        applyCustomPanelImagesToRuntime();
+        renderPanelImageRows();
+    }
+
+    function removeCustomPanelImage(typeIdx) {
+        customPanelImages[typeIdx] = null;
+        saveCustomPanelImagesToStorage();
+        // デフォルト画像に戻す
+        images[typeIdx] = new Image();
+        images[typeIdx].src = CONFIG.IMAGES[typeIdx];
+        images[typeIdx].onload = () => draw();
+        renderPanelImageRows();
+    }
+
+    function removeAllCustomPanelImages() {
+        customPanelImages = new Array(7).fill(null);
+        saveCustomPanelImagesToStorage();
+        CONFIG.IMAGES.forEach((src, idx) => {
+            images[idx] = new Image();
+            images[idx].src = src;
+            images[idx].onload = () => draw();
+        });
+        renderPanelImageRows();
+    }
+
+    // モーダル内の7行を描画する
+    function renderPanelImageRows() {
+        const container = document.getElementById('panel-image-rows');
+        if (!container) return;
+        container.innerHTML = '';
+        PANEL_IMAGE_DISPLAY_ORDER.forEach((typeIdx, displayIdx) => {
+            const label = PANEL_IMAGE_DISPLAY_LABELS[displayIdx];
+            const color = CONFIG.COLORS[typeIdx];
+            const previewSrc = customPanelImages[typeIdx] || CONFIG.IMAGES[typeIdx];
+            const hasCustom = !!customPanelImages[typeIdx];
+
+            const row = document.createElement('div');
+            row.className = 'panel-image-row';
+            row.innerHTML = `
+                <span class="panel-image-swatch" style="background:${color};"></span>
+                <span class="panel-image-label">${label}</span>
+                <img class="panel-image-preview" src="${previewSrc}" onerror="this.onerror=null; this.src='${PANEL_IMAGE_PLACEHOLDER_ICON}';">
+                <input type="file" accept="image/png,image/jpeg" style="display:none;" id="panel-image-input-${typeIdx}">
+                <button class="panel-image-upload-btn" onclick="document.getElementById('panel-image-input-${typeIdx}').click()">アップロード</button>
+                <button class="panel-image-remove-btn" ${hasCustom ? '' : 'disabled'} onclick="removeCustomPanelImage(${typeIdx})">×</button>
+            `;
+            container.appendChild(row);
+
+            document.getElementById(`panel-image-input-${typeIdx}`).addEventListener('change', (e) => {
+                uploadSinglePanelImage(typeIdx, e.target);
+            });
+        });
+    }
+
+    document.getElementById('panel-image-bulk-input').addEventListener('change', (e) => {
+        uploadBulkPanelImages(e.target);
+    });
+
+    function openPanelImageModal() {
+        renderPanelImageRows();
+        document.getElementById('panel-image-modal-overlay').classList.add('show');
+    }
+    function closePanelImageModal() {
+        document.getElementById('panel-image-modal-overlay').classList.remove('show');
+    }
+
     /* LOCAL STORAGE ハイスコアシステムの実装 */
     function loadRanking() {
-        let ranking = localStorage.getItem('rainbow_puzzle_ranking');
-        if (ranking) {
-            return JSON.parse(ranking);
-        } else {
-            let defaultRanking = [
-                {name: "------", score: 0}, {name: "------", score: 0},
-                {name: "------", score: 0}, {name: "------", score: 0},
-                {name: "------", score: 0}, {name: "------", score: 0},
-                {name: "------", score: 0}, {name: "------", score: 0},
-                {name: "------", score: 0}, {name: "------", score: 0}
-            ];
-            localStorage.setItem('rainbow_puzzle_ranking', JSON.stringify(defaultRanking));
+        let defaultRanking = [
+            {name: "------", score: 0}, {name: "------", score: 0},
+            {name: "------", score: 0}, {name: "------", score: 0},
+            {name: "------", score: 0}, {name: "------", score: 0},
+            {name: "------", score: 0}, {name: "------", score: 0},
+            {name: "------", score: 0}, {name: "------", score: 0}
+        ];
+        try {
+            let ranking = localStorage.getItem('rainbow_puzzle_ranking');
+            if (ranking) {
+                return JSON.parse(ranking);
+            } else {
+                localStorage.setItem('rainbow_puzzle_ranking', JSON.stringify(defaultRanking));
+                return defaultRanking;
+            }
+        } catch (e) {
+            // 🛡️ localStorageが使えない環境（セキュリティ制限等）でもゲーム進行を止めないためのフォールバック
+            console.warn('ランキングの読み込みに失敗しました。デフォルト値を使用します。', e);
             return defaultRanking;
         }
     }
@@ -2361,6 +2968,92 @@ update() {
         document.getElementById('reset-btn').disabled = false;
     }
 
+	// ⚙️ オプションモーダルの表示内容を、現在のuserSettingsに合わせて更新する
+	function updateOptionsUI() {
+		['none', 'normal', 'fast'].forEach(key => {
+			const btn = document.getElementById('opt-speed-' + key);
+			if (!btn) return;
+			const active = userSettings.animSpeed === key;
+			btn.style.background = active ? '#3D9DFF' : '#f1f5f9';
+			btn.style.color = active ? '#fff' : '#475569';
+		});
+		['circle', 'magatama', 'hexagon'].forEach(key => {
+			const btn = document.getElementById('opt-shape-' + key);
+			if (!btn) return;
+			const active = userSettings.ballShape === key;
+			btn.style.background = active ? '#3D9DFF' : '#f1f5f9';
+			btn.style.color = active ? '#fff' : '#475569';
+		});
+		const reduceMotionCheckbox = document.getElementById('opt-reduce-motion');
+		if (reduceMotionCheckbox) reduceMotionCheckbox.checked = userSettings.reduceMotion;
+		const bgmSlider = document.getElementById('opt-bgm-volume');
+		const seSlider = document.getElementById('opt-se-volume');
+		if (bgmSlider) bgmSlider.value = userSettings.bgmVolume;
+		if (seSlider) seSlider.value = userSettings.seVolume;
+		const bgmLabel = document.getElementById('opt-bgm-volume-label');
+		const seLabel = document.getElementById('opt-se-volume-label');
+		if (bgmLabel) bgmLabel.textContent = userSettings.bgmVolume + '%';
+		if (seLabel) seLabel.textContent = userSettings.seVolume + '%';
+
+		const soundSection = document.getElementById('opt-sound-section');
+		if (soundSection) soundSection.style.display = CONFIG.SHOW_SOUND_OPTIONS ? '' : 'none';
+	}
+
+	function setAnimSpeed(key) {
+		userSettings.animSpeed = key;
+		saveUserSettings();
+		applyUserSettings();
+		updateOptionsUI();
+	}
+
+	function setBallShape(key) {
+		userSettings.ballShape = key;
+		saveUserSettings();
+		applyUserSettings();
+		updateOptionsUI();
+	}
+
+	function toggleReduceMotion() {
+		const checkbox = document.getElementById('opt-reduce-motion');
+		userSettings.reduceMotion = checkbox.checked;
+		saveUserSettings();
+		applyUserSettings();
+	}
+
+	function onVolumeChange(type, value) {
+		value = Number(value);
+		if (type === 'bgm') userSettings.bgmVolume = value;
+		else userSettings.seVolume = value;
+		const label = document.getElementById(type === 'bgm' ? 'opt-bgm-volume-label' : 'opt-se-volume-label');
+		if (label) label.textContent = value + '%';
+		saveUserSettings();
+		// 🔊 音源実装後、ここで実際のBGM/SE音量に反映する予定
+	}
+
+	function resetUserSettingsToDefault() {
+		userSettings = { ...DEFAULT_SETTINGS };
+		saveUserSettings();
+		applyUserSettings();
+		updateOptionsUI();
+	}
+
+	function openOptionsModal() {
+		updateOptionsUI();
+		const modal = document.getElementById('options-modal');
+		modal.style.display = 'flex';
+		requestAnimationFrame(() => {
+			modal.style.opacity = '1';
+			document.getElementById('options-modal-content').style.transform = 'scale(1)';
+		});
+	}
+
+	function closeOptionsModal() {
+		const modal = document.getElementById('options-modal');
+		modal.style.opacity = '0';
+		document.getElementById('options-modal-content').style.transform = 'scale(0.9)';
+		setTimeout(() => { modal.style.display = 'none'; }, 200);
+	}
+
 	function confirmResetRanking() {
 		const modal = document.getElementById('ranking-reset-modal');
 		modal.style.display = 'flex';
@@ -2377,7 +3070,8 @@ update() {
 	}
 	function executeRankingReset() {
 		closeRankingResetModal();
-		localStorage.removeItem('rainbow_puzzle_ranking');
+		try { localStorage.removeItem('rainbow_puzzle_ranking'); }
+		catch (e) { console.warn('ランキングのリセットに失敗しました。', e); }
 		updateBestScoreDisplay();
 		renderRankingList();
 	}
@@ -2392,7 +3086,8 @@ update() {
         ranking.sort((a, b) => b.score - a.score);
         ranking = ranking.slice(0, 10);
         
-        localStorage.setItem('rainbow_puzzle_ranking', JSON.stringify(ranking));
+        try { localStorage.setItem('rainbow_puzzle_ranking', JSON.stringify(ranking)); }
+        catch (e) { console.warn('ランキングの保存に失敗しました。', e); }
         
         document.getElementById('name-input-box').style.display = 'none';
         renderRankingList();
@@ -2419,6 +3114,7 @@ update() {
         gameStartTime = null;
         document.getElementById('debug-time').textContent = `TIME: ${formatTime(0)}`;
 		skillStock = 0; skillGauge = 0; particles = []; specialEffects = []; textEffects = []; dangerCounts = {}; frozenCells = {};
+		swapAnim = null; fallAnims = {}; // 🎬 アニメーション状態もリセット
         sunnyThreshold = CONFIG.THRESHOLD.SUNNY_START;
         rainyThreshold = CONFIG.THRESHOLD.RAINY_START;
         snowThreshold = CONFIG.THRESHOLD.SNOW_START;
@@ -2477,13 +3173,100 @@ update() {
         draw();
     }
 
+    // 🎬 パネル移動アニメーション：イージング関数(減速しながら着地する動き)
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function easeInQuad(t) {
+        const startSpeed = 0.7; // パネル落下アニメ 開始時点の速度の割合(0=完全に静止スタート、1=等速そのまま)
+        return startSpeed * t + (1 - startSpeed) * t * t;
+    }
+
+    // 🎬 指定セルの描画オフセット(入れ替え・落下アニメによる見た目のズレ)を計算
+    function getCellRenderOffset(r, c) {
+        let dx = 0, dy = 0;
+        const now = performance.now();
+
+        if (swapAnim) {
+            const t = Math.min(1, (now - swapAnim.startTime) / swapAnim.duration);
+            const remaining = 1 - easeOutCubic(t);
+            if (r === swapAnim.r1 && c === swapAnim.c1) {
+                dx += (swapAnim.c2 - swapAnim.c1) * CONFIG.CELL_SIZE * remaining;
+                dy += (swapAnim.r2 - swapAnim.r1) * CONFIG.CELL_SIZE * remaining;
+            } else if (r === swapAnim.r2 && c === swapAnim.c2) {
+                dx += (swapAnim.c1 - swapAnim.c2) * CONFIG.CELL_SIZE * remaining;
+                dy += (swapAnim.r1 - swapAnim.r2) * CONFIG.CELL_SIZE * remaining;
+            }
+        }
+
+        const fa = fallAnims[`${r},${c}`];
+        if (fa) {
+            const t = Math.min(1, (now - fa.startTime) / fa.duration);
+            const remaining = 1 - easeInQuad(t); // 加速しながら落ちる(重力っぽい動き)
+            dy += -fa.dropDistance * remaining; // 開始時は上方向にズレていて、着地位置(0)へ収束していく
+        }
+
+        dy += getLandBounceOffset(r, c);
+
+        return { dx, dy };
+    }
+
+    // 🎬 着地バウンドのオフセット量を計算する（減衰しながら1回跳ねて収束）
+    function getLandBounceOffset(r, c) {
+        const la = landAnims[`${r},${c}`];
+        if (!la) return 0;
+        const t = Math.min(1, (performance.now() - la.startTime) / la.duration);
+        const decay = 1 - t;
+        return -Math.abs(Math.sin(t * Math.PI * 2)) * CONFIG.LAND_BOUNCE_HEIGHT * decay; // 常に上方向のみに跳ねる(着地位置より下に沈まない)
+    }
+
+    // 🎬 期限が切れたアニメーションを掃除する(draw()の毎フレーム冒頭で呼ぶ)
+    function pruneFinishedAnimations() {
+        const now = performance.now();
+        if (swapAnim && now - swapAnim.startTime >= swapAnim.duration) swapAnim = null;
+        for (const key in fallAnims) {
+            if (now - fallAnims[key].startTime >= fallAnims[key].duration) {
+                delete fallAnims[key];
+                if (!userSettings.reduceMotion) { // モーション減少ONなら着地バウンドをスキップ
+                    landAnims[key] = { startTime: now, duration: CONFIG.LAND_ANIM_DURATION };
+                }
+            }
+        }
+        for (const key in landAnims) {
+            if (now - landAnims[key].startTime >= landAnims[key].duration) delete landAnims[key];
+        }
+    }
+
+    // 🎬 パネル入れ替えアニメーションを実行し、完了したらresolveするPromiseを返す
+    function animateSwap(r1, c1, r2, c2) {
+        return new Promise(resolve => {
+            if (userSettings.animSpeed === 'none') { resolve(); return; } // 「なし」の時はスキップ
+            const duration = CONFIG.SWAP_ANIM_DURATION;
+            swapAnim = { r1, c1, r2, c2, startTime: performance.now(), duration };
+            setTimeout(() => { swapAnim = null; resolve(); }, duration);
+        });
+    }
+
+    // 🎬 現在登録されている落下アニメの中で最も長い所要時間を取得
+    function getMaxFallDuration() {
+        let max = 0;
+        for (const key in fallAnims) max = Math.max(max, fallAnims[key].duration);
+        return max;
+    }
+
+    // 🎬 落下アニメーションの完了を待つ(アニメが無ければminWaitだけ待つ)
+    function waitForFallAnimations(minWait = 0) {
+        const duration = Math.max(getMaxFallDuration(), minWait);
+        return new Promise(res => setTimeout(res, duration));
+    }
+
     function draw() {
+        pruneFinishedAnimations();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
             for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
                 const type = board[r][c]; if (type === -1) continue;
-                const x = c * CONFIG.CELL_SIZE; const y = r * CONFIG.CELL_SIZE;
+                const { dx: __ox, dy: __oy } = getCellRenderOffset(r, c);
+                const x = c * CONFIG.CELL_SIZE + __ox; const y = r * CONFIG.CELL_SIZE + __oy;
                 
                 if (type === CONFIG.PANEL_TYPE.RAINBOW) {
                     ctx.save();
@@ -2538,7 +3321,7 @@ update() {
 					ctx.fillText(count, x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2);
                     ctx.restore();
 				} else if (type >= CONFIG.PANEL_TYPE.BALL_MIN && type <= CONFIG.PANEL_TYPE.BALL_MAX) {
-                    // ▼7色の玉のグラデーション描画（勾玉シェイプ）
+                    // ▼七色の玉／勾玉のグラデーション描画
                     let cIdx = type - 102;
                     ctx.save();
 
@@ -2677,9 +3460,8 @@ update() {
 					const oy = y + (CONFIG.CELL_SIZE - iconSize) / 2;
 					ctx.translate(ox, oy);
 					ctx.scale(scale, scale);
-					const starPath = new Path2D("M44.27,8.41l10.25,20.52,22.68,3.41c1.51.23,2.12,2.09,1.03,3.16l-16.34,16.09,3.77,22.62c.25,1.51-1.33,2.66-2.69,1.95l-20.35-10.57-20.35,10.57c-1.36.71-2.94-.44-2.69-1.95l3.77-22.62L6.99,35.5c-1.09-1.07-.49-2.93,1.03-3.16l22.68-3.41,10.25-20.52c.68-1.37,2.64-1.37,3.32,0Z");
 					// グロー
-					ctx.shadowBlur = (15 + Math.sin(selectionPulse * 1.5) * 6) / scale;
+					ctx.shadowBlur = (15 + Math.sin(selectionPulse * 1.5) * 3) / scale;
 					ctx.shadowColor = "#ffe600";
 					// グラデーション塗り
 					const starGrad = ctx.createRadialGradient(42, 42, 0, 42, 42, 42);
@@ -2687,7 +3469,7 @@ update() {
 					starGrad.addColorStop(0.5, "#ffe53b");
 					starGrad.addColorStop(1.0, "#e6a800");
 					ctx.fillStyle = starGrad;
-					ctx.fill(starPath);
+					ctx.fill(STAR_ICON_PATH);
 					ctx.restore();
 				} else if (type === CONFIG.PANEL_TYPE.SNOW) {
 					// ❄ 雪玉（カウント表示 + カウント3以下で色変化）
@@ -2893,6 +3675,7 @@ update() {
                     else {
                         if (!gameStartTime) gameStartTime = Date.now();
 						isAnimating = true;
+						const swapR1 = selected.r, swapC1 = selected.c, swapR2 = r, swapC2 = c; // 🎬 アニメ用に座標を確定
                         const temp = board[r][c]; board[r][c] = board[selected.r][selected.c]; board[selected.r][selected.c] = temp;
 						lastMovedCell = [{r: selected.r, c: selected.c}, {r, c}];
 						
@@ -2901,11 +3684,15 @@ update() {
 						
                         selected = null;
                         
+					await animateSwap(swapR1, swapC1, swapR2, swapC2); // 🎬 2つのパネルが入れ替わるアニメーション（雷玉出現などの処理より先に完了させる）
+                        
 				if (isLevelRainbow) {
 					levelRainbowCount--;
 					if (levelRainbowCount <= 0) {
 						isLevelRainbow = false;
-						setTimeout(() => { updateRainbowUI(); }, 1500);
+						sevenColorsEndingTransition = true;
+						playSevenColorsEndFlash();
+						setTimeout(() => { sevenColorsEndingTransition = false; updateRainbowUI(); }, 1500);
 					} else {
 						// 全消しパネルの出現チェック
 						if (allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
@@ -2919,8 +3706,6 @@ update() {
 				}
 						totalSpentMoves++;
                         movesUntilNextObstacle--;
-                        
-                        draw(); await new Promise(res => setTimeout(res, 200)); 
                         
                         await processMatches();
                         
@@ -2947,6 +3732,7 @@ update() {
 		updateSkillUI();
         isAnimating = false;
         draw();
+        if (!isGameOver) autoSaveGame(); // 💾 1手ごとに中断データを更新
     });
 
 	function unfreezeCell(r, c) {
@@ -3179,7 +3965,7 @@ update() {
             if (flashAlpha > 0) {
                 ctx.globalAlpha = flashAlpha;
                 ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = 30;
+                ctx.shadowBlur = 12;
                 ctx.shadowColor = '#ffffff';
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, CONFIG.CELL_SIZE * 0.5 * (1 - t * 0.5), 0, Math.PI * 2);
@@ -3189,7 +3975,7 @@ update() {
             const flareScale = 0.8 + t * 1.5;
             const flareAlpha = this.life * 0.9;
             ctx.globalAlpha = flareAlpha;
-            ctx.shadowBlur = 20;
+            ctx.shadowBlur = 10;
             ctx.shadowColor = '#ffe600';
             const svgSize = 85;
             const iconSize = CONFIG.CELL_SIZE * flareScale;
@@ -3337,6 +4123,14 @@ update() {
                     cellsToTurn.forEach(cell => {
                         if (board[cell.r][cell.c] === CONFIG.PANEL_TYPE.STAR) starLost = true;
                         board[cell.r][cell.c] = CONFIG.PANEL_TYPE.OBSTACLE;
+                        if (!userSettings.reduceMotion) { // モーション減少ONなら震え演出をスキップ
+                            particles.push(new Particle(cell.c * CONFIG.CELL_SIZE, cell.r * CONFIG.CELL_SIZE, CONFIG.THEME_COLORS.OBSTACLE, "shake"));
+                            shakingCells.add(`${cell.r},${cell.c}`);
+                            setTimeout(() => {
+                                shakingCells.delete(`${cell.r},${cell.c}`);
+                                if (!isGameOver) draw();
+                            }, 500);
+                        }
                     });
                     cleanUpDangerCountsData();
                     draw();
@@ -3445,9 +4239,6 @@ update() {
 
         const ring = document.createElement('div');
         ring.className = 'rainbow-shockwave-ring';
-        ring.style.left = '50%';
-        ring.style.top = '50%';
-        ring.style.transform = 'translate(-50%, -50%)';
 
         wrap.appendChild(ring);
         gameContainer.appendChild(wrap);
@@ -3564,7 +4355,11 @@ update() {
 						}
 					});
 				}
-				spawnRainbowParticles(selected.c, selected.r);
+				if (type === CONFIG.PANEL_TYPE.STAR) {
+					spawnRainbowParticles(selected.c, selected.r, CONFIG.PARTICLE_COUNT_RAINBOW, CONFIG.STAR_PARTICLE_COLORS);
+				} else {
+					spawnRainbowParticles(selected.c, selected.r);
+				}
 			}
 			
 			board[selected.r][selected.c] = -1;
@@ -3577,9 +4372,9 @@ update() {
     }
 
     async function processRefillOnly() {
-        isAnimating = true; draw(); await new Promise(res => setTimeout(res, 250));
+        isAnimating = true; draw(); await new Promise(res => setTimeout(res, userSettings.animSpeed === 'none' ? 280 : 150)); // パネルアニメーション速さ 右の数値がオプション「なし」の時の数値
         refillBoard();
-        draw(); await new Promise(res => setTimeout(res, 250));
+        await waitForFallAnimations(250); // 🎬 パネルが上から落ちてくるアニメーション
         if (checkMatches().length > 0) await processMatches(true);
         isAnimating = false;
     }
@@ -3845,7 +4640,7 @@ update() {
 			for (const s of specials) {
 				if (board[s.r][s.c] === CONFIG.PANEL_TYPE.STAR) {
 					// 🌙 星玉消去
-					spawnRainbowParticles(s.c, s.r);
+					spawnRainbowParticles(s.c, s.r, CONFIG.PARTICLE_COUNT_RAINBOW, CONFIG.STAR_PARTICLE_COLORS);
 					const slotIdx = nightStarCount;
 					nightStarCount++;
 					board[s.r][s.c] = -1;
@@ -3911,13 +4706,15 @@ update() {
 
             updateSkillUI();
             
-            draw(); await new Promise(res => setTimeout(res, 250)); 
+            draw(); await new Promise(res => setTimeout(res, userSettings.animSpeed === 'none' ? 280 : 150)); // パネルアニメーション速さ 右の数値がオプション「なし」の時の数値
             refillBoard();
-            draw(); await new Promise(res => setTimeout(res, 200)); matches = checkMatches();
+            await waitForFallAnimations(200); // 🎬 パネルが上から落ちてくるアニメーション
+            matches = checkMatches();
         }
         
         if (!hasMatched && moves <= 0) {
             isGameOver = true; 
+            clearAutoSave(); // 💾 ゲームオーバー時は中断データ不要のため破棄
             showEndGameOverlay(); 
         }
 		if (pendingRainbowBalls.length > 0) {
@@ -4013,6 +4810,9 @@ update() {
         const typeCount = getCurrentTypeCount(); 
         let tempDangerCounts = {};
         let tempFrozenCells = {};
+        fallAnims = {}; // 🎬 今回の補充で落下する分のみを扱うのでリセット
+        const now = performance.now();
+        const useFallAnim = userSettings.animSpeed !== 'none'; // 「なし」の時は落下アニメを登録しない
         
         for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
             let srcRows = [];
@@ -4020,11 +4820,13 @@ update() {
                 if (board[r][c] !== -1) {
                     srcRows.push({
                         type: board[r][c],
-                        origKey: `${r},${c}`
+                        origKey: `${r},${c}`,
+                        origRow: r
                     });
                 }
             }
             
+            let newAboveCount = 0; // 新規パネルが上から何個目かを数える(積み重なって落ちてくる演出用)
             for (let r = CONFIG.BOARD_SIZE - 1; r >= 0; r--) {
                 if (srcRows.length > 0) {
                     let panelData = srcRows.shift();
@@ -4036,8 +4838,29 @@ update() {
                     if (frozenCells[panelData.origKey] !== undefined) {
                         tempFrozenCells[`${r},${c}`] = frozenCells[panelData.origKey];
                     }
+
+                    // 🎬 既存パネルが落下した分だけ落下アニメを設定
+                    const rowsFallen = r - panelData.origRow;
+                    if (rowsFallen > 0 && useFallAnim) {
+                        fallAnims[`${r},${c}`] = {
+                            startTime: now,
+                            duration: Math.min(CONFIG.FALL_ANIM_DURATION_PER_ROW * rowsFallen, CONFIG.FALL_ANIM_DURATION_MAX),
+                            dropDistance: rowsFallen * CONFIG.CELL_SIZE
+                        };
+                    }
                 } else {
                     board[r][c] = isNightMode ? getWeightedNightColor(typeCount) : Math.floor(Math.random() * typeCount);
+
+                    // 🎬 新規パネルは盤面の上から落下してくる演出
+                    newAboveCount++;
+                    if (useFallAnim) {
+                        const rowsFallen = r + newAboveCount;
+                        fallAnims[`${r},${c}`] = {
+                            startTime: now,
+                            duration: Math.min(CONFIG.FALL_ANIM_DURATION_PER_ROW * rowsFallen, CONFIG.FALL_ANIM_DURATION_MAX),
+                            dropDistance: rowsFallen * CONFIG.CELL_SIZE
+                        };
+                    }
                 }
             }
         }
@@ -4054,14 +4877,16 @@ update() {
             if (board[r][c] < CONFIG.PANEL_TYPE.OBSTACLE && board[r][c] !== -1 && frozenCells[`${r},${c}`] === undefined && !(lastMovedCell && lastMovedCell.some(cell => cell.r === r && cell.c === c))) { 
 				board[r][c] = CONFIG.PANEL_TYPE.OBSTACLE;
 				cleanUpDangerCountsData();
-				particles.push(new Particle(c * CONFIG.CELL_SIZE, r * CONFIG.CELL_SIZE, CONFIG.THEME_COLORS.OBSTACLE, "shake"));
-				shakingCells.add(`${r},${c}`);
-				setTimeout(() => {
-					shakingCells.delete(`${r},${c}`);
-					if (!isGameOver) { 
-						draw(); 
-					}
-				}, 500);
+				if (!userSettings.reduceMotion) { // モーション減少ONなら震え演出をスキップ
+					particles.push(new Particle(c * CONFIG.CELL_SIZE, r * CONFIG.CELL_SIZE, CONFIG.THEME_COLORS.OBSTACLE, "shake"));
+					shakingCells.add(`${r},${c}`);
+					setTimeout(() => {
+						shakingCells.delete(`${r},${c}`);
+						if (!isGameOver) { 
+							draw(); 
+						}
+					}, 500);
+				}
             break; 
             } tries++;
         }
@@ -4104,7 +4929,7 @@ update() {
 		}
 	}
 	
-	// ▼7色の玉システムの関数群
+	// ▼七色の玉システムの関数群
     function spawnRainbowBall(colorIndex) {
         let candidates = [];
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
@@ -4217,8 +5042,8 @@ update() {
 			}
 		}
 
-		// ランダムに5〜8枚選ぶ
-		const count = CONFIG.THRESHOLD.RAINY_COUNT_MIN + Math.floor(Math.random() * (CONFIG.THRESHOLD.RAINY_COUNT_MAX - CONFIG.THRESHOLD.RAINY_COUNT_MIN + 1));
+		// コンフィグの設定数だけランダムに選ぶ
+		const count = CONFIG.RAINY_COUNT_MIN + Math.floor(Math.random() * (CONFIG.RAINY_COUNT_MAX - CONFIG.RAINY_COUNT_MIN + 1));
 		for (let i = candidates.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
 			[candidates[i], candidates[j]] = [candidates[j], candidates[i]];
@@ -4314,8 +5139,7 @@ update() {
 
 		// 5. ボードを補充
 		refillBoard();
-		draw();
-		await new Promise(res => setTimeout(res, 200));
+		await waitForFallAnimations(200); // 🎬 パネルが上から落ちてくるアニメーション
 
 		// 6. 暗転解除
 		darkOverlayAlpha = 0;
@@ -4501,8 +5325,55 @@ update() {
 
     function confirmResetGame() {
         closeResetModal(); 
+        clearAutoSave(); // 💾 明示的なリセット時は中断データも破棄
         initGame();        
     }
+
+    /************************************************************
+     * 💾 中断データ再開確認モーダルの制御ロジック
+     ************************************************************/
+    function openResumeModal(savedState) {
+        const detail = document.getElementById('resume-modal-detail');
+        if (detail) detail.textContent = `スコア ${savedState.score}点・残り${savedState.moves}手の続きがあります`;
+        const modal = document.getElementById('resume-confirm-modal');
+        const content = document.getElementById('resume-modal-content');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            content.style.transform = 'scale(1)';
+        }, 10);
+    }
+
+    function closeResumeModal() {
+        const modal = document.getElementById('resume-confirm-modal');
+        const content = document.getElementById('resume-modal-content');
+        modal.style.opacity = '0';
+        content.style.transform = 'scale(0.9)';
+        setTimeout(() => { modal.style.display = 'none'; }, 200);
+    }
+
+    function resumeGameFromModal() {
+        closeResumeModal();
+        const saved = loadAutoSave();
+        if (saved) applySaveState(saved);
+        else initGame(); // 万一読み込みに失敗した場合は新規開始にフォールバック
+    }
+
+    function startNewGameFromModal() {
+        closeResumeModal();
+        clearAutoSave();
+        initGame();
+    }
+
+	function playSevenColorsEndFlash() {
+		const gc = document.getElementById('game-container');
+		if (!gc) return;
+		const flash = document.createElement('div');
+		flash.className = 'seven-colors-end-flash';
+		flash.style.background = isNightMode ? '#3E3E78' : '#ffffff';
+		gc.appendChild(flash);
+		setTimeout(() => flash.remove(), 2100);
+	}			
 
 	// UIの色や表示を更新する仕組み
 	function updateRainbowUI() {
@@ -4540,7 +5411,7 @@ update() {
 				movesEl.innerText = moves;
 				movesEl.classList.remove('rainbow-moves');
 			}
-			if (gameContainer) gameContainer.classList.remove('rainbow-bg');
+			if (gameContainer && !sevenColorsEndingTransition) gameContainer.classList.remove('rainbow-bg'); // 🌈 フェード演出中は着脱を凍結
 		}
 		// デバッグ進捗表示の更新
 		const colorNames = ['赤', '黄', '緑', '青', '紫', '橙', '藍'];
@@ -4572,7 +5443,30 @@ update() {
         updateRainbowUI();
     };
 
-    initGame();
+    // ⚙️ 保存済みのプレイヤー設定を読み込んでから反映する
+    loadUserSettings();
+    applyUserSettings();
+
+    // 💾 中断データがあれば再開確認モーダルを表示し、なければ通常どおり新規開始
+    const pendingAutoSave = loadAutoSave();
+    if (pendingAutoSave) {
+        openResumeModal(pendingAutoSave);
+    } else {
+        initGame();
+    }
+			
+    // ⚙️ #top-button-row の右端を、#right-ui（スコア等が入ってる枠）の右端に揃える
+    function alignTopButtonRow() {
+        const rightUiTop = document.getElementById('right-ui-top');
+        const row = document.getElementById('top-button-row');
+        if (!rightUiTop || !row) return;
+        const rect = rightUiTop.getBoundingClientRect();
+        const gap = window.innerWidth - rect.right - 20; // ⚙️ OPTION オプションボタンの位置調整
+        row.style.paddingRight = Math.max(gap, 0) + 'px';
+    }
+    window.addEventListener('resize', alignTopButtonRow);
+    window.addEventListener('load', alignTopButtonRow);
+    setTimeout(alignTopButtonRow, 0); // 初回描画直後にも一度実行
 	
 </script>
 </body>
