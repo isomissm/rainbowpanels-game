@@ -25,5 +25,8 @@
 ## バージョン
 ver 9.1.0 2026/7/6更新
 
+© 2026 ナナイロパネル／Rainbow Panels by isomi_ssm
+
 ---
 GeminiやClaudeなど、AIたちと一緒に作っているパズルゲームだよ🌈
+
