@@ -44,7 +44,7 @@ body {
     border-radius: 10px;
     margin-bottom: 25px;
     font-size: 12px;
-    display: none;  /* デバッグパネル表示flex・非表示none */
+    display: flex;  /* デバッグパネル表示flex・非表示none */
     align-items: flex-start;
     gap: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -753,8 +753,8 @@ background: #c8e8ff;
 }
 @keyframes sevenColorsEndFade {
     0% { opacity: 0; }
-    60% { opacity: 0.9; }
-    75% { opacity: 0.9; }
+    60% { opacity: 1; }
+    75% { opacity: 1; }
     100% { opacity: 0; }
 }
 .seven-colors-end-flash {
@@ -1921,8 +1921,8 @@ const CONFIG = {
     let flashAlpha = 0.9;
     let flashColor = '#ffe600';
     let isLevelRainbow = false;
-    let sevenColorsEndingTransition = false;  // 🌈 SEVEN COLORS終了フェード中、rainbow-bgクラスの着脱を一時凍結するフラグ
-    let allClearSpawnCount = null;
+	let sevenColorsEndingTransition = false;  // 🌈 SEVEN COLORS終了フェード中、rainbow-bgクラスの着脱を一時凍結するフラグ
+	let sevenColorsEndToken = 0;  // 🌈 終了フェードの識別番号。新しいSEVEN COLORSが割り込んだら古いフェードのタイマーを無効化するlet allClearSpawnCount = null;
     let levelRainbowCount = 0;
 
     // Canvas上の指定位置に✦キラキラの小片を生成するクラス
@@ -3259,13 +3259,14 @@ update() {
     }
 
     function draw() {
-        pruneFinishedAnimations();
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
-            for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
-                const type = board[r][c]; if (type === -1) continue;
-                const { dx: __ox, dy: __oy } = getCellRenderOffset(r, c);
+    if (!board || board.length < CONFIG.BOARD_SIZE) return; // 💾 再開確認モーダル表示中など、盤面がまだ初期化されていない場合は何もしない
+    pruneFinishedAnimations();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
+        for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
+            const type = board[r][c]; if (type === -1) continue;
+            const { dx: __ox, dy: __oy } = getCellRenderOffset(r, c);
                 const x = c * CONFIG.CELL_SIZE + __ox; const y = r * CONFIG.CELL_SIZE + __oy;
                 
                 if (type === CONFIG.PANEL_TYPE.RAINBOW) {
@@ -3689,12 +3690,16 @@ update() {
 				if (isLevelRainbow) {
 					levelRainbowCount--;
 					if (levelRainbowCount <= 0) {
-						isLevelRainbow = false;
-						sevenColorsEndingTransition = true;
-						playSevenColorsEndFlash();
-						setTimeout(() => { sevenColorsEndingTransition = false; updateRainbowUI(); }, 1500);
-					} else {
-						// 全消しパネルの出現チェック
+					isLevelRainbow = false;
+					sevenColorsEndingTransition = true;
+					playSevenColorsEndFlash();
+					const myFadeToken = ++sevenColorsEndToken; // 🌈 このフェード専用の識別番号を発行
+					setTimeout(() => {
+					if (myFadeToken !== sevenColorsEndToken) return;
+					sevenColorsEndingTransition = false;
+					updateRainbowUI();
+				}, 1400); // 🌈 フラッシュが完全に覆っている区間（1200〜1500ms）内で切り替える。ここで虹色アニメを止めておけば、残りのフェードアウト(1400〜2000ms)は完全に静止した本当の背景色を見せるだけになる
+				} else {// 全消しパネルの出現チェック
 						if (allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
 							await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
 							allClearSpawnCount = null; // 使用済みにする
@@ -4959,10 +4964,12 @@ update() {
 	}
 	
 	function checkRainbowCompletion() {
-		if (collectedRainbowBalls.every(v => v === true)) {
-			isLevelRainbow = true;
-			levelRainbowCount = CONFIG.LEVEL_RAINBOW_DURATION;
-			collectedRainbowBalls.fill(false);
+    if (collectedRainbowBalls.every(v => v === true)) {
+        sevenColorsEndToken++; // 🌈 進行中の終了フェードがあれば無効化してから新しいSEVEN COLORSを開始
+        sevenColorsEndingTransition = false;
+        document.querySelectorAll('.seven-colors-end-flash').forEach(el => el.remove()); // 🌈 前回の終了フラッシュが残っていれば除去
+        isLevelRainbow = true;
+        levelRainbowCount = CONFIG.LEVEL_RAINBOW_DURATION;collectedRainbowBalls.fill(false);
 			rainbowBallProgress.fill(0);
 			// 中間あたり（残り8〜12手のタイミング）でランダム出現
 			allClearSpawnCount = CONFIG.ALLCLEAR_SPAWN_COUNT_MIN + Math.floor(Math.random() * CONFIG.ALLCLEAR_SPAWN_COUNT_RANGE);
@@ -5387,7 +5394,10 @@ update() {
 			// SEVEN COLORS中：七色の玉の色を保持
 			for (let i = 0; i < 7; i++) {
 				if (slots[i]) {
-					slots[i].style.background = CONFIG.COLORS[i];
+					slots[i].style.background = CONFIG.COLORS[i];if (gameContainer && !sevenColorsEndingTransition) {
+				gameContainer.style.transition = 'none'; // 🌈 夜モード用に残っていたtransitionをリセットし、瞬時に正しい背景色へ戻す
+				gameContainer.classList.remove('rainbow-bg');
+			}
 					slots[i].style.boxShadow = `0 0 6px ${CONFIG.COLORS[i]}`;
 				}
 			}
@@ -5411,7 +5421,15 @@ update() {
 				movesEl.innerText = moves;
 				movesEl.classList.remove('rainbow-moves');
 			}
-			if (gameContainer && !sevenColorsEndingTransition) gameContainer.classList.remove('rainbow-bg'); // 🌈 フェード演出中は着脱を凍結
+			if (gameContainer && !sevenColorsEndingTransition) {
+    console.log(`[SEVENEND] rainbow-bg除去直前 t=${Date.now()} 除去前の実際の背景色=${getComputedStyle(gameContainer).backgroundColor}`);
+    gameContainer.style.transition = 'none';
+    gameContainer.classList.remove('rainbow-bg');
+    console.log(`[SEVENEND] rainbow-bg除去直後 実際の背景色=${getComputedStyle(gameContainer).backgroundColor}`);
+    setTimeout(() => {
+        console.log(`[SEVENEND] 除去100ms後 実際の背景色=${getComputedStyle(gameContainer).backgroundColor}`);
+    }, 100);
+}
 		}
 		// デバッグ進捗表示の更新
 		const colorNames = ['赤', '黄', '緑', '青', '紫', '橙', '藍'];
