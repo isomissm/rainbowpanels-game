@@ -3699,11 +3699,7 @@ update() {
 					sevenColorsEndingTransition = false;
 					updateRainbowUI();
 				}, 1400); // 🌈 フラッシュが完全に覆っている区間（1200〜1500ms）内で切り替える。ここで虹色アニメを止めておけば、残りのフェードアウト(1400〜2000ms)は完全に静止した本当の背景色を見せるだけになる
-				} else {// 全消しパネルの出現チェック
-						if (allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
-							await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
-							allClearSpawnCount = null; // 使用済みにする
-						}
+				} else {
 						updateRainbowUI();
 					}
 				} else {
@@ -3713,6 +3709,12 @@ update() {
                         movesUntilNextObstacle--;
                         
                         await processMatches();
+                        
+                        // 全消しパネルの出現チェック（マッチ処理後に雷玉を出現させる）
+                        if (isLevelRainbow && allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
+                            await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
+                            allClearSpawnCount = null; // 使用済みにする
+                        }
                         
                         if (!isGameOver) {
                             advanceDangerCounts();
