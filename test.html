@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver9.0.1)</title>
+<title>ナナイロパネル／Rainbow Panels (ver10.0.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
@@ -44,7 +44,7 @@ body {
     border-radius: 10px;
     margin-bottom: 25px;
     font-size: 12px;
-    display: none;  /* デバッグパネル表示flex・非表示none */
+    display: flex;  /* デバッグパネル表示flex・非表示none */
     align-items: flex-start;
     gap: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -753,8 +753,8 @@ background: #c8e8ff;
 }
 @keyframes sevenColorsEndFade {
     0% { opacity: 0; }
-    60% { opacity: 0.9; }
-    75% { opacity: 0.9; }
+    60% { opacity: 1; }
+    75% { opacity: 1; }
     100% { opacity: 0; }
 }
 .seven-colors-end-flash {
@@ -1401,6 +1401,19 @@ canvas {
     </div>
   </div>
 </div>
+<!-- 💾 中断データ再開確認モーダル -->
+<div id="resume-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
+  <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="resume-modal-content">
+    <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">前回の続きがあるよ</h3>
+    <p id="resume-modal-detail" style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: bold; line-height: 1.5;">中断したところから再開する？</p>
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <button onclick="startNewGameFromModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #ff7675; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">最初から<br>
+      始める</button>
+      <button onclick="resumeGameFromModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #3D9DFF; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(61,157,255,0.3);">続きから<br>
+      再開する</button>
+    </div>
+  </div>
+</div>
 <!-- ⚙️ オプションモーダル -->
 <div id="options-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; padding: 28px 24px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 380px; width: 88%; max-height: 85vh; overflow-y: auto; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box;" id="options-modal-content">
@@ -1606,11 +1619,12 @@ const CONFIG = {
 			"koma01.png", "koma02.png", "koma03.png", "koma04.png",
 			"koma05.png", "koma06.png", "koma07.png"
 		],
-
+		
+		// 通常パネル（色パネル）のカラー設定
 		COLORS: [
 			"#ff7675", // 0: 赤
 			"#ffe53b", // 1: 黄
-			"#55EFCB", // 2: 緑
+			"#3BE8BF", // 2: 緑
 			"#66B5FF", // 3: 青
 			"#c175ff", // 4: 紫
 			"#ff9300", // 5: オレンジ
@@ -1626,6 +1640,17 @@ const CONFIG = {
 			"✿", // 5: オレンジ
 			"☆", // 6: 藍色
 		],
+
+		// 🔧 パネルアイコン画像（SVGアイコン）の表示サイズ
+		PANEL_ICON_SIZE: [
+			42, // 0: 赤（ohisama）
+			36, // 1: 黄（yotuba）
+			38, // 2: 緑（teruteru）
+			36, // 3: 青（amatubu）
+			32, // 4: 紫（nagarebosi）
+			36, // 5: 橙（hana）
+			36, // 6: 藍（tuki）
+		], 
 		
 		// ⭐ 星玉消去時の散る色（星パネルのグラデーションに合わせた色味）
 		STAR_PARTICLE_COLORS: ["#fffde7", "#ffe53b", "#ffc400", "#e6a800"], 
@@ -1727,6 +1752,105 @@ const CONFIG = {
         // reduceMotion：お邪魔パネルの震えなど「追加の演出」の抑制に使用（addObstacle()等で直接参照）
     }
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 💾 オートセーブ／レジューム機能
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const AUTOSAVE_STORAGE_KEY = 'nanairoPanelAutoSave';
+    const AUTOSAVE_VERSION = 1; // セーブ構造を変更したら数値を上げる（古いバージョンのデータは自動破棄）
+
+    // 現在のゲーム状態をセーブ用オブジェクトにまとめる
+    function buildSaveState() {
+        return {
+            board, score, moves, gameElapsedTime,
+            totalSpentMoves, obstacleDropCount, movesUntilNextObstacle,
+            darkSpawnCount, darkActivatedCount, darkClearedCount,
+            isNightMode, nightStarCount, nightTriggered, nightNextThreshold,
+            nightCycleDarkCount, nightModeEntryScore, nightStarSpawned,
+            lightPanelThreshold, darkPanelThreshold, almightyThreshold, darkFastThreshold,
+            sunnyThreshold, rainyThreshold, snowThreshold,
+            dangerCounts, frozenCells,
+            skillStock, skillGauge,
+            collectedRainbowBalls, everCollectedRainbowBalls, rainbowBallProgress,
+            isLevelRainbow, levelRainbowCount, allClearSpawnCount
+        };
+    }
+
+    // 1手ごとに呼び出す：現在の状態をlocalStorageへ保存
+    function autoSaveGame() {
+        try {
+            const payload = { version: AUTOSAVE_VERSION, savedAt: Date.now(), state: buildSaveState() };
+            localStorage.setItem(AUTOSAVE_STORAGE_KEY, JSON.stringify(payload));
+        } catch (e) {
+            console.warn('オートセーブに失敗しました。', e);
+        }
+    }
+
+    // 中断データを読み込む（存在しない/壊れている/バージョン不一致の場合はnullを返す）
+    function loadAutoSave() {
+        try {
+            const raw = localStorage.getItem(AUTOSAVE_STORAGE_KEY);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (!parsed || parsed.version !== AUTOSAVE_VERSION || !parsed.state) return null;
+            return parsed.state;
+        } catch (e) {
+            console.warn('中断データの読み込みに失敗しました。', e);
+            return null;
+        }
+    }
+
+    // 中断データを破棄する（ゲームオーバー時・リセット時・新規開始時に呼ぶ）
+    function clearAutoSave() {
+        try { localStorage.removeItem(AUTOSAVE_STORAGE_KEY); } catch (e) {}
+    }
+
+    // 保存済み状態を現在のゲーム変数へ復元する
+    function applySaveState(s) {
+        board = s.board;
+        score = s.score; moves = s.moves; gameElapsedTime = s.gameElapsedTime || 0;
+        totalSpentMoves = s.totalSpentMoves || 0;
+        obstacleDropCount = s.obstacleDropCount || 0;
+        movesUntilNextObstacle = s.movesUntilNextObstacle;
+        darkSpawnCount = s.darkSpawnCount || 0; darkActivatedCount = s.darkActivatedCount || 0; darkClearedCount = s.darkClearedCount || 0;
+        isNightMode = !!s.isNightMode; nightStarCount = s.nightStarCount || 0; nightTriggered = !!s.nightTriggered; nightNextThreshold = s.nightNextThreshold || 0;
+        nightCycleDarkCount = s.nightCycleDarkCount || 0; nightModeEntryScore = s.nightModeEntryScore || 0; nightStarSpawned = !!s.nightStarSpawned;
+        lightPanelThreshold = s.lightPanelThreshold; darkPanelThreshold = s.darkPanelThreshold; almightyThreshold = s.almightyThreshold; darkFastThreshold = s.darkFastThreshold;
+        sunnyThreshold = s.sunnyThreshold; rainyThreshold = s.rainyThreshold; snowThreshold = s.snowThreshold;
+        dangerCounts = s.dangerCounts || {}; frozenCells = s.frozenCells || {};
+        skillStock = s.skillStock || 0; skillGauge = s.skillGauge || 0;
+        collectedRainbowBalls = s.collectedRainbowBalls || [false, false, false, false, false, false, false];
+        everCollectedRainbowBalls = s.everCollectedRainbowBalls || [false, false, false, false, false, false, false];
+        rainbowBallProgress = s.rainbowBallProgress || [0, 0, 0, 0, 0, 0, 0];
+        isLevelRainbow = !!s.isLevelRainbow; levelRainbowCount = s.levelRainbowCount || 0; allClearSpawnCount = s.allClearSpawnCount ?? null;
+
+        isGameOver = false; isPaused = false; isAnimating = false; isStarEffectActive = false; isReplenishingStars = false;
+        selected = null; swapAnim = null; fallAnims = {}; landAnims = {}; particles = []; specialEffects = []; textEffects = [];
+        pendingRainbowBalls = []; lastMovedCell = null;
+
+        // 経過時間の計測を、保存時点の続きから再開する（すでに1手以上進んでいた場合のみ）
+        gameStartTime = totalSpentMoves > 0 ? Date.now() - gameElapsedTime : null;
+        document.getElementById('debug-time').textContent = `TIME: ${formatTime(gameElapsedTime)}`;
+
+        document.getElementById('reset-btn').disabled = false;
+        document.body.style.transition = 'none';
+        document.body.style.backgroundColor = isNightMode ? '#241E58' : '#CAF5FF';
+        const gc = document.getElementById('game-container');
+        if (gc) { gc.style.transition = 'none'; gc.style.backgroundColor = isNightMode ? '#3E3E78' : '#ffffff'; }
+        document.querySelectorAll('.night-star-bg').forEach(el => el.remove());
+        if (isNightMode) spawnNightBgStars();
+
+        document.getElementById('score').innerText = score;
+        document.getElementById('moves').innerText = moves;
+        document.getElementById('overlay').style.display = 'none';
+
+        updateBestScoreDisplay();
+        updateSkillUI();
+        updateLevelUI();
+        updateRainbowUI();
+        updateNightStarUI();
+        draw();
+    }
+
     // ────────────────────────────────────────────────────
     // 以下、ゲームの制御ロジック
     // ────────────────────────────────────────────────────
@@ -1809,8 +1933,8 @@ const CONFIG = {
     let flashAlpha = 0.9;
     let flashColor = '#ffe600';
     let isLevelRainbow = false;
-    let sevenColorsEndingTransition = false;  // 🌈 SEVEN COLORS終了フェード中、rainbow-bgクラスの着脱を一時凍結するフラグ
-    let allClearSpawnCount = null;
+	let sevenColorsEndingTransition = false;  // 🌈 SEVEN COLORS終了フェード中、rainbow-bgクラスの着脱を一時凍結するフラグ
+	let sevenColorsEndToken = 0;  // 🌈 終了フェードの識別番号。新しいSEVEN COLORSが割り込んだら古いフェードのタイマーを無効化するlet allClearSpawnCount = null;
     let levelRainbowCount = 0;
 
     // Canvas上の指定位置に✦キラキラの小片を生成するクラス
@@ -2552,8 +2676,32 @@ update() {
         images.push(img);
     });
 
-    // 晴玉・雨玉・雲パネル用のアイコン（SVGをコードに直接埋め込み）
-    const SUNNY_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><g fill="#FF6E00"><circle cx="42.5" cy="42.7" r="17"/><rect x="40.3" y="6.5" width="4.4" height="11.8"/><rect x="18.8" y="15.4" width="4.4" height="11.8" transform="translate(-8.9 21.1) rotate(-45)"/><rect x="9.9" y="36.9" width="4.4" height="11.8" transform="translate(-30.7 54.9) rotate(-90)"/><rect x="18.8" y="58.4" width="4.4" height="11.8" transform="translate(-9.5 124.5) rotate(-135)"/><rect x="40.3" y="67.2" width="4.4" height="11.8" transform="translate(85.1 146.2) rotate(180)"/><rect x="61.8" y="58.3" width="4.4" height="11.8" transform="translate(154.7 64.3) rotate(135)"/><rect x="70.7" y="36.8" width="4.4" height="11.8" transform="translate(115.6 -30.2) rotate(90)"/><rect x="61.8" y="15.3" width="4.4" height="11.8" transform="translate(33.7 -39) rotate(45)"/></g></svg>';
+    // 🌞 ohisama SVGは色を差し替えられるようテンプレート化（赤パネルと晴玉で別々の色を指定できる）
+    const makeOhisamaSVG = (color) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><circle cx="42.5" cy="42.46" r="14.13" fill="' + color + '"/><rect x="40.32" y="12.69" width="4.37" height="9.17" fill="' + color + '"/><rect x="22.45" y="20.1" width="4.37" height="9.17" transform="translate(-10.24 24.65) rotate(-45)" fill="' + color + '"/><rect x="15.05" y="37.96" width="4.37" height="9.17" transform="translate(-25.31 59.77) rotate(-90)" fill="' + color + '"/><rect x="22.54" y="55.73" width="4.37" height="9.17" transform="translate(-.44 120.45) rotate(-135)" fill="' + color + '"/><rect x="40.4" y="63.14" width="4.37" height="9.17" transform="translate(85.17 135.45) rotate(180)" fill="' + color + '"/><rect x="58.23" y="55.71" width="4.37" height="9.17" transform="translate(145.76 60.21) rotate(135)" fill="' + color + '"/><rect x="65.58" y="37.87" width="4.37" height="9.17" transform="translate(110.23 -25.31) rotate(90)" fill="' + color + '"/><rect x="58.16" y="20.04" width="4.37" height="9.17" transform="translate(35.09 -35.45) rotate(45)" fill="' + color + '"/></svg>';
+
+    const PANEL_OHISAMA_COLOR = '#FFC90F'; // 🔧 赤パネルのアイコン色
+    const SUNNY_OHISAMA_COLOR = '#ff9300'; // 🔧 晴玉のアイコン色（ここを変えれば赤パネルと別の色にできる）
+
+    // 🎨 パネルアイコン画像のSVG（Illustratorで作成したSVGをコードに直接埋め込み）
+    // CONFIG.COLORSと同じ並び順（0:赤 1:黄 2:緑 3:青 4:紫 5:橙 6:藍）
+    const TYPE_ICON_SVGS = [
+        makeOhisamaSVG(PANEL_OHISAMA_COLOR), // 0: 赤 ohisama
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path d="M71.61,43.13c-3.04-3.21-7.35-4.74-12.26-5.37,4.91-.71,9.21-2.32,12.2-5.58,7.14-7.79-1.44-17.35-6.08-16.09,1.27-4.66-8.3-13.22-16.09-6.08-3.49,3.2-5.09,7.91-5.71,13.26-.62-5.36-2.21-10.07-5.71-13.28-7.79-7.14-17.35,1.44-16.09,6.08-4.66-1.27-13.22,8.3-6.08,16.09,2.7,2.95,6.47,4.54,10.8,5.34-4.36.62-8.2,2.05-11.02,4.88-7.47,7.48.71,17.4,5.4,16.33-1.46,4.6,7.74,13.55,15.82,6.76,2.37-2,3.95-4.69,5.01-7.79.37,9.23,2.35,18.13,5.57,22.18l3.45-2.22c-3.22-4.7-5.07-11.67-5.75-19.73.98,3.07,2.47,5.74,4.75,7.76,7.91,7.01,17.32-1.73,15.98-6.35,4.68,1.19,13.08-8.52,5.81-16.19Z" fill="#7ABD2C"/></svg>', // 1: 黄 yotuba
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path d="M51.67,45.63c7.11-3.03,12.02-9.5,12.02-17.7,0-11.48-9.59-20.78-21.41-20.78s-21.41,9.3-21.41,20.78c0,8.51,5.28,15.17,12.84,18.04-3.25,7.89-9.49,18.47-14.57,24.66,5,.68,8.07,2.28,10.24,4.15,3,2.58,6.47,3.97,10.58,2.9,4.61-1.2,7-1.69,12.3-.34,4.03,1.02,9.05-5.98,14.66-8.63-5.15-4.86-12.09-16.2-15.23-23.08Z" fill="#f8fbfb"/><g><circle cx="32.85" cy="27.83" r="2.35" fill="#656464"/><circle cx="52.21" cy="27.17" r="2.35" fill="#656464"/></g></svg>', // 2: 緑 teruteru
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path d="M41.98,77.02c10.84,0,18.86-9.04,18.86-19.23,0-13.77-9.87-31.66-18.86-49.6-8.98,17.94-18.86,35.83-18.86,49.6,0,10.19,8.02,19.23,18.86,19.23Z" fill="#AAEBFF"/></svg>', // 3: 青 amatubu
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path d="M44.27,8.41l10.25,20.52,22.68,3.41c1.51.23,2.12,2.09,1.03,3.16l-16.34,16.09,3.77,22.62c.25,1.51-1.33,2.66-2.69,1.95l-20.35-10.57-20.35,10.57c-1.36.71-2.94-.44-2.69-1.95l3.77-22.62L6.99,35.5c-1.09-1.07-.49-2.93,1.03-3.16l22.68-3.41,10.25-20.52c.68-1.37,2.64-1.37,3.32,0Z" fill="#fff8a8"/></svg>', // 4: 紫 nagarebosi
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path d="M63.91,47.46c14.03-2.76,14.85-12.15,13.74-15.57-1.11-3.41-7.29-10.53-20.26-4.52-1.9.88-4.03,2.26-6.15,3.87.9-2.55,1.56-5.04,1.82-7.14,1.71-14.19-6.97-17.87-10.56-17.87s-12.27,3.68-10.56,17.87c.25,2.08.9,4.52,1.78,7.03-2.14-1.64-4.3-3.04-6.22-3.93-12.97-6.01-19.15,1.11-20.26,4.52-1.11,3.41-.29,12.81,13.74,15.57,2.05.4,4.57.54,7.22.49-2.22,1.54-4.22,3.15-5.66,4.7-9.73,10.48-4.87,18.56-1.96,20.67,2.9,2.11,12.09,4.24,19.05-8.25,1.02-1.83,1.92-4.19,2.69-6.74.77,2.59,1.69,4.99,2.72,6.84,6.96,12.49,16.15,10.36,19.05,8.25,2.9-2.11,7.77-10.19-1.96-20.67-1.42-1.53-3.38-3.12-5.56-4.63,2.7.06,5.26-.08,7.34-.49Z" fill="#fdfbf2"/><circle cx="42.44" cy="43.27" r="5.88" fill="#FFF15B"/></svg>', // 5: 橙 hana
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path d="M46.8,8.22c4.62,5.83,7.39,13.21,7.39,21.23,0,18.9-15.32,34.22-34.22,34.22-2.45,0-4.84-.26-7.14-.75,6.27,7.94,15.98,13.05,26.88,13.05,18.91,0,34.24-15.33,34.24-34.24,0-16.48-11.65-30.24-27.16-33.5Z" fill="#B7C1F9"/></svg>', // 6: 藍 tuki
+    ];
+    const typeIconImages = TYPE_ICON_SVGS.map(svg => {
+        const img = new Image();
+        img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        img.onload = () => draw(); img.onerror = () => draw();
+        return img;
+    });
+
+    // 晴玉パネル用のアイコン（ohisamaと同形状・色は赤パネルと別指定）
+    const SUNNY_ICON_SVG = makeOhisamaSVG(SUNNY_OHISAMA_COLOR);
 
     const RAINY_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><g fill="#0068E5"><rect x="23.6" y="37.2" width="2.3" height="16.2" transform="translate(10.1 -4.2) rotate(12.2)"/><path d="M19.3,70.1c2.4.5,4.7-1.6,4.6-4.6,0-2.2-.9-6.2-1.6-9.2-1.9,2.4-4.3,5.7-5.3,7.7-1.3,2.7-.1,5.5,2.3,6.1Z"/><rect x="40.4" y="39.1" width="2.3" height="22" transform="translate(11.5 -7.6) rotate(12.2)"/><path d="M35.4,77.8c2.4.5,4.7-1.6,4.6-4.6,0-2.2-.9-6.2-1.6-9.2-1.9,2.4-4.3,5.7-5.3,7.7-1.3,2.7-.1,5.5,2.3,6.1Z"/><rect x="57.8" y="37.7" width="2.3" height="20.6" transform="translate(11.5 -11.4) rotate(12.2)"/><path d="M53,75c2.4.5,4.7-1.6,4.6-4.6,0-2.2-.9-6.2-1.6-9.2-1.9,2.4-4.3,5.7-5.3,7.7s-.1,5.5,2.3,6.1Z"/></g><path fill="#DCE7E7" d="M61.3,12.9c-2.3-10.1-20.3-12-25.6-2.8-6.3-2.3-13.5,2.2-13.8,7.5-11.5,2-10.3,16,2.9,14.9,2.6,4.6,12.1,6.5,17.1,3.2,4.8,4.2,15.8,3,18.4-1.8,14.1.3,17.5-18.4,1-21Z"/></svg>';
 
@@ -3147,13 +3295,14 @@ update() {
     }
 
     function draw() {
-        pruneFinishedAnimations();
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
-            for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
-                const type = board[r][c]; if (type === -1) continue;
-                const { dx: __ox, dy: __oy } = getCellRenderOffset(r, c);
+    if (!board || board.length < CONFIG.BOARD_SIZE) return; // 💾 再開確認モーダル表示中など、盤面がまだ初期化されていない場合は何もしない
+    pruneFinishedAnimations();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
+        for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
+            const type = board[r][c]; if (type === -1) continue;
+            const { dx: __ox, dy: __oy } = getCellRenderOffset(r, c);
                 const x = c * CONFIG.CELL_SIZE + __ox; const y = r * CONFIG.CELL_SIZE + __oy;
                 
                 if (type === CONFIG.PANEL_TYPE.RAINBOW) {
@@ -3419,8 +3568,14 @@ update() {
                         if (img.complete && img.naturalWidth !== 0) {
                             ctx.drawImage(img, Math.floor(x + (CONFIG.CELL_SIZE-32)/2), Math.floor(y + (CONFIG.CELL_SIZE-32)/2), 32, 32);
                         } else {
-                            ctx.fillStyle = "rgba(0,0,0,0.22)"; ctx.font = "bold 26px sans-serif"; 
-                            ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(CONFIG.SYMBOLS[type], x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2);
+                            const typeIcon = typeIconImages[type];
+                            if (typeIcon.complete && typeIcon.naturalWidth !== 0) {
+                                const iconSize = CONFIG.PANEL_ICON_SIZE[type];
+                                ctx.drawImage(typeIcon, Math.round(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.round(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
+                            } else {
+                                ctx.fillStyle = "rgba(0,0,0,0.22)"; ctx.font = "bold 26px sans-serif"; 
+                                ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(CONFIG.SYMBOLS[type], x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2);
+                            }
                         }
                     }
                 }
@@ -3577,16 +3732,16 @@ update() {
 				if (isLevelRainbow) {
 					levelRainbowCount--;
 					if (levelRainbowCount <= 0) {
-						isLevelRainbow = false;
-						sevenColorsEndingTransition = true;
-						playSevenColorsEndFlash();
-						setTimeout(() => { sevenColorsEndingTransition = false; updateRainbowUI(); }, 1500);
-					} else {
-						// 全消しパネルの出現チェック
-						if (allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
-							await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
-							allClearSpawnCount = null; // 使用済みにする
-						}
+					isLevelRainbow = false;
+					sevenColorsEndingTransition = true;
+					playSevenColorsEndFlash();
+					const myFadeToken = ++sevenColorsEndToken; // 🌈 このフェード専用の識別番号を発行
+					setTimeout(() => {
+					if (myFadeToken !== sevenColorsEndToken) return;
+					sevenColorsEndingTransition = false;
+					updateRainbowUI();
+				}, 1400); // 🌈 フラッシュが完全に覆っている区間（1200〜1500ms）内で切り替える。ここで虹色アニメを止めておけば、残りのフェードアウト(1400〜2000ms)は完全に静止した本当の背景色を見せるだけになる
+				} else {
 						updateRainbowUI();
 					}
 				} else {
@@ -3596,6 +3751,12 @@ update() {
                         movesUntilNextObstacle--;
                         
                         await processMatches();
+                        
+                        // 全消しパネルの出現チェック（マッチ処理後に雷玉を出現させる）
+                        if (isLevelRainbow && allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
+                            await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
+                            allClearSpawnCount = null; // 使用済みにする
+                        }
                         
                         if (!isGameOver) {
                             advanceDangerCounts();
@@ -3620,6 +3781,7 @@ update() {
 		updateSkillUI();
         isAnimating = false;
         draw();
+        if (!isGameOver) autoSaveGame(); // 💾 1手ごとに中断データを更新
     });
 
 	function unfreezeCell(r, c) {
@@ -4601,6 +4763,7 @@ update() {
         
         if (!hasMatched && moves <= 0) {
             isGameOver = true; 
+            clearAutoSave(); // 💾 ゲームオーバー時は中断データ不要のため破棄
             showEndGameOverlay(); 
         }
 		if (pendingRainbowBalls.length > 0) {
@@ -4845,10 +5008,12 @@ update() {
 	}
 	
 	function checkRainbowCompletion() {
-		if (collectedRainbowBalls.every(v => v === true)) {
-			isLevelRainbow = true;
-			levelRainbowCount = CONFIG.LEVEL_RAINBOW_DURATION;
-			collectedRainbowBalls.fill(false);
+    if (collectedRainbowBalls.every(v => v === true)) {
+        sevenColorsEndToken++; // 🌈 進行中の終了フェードがあれば無効化してから新しいSEVEN COLORSを開始
+        sevenColorsEndingTransition = false;
+        document.querySelectorAll('.seven-colors-end-flash').forEach(el => el.remove()); // 🌈 前回の終了フラッシュが残っていれば除去
+        isLevelRainbow = true;
+        levelRainbowCount = CONFIG.LEVEL_RAINBOW_DURATION;collectedRainbowBalls.fill(false);
 			rainbowBallProgress.fill(0);
 			// 中間あたり（残り8〜12手のタイミング）でランダム出現
 			allClearSpawnCount = CONFIG.ALLCLEAR_SPAWN_COUNT_MIN + Math.floor(Math.random() * CONFIG.ALLCLEAR_SPAWN_COUNT_RANGE);
@@ -5211,7 +5376,44 @@ update() {
 
     function confirmResetGame() {
         closeResetModal(); 
+        clearAutoSave(); // 💾 明示的なリセット時は中断データも破棄
         initGame();        
+    }
+
+    /************************************************************
+     * 💾 中断データ再開確認モーダルの制御ロジック
+     ************************************************************/
+    function openResumeModal(savedState) {
+        const detail = document.getElementById('resume-modal-detail');
+        if (detail) detail.textContent = `スコア ${savedState.score}点・残り${savedState.moves}手の続きがあります`;
+        const modal = document.getElementById('resume-confirm-modal');
+        const content = document.getElementById('resume-modal-content');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            content.style.transform = 'scale(1)';
+        }, 10);
+    }
+
+    function closeResumeModal() {
+        const modal = document.getElementById('resume-confirm-modal');
+        const content = document.getElementById('resume-modal-content');
+        modal.style.opacity = '0';
+        content.style.transform = 'scale(0.9)';
+        setTimeout(() => { modal.style.display = 'none'; }, 200);
+    }
+
+    function resumeGameFromModal() {
+        closeResumeModal();
+        const saved = loadAutoSave();
+        if (saved) applySaveState(saved);
+        else initGame(); // 万一読み込みに失敗した場合は新規開始にフォールバック
+    }
+
+    function startNewGameFromModal() {
+        closeResumeModal();
+        clearAutoSave();
+        initGame();
     }
 
 	function playSevenColorsEndFlash() {
@@ -5236,7 +5438,10 @@ update() {
 			// SEVEN COLORS中：七色の玉の色を保持
 			for (let i = 0; i < 7; i++) {
 				if (slots[i]) {
-					slots[i].style.background = CONFIG.COLORS[i];
+					slots[i].style.background = CONFIG.COLORS[i];if (gameContainer && !sevenColorsEndingTransition) {
+				gameContainer.style.transition = 'none'; // 🌈 夜モード用に残っていたtransitionをリセットし、瞬時に正しい背景色へ戻す
+				gameContainer.classList.remove('rainbow-bg');
+			}
 					slots[i].style.boxShadow = `0 0 6px ${CONFIG.COLORS[i]}`;
 				}
 			}
@@ -5260,7 +5465,15 @@ update() {
 				movesEl.innerText = moves;
 				movesEl.classList.remove('rainbow-moves');
 			}
-			if (gameContainer && !sevenColorsEndingTransition) gameContainer.classList.remove('rainbow-bg'); // 🌈 フェード演出中は着脱を凍結
+			if (gameContainer && !sevenColorsEndingTransition) {
+    console.log(`[SEVENEND] rainbow-bg除去直前 t=${Date.now()} 除去前の実際の背景色=${getComputedStyle(gameContainer).backgroundColor}`);
+    gameContainer.style.transition = 'none';
+    gameContainer.classList.remove('rainbow-bg');
+    console.log(`[SEVENEND] rainbow-bg除去直後 実際の背景色=${getComputedStyle(gameContainer).backgroundColor}`);
+    setTimeout(() => {
+        console.log(`[SEVENEND] 除去100ms後 実際の背景色=${getComputedStyle(gameContainer).backgroundColor}`);
+    }, 100);
+}
 		}
 		// デバッグ進捗表示の更新
 		const colorNames = ['赤', '黄', '緑', '青', '紫', '橙', '藍'];
@@ -5296,7 +5509,13 @@ update() {
     loadUserSettings();
     applyUserSettings();
 
-    initGame();
+    // 💾 中断データがあれば再開確認モーダルを表示し、なければ通常どおり新規開始
+    const pendingAutoSave = loadAutoSave();
+    if (pendingAutoSave) {
+        openResumeModal(pendingAutoSave);
+    } else {
+        initGame();
+    }
 			
     // ⚙️ #top-button-row の右端を、#right-ui（スコア等が入ってる枠）の右端に揃える
     function alignTopButtonRow() {
