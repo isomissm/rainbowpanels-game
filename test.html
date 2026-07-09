@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver10.0.0)</title>
+<title>ナナイロパネル／Rainbow Panels (ver10.1.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
@@ -1463,10 +1463,24 @@ canvas {
       </div>
     </div>
 
-    <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px;">
-      <button onclick="resetUserSettingsToDefault()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 12px; cursor: pointer;">初期設定に戻す</button>
-      <button onclick="closeOptionsModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #3D9DFF; color: white; font-weight: 900; font-size: 12px; cursor: pointer; box-shadow: 0 4px 10px rgba(61,157,255,0.3);">閉じる</button>
+    <div style="text-align: left; margin-bottom: 8px; margin-top: 16px;">
+      <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">アイコン</div>
+      <div style="display: flex; gap: 6px;">
+        <button id="opt-icon-cute" onclick="setIconStyle('cute')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">
+          かわいい
+        </button>
+        <button id="opt-icon-simple" onclick="setIconStyle('simple')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">
+          シンプル
+        </button>
+      </div>
     </div>
+
+    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 32px 0;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+      <button onclick="closeOptionsModal()" style="width: 70%; padding: 12px; border: none; border-radius: 999px; background: #3D9DFF; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(61,157,255,0.3);">閉じる</button>
+      <button onclick="resetUserSettingsToDefault()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #ff7675; color: #FFFFFF; font-weight: 700; font-size: 14px; cursor: pointer;">初期設定に戻す</button>
+    </div>
+
   </div>
 </div>
 <p style="text-align: center; color: #64748b; font-size: 14px; margin-top: 16px;"> © 2026 ナナイロパネル／Rainbow Panels by isomi_ssm </p>
@@ -1705,7 +1719,8 @@ const CONFIG = {
         bgmVolume:    80,       // 0-100（音源実装後に接続予定。現状は値の保持のみ）
         seVolume:     80,       // 0-100（同上）
         reduceMotion: false,    // trueで、お邪魔パネル出現時の震え等「追加の演出」を抑える（パネル移動アニメの速度とは別軸）
-        ballShape:    'circle'  // 'circle' | 'magatama' | 'hexagon'
+        ballShape:    'circle', // 'circle' | 'magatama' | 'hexagon'
+        iconStyle:    'cute'    // 'cute'（カラフルアイコン） | 'simple'（白抜き半透明アイコン）
     };
 	
     // CONFIGのベース値（速度プリセットを切り替えるたびに、ここから再計算する）
@@ -2701,6 +2716,22 @@ update() {
         return img;
     });
 
+    // 🔧 シンプルアイコン（白抜き＋半透明）用：元SVGのfill属性を全て指定色に置き換えて作る
+    // CONFIG.COLORSと同じ並び順（0:赤 1:黄 2:緑 3:青 4:紫 5:橙 6:藍）
+    function toSimpleIconSVG(svg, color) {
+        return svg.replace(/fill="#[0-9a-fA-F]{3,8}"/g, 'fill="' + color + '"');
+    }
+    const SIMPLE_ICON_COLOR = '#ffffff';        // 🔧 シンプルアイコンの基本色（白）
+    const SIMPLE_ICON_COLOR_YELLOW = '#7ABD2C'; // 🔧 黄パネルだけは白だと見えづらいので緑のまま（yotuba本来の色）
+    const SIMPLE_ICON_OPACITY = 0.4;            // 🔧 シンプルアイコンの透明度（0〜1）
+    const simpleIconImages = TYPE_ICON_SVGS.map((svg, i) => {
+        const color = (i === 1) ? SIMPLE_ICON_COLOR_YELLOW : SIMPLE_ICON_COLOR;
+        const img = new Image();
+        img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(toSimpleIconSVG(svg, color));
+        img.onload = () => draw(); img.onerror = () => draw();
+        return img;
+    });
+
     // 晴玉パネル用のアイコン（ohisamaと同形状・色は赤パネルと別指定）
     const SUNNY_ICON_SVG = makeOhisamaSVG(SUNNY_OHISAMA_COLOR);
 
@@ -3021,6 +3052,13 @@ update() {
 			btn.style.background = active ? '#3D9DFF' : '#f1f5f9';
 			btn.style.color = active ? '#fff' : '#475569';
 		});
+		['cute', 'simple'].forEach(key => {
+			const btn = document.getElementById('opt-icon-' + key);
+			if (!btn) return;
+			const active = userSettings.iconStyle === key;
+			btn.style.background = active ? '#3D9DFF' : '#f1f5f9';
+			btn.style.color = active ? '#fff' : '#475569';
+		});
 		const reduceMotionCheckbox = document.getElementById('opt-reduce-motion');
 		if (reduceMotionCheckbox) reduceMotionCheckbox.checked = userSettings.reduceMotion;
 		const bgmSlider = document.getElementById('opt-bgm-volume');
@@ -3048,6 +3086,13 @@ update() {
 		saveUserSettings();
 		applyUserSettings();
 		updateOptionsUI();
+	}
+
+	function setIconStyle(key) {
+		userSettings.iconStyle = key;
+		saveUserSettings();
+		updateOptionsUI();
+		draw();
 	}
 
 	function toggleReduceMotion() {
@@ -3569,10 +3614,13 @@ update() {
                         if (img.complete && img.naturalWidth !== 0) {
                             ctx.drawImage(img, Math.floor(x + (CONFIG.CELL_SIZE-32)/2), Math.floor(y + (CONFIG.CELL_SIZE-32)/2), 32, 32);
                         } else {
-                            const typeIcon = typeIconImages[type];
+                            const useSimple = userSettings.iconStyle === 'simple';
+                            const typeIcon = useSimple ? simpleIconImages[type] : typeIconImages[type];
                             if (typeIcon.complete && typeIcon.naturalWidth !== 0) {
                                 const iconSize = CONFIG.PANEL_ICON_SIZE[type];
+                                if (useSimple) { ctx.save(); ctx.globalAlpha = SIMPLE_ICON_OPACITY; }
                                 ctx.drawImage(typeIcon, Math.round(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.round(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
+                                if (useSimple) { ctx.restore(); }
                             } else {
                                 ctx.fillStyle = "rgba(0,0,0,0.22)"; ctx.font = "bold 26px sans-serif"; 
                                 ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(CONFIG.SYMBOLS[type], x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2);
