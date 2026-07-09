@@ -706,7 +706,7 @@ opacity: 0;
 /* パネル画像差し替えボタン（リセットボタンと同デザイン、色違い）※メイン画面・オプション画面共通で使うクラス */
 .panel-image-btn {
     margin-top: 16px;
-    padding: 16px 45px;
+    padding: 12px 45px; /* 画像を差し替えるボタンのサイズ 高さと幅 */
     background: #3D9DFF;
     color: #fff;
     border: none;
@@ -922,9 +922,6 @@ canvas {
     border-radius: 10px;
     padding: 3px 10px;
     cursor: pointer;
-}
-.panel-image-btn.reset-btn-mobile {
-    margin-top: 10px;
 }
 .reset-btn-spacer {
     height: 12px; /* リセットボタン上のスペース（スマホレイアウト） */
@@ -1273,7 +1270,7 @@ canvas {
 <button id="view-ranking-btn-mobile" onclick="showRankingScreen()" class="view-ranking-btn view-ranking-btn-mobile">🏆 ランキングを見る</button>
 <div class="reset-btn-spacer"></div>
 <button id="reset-btn" onclick="openResetModal()" class="reset-btn-mobile">ゲームをリセットする</button>
-<button id="panel-image-open-btn" onclick="openPanelImageModal()" class="reset-btn-mobile panel-image-btn">パネルの画像を差し替える<br>（ファイル選択）</button>
+<div class="panel-image-btn-slot"></div>
 <!-- 🖼️ パネル画像差し替えモーダル -->
 <div id="panel-image-modal-overlay">
   <div id="panel-image-modal">
@@ -1480,7 +1477,7 @@ canvas {
           シンプル
         </button>
       </div>
-      <button onclick="openPanelImageModal()" class="reset-btn-mobile panel-image-btn" style="display: block; margin-left: auto; margin-right: auto; margin-top: 24px;">パネルの画像を差し替える<br>（ファイル選択）</button>
+      <div class="panel-image-btn-slot" style="margin-top: 24px; text-align: center;"></div>
     </div>
 
     <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 32px 0;">
@@ -2952,9 +2949,20 @@ update() {
         renderPanelImageRows();
         document.getElementById('panel-image-modal-overlay').classList.add('show');
     }
+	
     function closePanelImageModal() {
         document.getElementById('panel-image-modal-overlay').classList.remove('show');
     }
+	
+	// 🔧 「パネル画像を差し替える」ボタンの本体（ここが唯一の定義元）
+    const PANEL_IMAGE_BUTTON_HTML = '<button onclick="openPanelImageModal()" class="panel-image-btn">パネルの画像を差し替える<br>（ファイル選択）</button>';
+
+    function injectPanelImageButtons() {
+        document.querySelectorAll('.panel-image-btn-slot').forEach(slot => {
+            slot.innerHTML = PANEL_IMAGE_BUTTON_HTML;
+        });
+    }
+    injectPanelImageButtons();
 
     /* LOCAL STORAGE ハイスコアシステムの実装 */
     function loadRanking() {
