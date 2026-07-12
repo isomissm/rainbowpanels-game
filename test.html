@@ -626,7 +626,7 @@ opacity: 0;
 #allclear-overlay.active {
     background: rgba(0, 0, 0, 0.6);
 }
-/* ゲームオーバー暗幕：下部レベルバーまで綺麗に覆い、バランスよく縦並びにする */
+/* GAMEOVER・ランキング画面の黒枠設定（黒画面） */
 #overlay {
     position: absolute;
     top: 0;
@@ -639,7 +639,7 @@ opacity: 0;
     align-items: center;
     justify-content: flex-start; /* 上詰めで余白をコントロール */
     padding-top: 20px;
-    border-radius: 16px;
+    border-radius: 12px;
     color: white;
     z-index: 10;
     text-align: center;
@@ -1507,6 +1507,9 @@ canvas {
 	 * 「LEVEL RAINBOW」→「SEVEN COLORS」に表示名を変更済み
 	 * 変数名（isLevelRainbow, levelRainbowCount, LEVEL_RAINBOW_DURATIONなど）は
 	 * 変更リスクを避けるため内部処理上はそのまま維持している
+	 * 
+	 * ※SEVEN COLORSモードは「ナナイロモード」記載にする
+	 * 
 	 ************************************************************/
 
 /* コンフィグ */
@@ -1628,11 +1631,13 @@ const CONFIG = {
 		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌙 パネル選択設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		SELECTION_BORDER_RGB_DAY:   "70, 85, 100",  // 選択パネル枠線の色（昼）※黒すぎを緩和
-		SELECTION_BORDER_RGB_NIGHT: "140, 133, 220", // 選択パネル枠線の色（夜）※明るすぎを緩和
-		SELECTION_BORDER_LOOP_MIN:  0.55, // 明暗ループの下限倍率（暗い側）
-		SELECTION_BORDER_LOOP_MAX:  1.3,  // 明暗ループの上限倍率（明るい側）
+		SELECTION_BORDER_DARK_DAY:   "10, 12, 15",    // 選択パネル枠線・暗い側の色（昼）※ほぼ黒
+		SELECTION_BORDER_LIGHT_DAY:  "255, 255, 255", // 選択パネル枠線・明るい側の色（昼）※純白
+		SELECTION_BORDER_DARK_NIGHT:  "3, 3, 8",      // 選択パネル枠線・暗い側の色（夜）※ほぼ黒
+		SELECTION_BORDER_LIGHT_NIGHT: "225, 222, 255",// 選択パネル枠線・明るい側の色（夜）
 		SELECTION_BORDER_LOOP_SHARPNESS: 0.6, // 1で対称、1より小さいほど明るい側が長く続く（0.4〜0.8あたりで調整）
+		SELECTION_BORDER_ALPHA_MIN: 0.5, // フチの透明度・下限（元は0.2）
+		SELECTION_BORDER_ALPHA_MAX: 0.9, // フチの透明度・上限（元は0.8）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🟥 特殊パネルの出現スコア閾値
@@ -3702,11 +3707,13 @@ update() {
                 }
 				
                 if (selected && selected.r === r && selected.c === c) {
-                    const alpha = 0.5 + Math.sin(selectionPulse) * 0.3;
+                    const alphaMid = (CONFIG.SELECTION_BORDER_ALPHA_MIN + CONFIG.SELECTION_BORDER_ALPHA_MAX) / 2;
+                    const alphaRange = (CONFIG.SELECTION_BORDER_ALPHA_MAX - CONFIG.SELECTION_BORDER_ALPHA_MIN) / 2;
+                    const alpha = alphaMid + Math.sin(selectionPulse) * alphaRange;
                     const normalized = Math.pow(0.5 + 0.5 * Math.sin(selectionPulse), CONFIG.SELECTION_BORDER_LOOP_SHARPNESS);
-                    const brightness = CONFIG.SELECTION_BORDER_LOOP_MIN + (CONFIG.SELECTION_BORDER_LOOP_MAX - CONFIG.SELECTION_BORDER_LOOP_MIN) * normalized;
-                    const baseRgb = (isNightMode ? CONFIG.SELECTION_BORDER_RGB_NIGHT : CONFIG.SELECTION_BORDER_RGB_DAY).split(',').map(Number);
-                    const litRgb = baseRgb.map(v => Math.min(255, Math.round(v * brightness))).join(', ');
+                    const darkRgb = (isNightMode ? CONFIG.SELECTION_BORDER_DARK_NIGHT : CONFIG.SELECTION_BORDER_DARK_DAY).split(',').map(Number);
+                    const lightRgb = (isNightMode ? CONFIG.SELECTION_BORDER_LIGHT_NIGHT : CONFIG.SELECTION_BORDER_LIGHT_DAY).split(',').map(Number);
+                    const litRgb = darkRgb.map((d, i) => Math.round(d + (lightRgb[i] - d) * normalized)).join(', ');
                     ctx.strokeStyle = `rgba(${litRgb}, ${alpha})`; ctx.lineWidth = 4;
                     roundRect(x + 5, y + 5, CONFIG.CELL_SIZE - 10, CONFIG.CELL_SIZE - 10, 9); ctx.stroke();
                 }
