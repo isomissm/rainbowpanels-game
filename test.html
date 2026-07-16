@@ -4037,7 +4037,7 @@ update() {
         const gc = document.getElementById('game-container');
         if (gc) { gc.style.transition = 'background-color 2.5s ease'; gc.style.backgroundColor = '#3E3E78'; } //夜モード背景色（左枠内）
         const skyGlow = document.getElementById('day-sky-glow');
-        if (skyGlow) { skyGlow.style.transition = 'opacity 2.5s ease'; skyGlow.style.opacity = '0'; } // 🌤️ 昼の薄青グラデーションをフェードアウト
+        if (skyGlow) { skyGlow.style.transition = 'opacity 4s ease'; skyGlow.style.opacity = '0'; } // 🌤️ 昼の薄青グラデーションをフェードアウト
 
         // 夜突入スコアを記録（星スポーンはDELAY_SCORE分後）
         nightModeEntryScore = score;
