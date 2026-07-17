@@ -5667,10 +5667,7 @@ update() {
 			// SEVEN COLORS中：七色の玉の色を保持
 			for (let i = 0; i < 7; i++) {
 				if (slots[i]) {
-					slots[i].style.background = CONFIG.COLORS[i];if (gameContainer && !sevenColorsEndingTransition) {
-				gameContainer.style.transition = 'none'; // 🌈 夜モード用に残っていたtransitionをリセットし、瞬時に正しい背景色へ戻す
-				gameContainer.classList.remove('rainbow-bg');
-			}
+					slots[i].style.background = CONFIG.COLORS[i];
 					slots[i].style.boxShadow = `0 0 6px ${CONFIG.COLORS[i]}`;
 				}
 			}
