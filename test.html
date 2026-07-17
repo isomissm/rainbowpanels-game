@@ -5247,7 +5247,7 @@ update() {
 			// 中間あたり（残り8〜12手のタイミング）でランダム出現
 			allClearSpawnCount = CONFIG.ALLCLEAR_SPAWN_COUNT_MIN + Math.floor(Math.random() * CONFIG.ALLCLEAR_SPAWN_COUNT_RANGE);
 
-			createRainbowShockwaveEffect();
+			// createRainbowShockwaveEffect(); // 🔧 検証用に一時無効化（波紋なしでも重いか確認）
 
 			updateRainbowUI();
 		}
