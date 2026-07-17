@@ -4515,13 +4515,7 @@ update() {
         wrap.appendChild(ring);
         gameContainer.appendChild(wrap);
         const duration = parseFloat(getComputedStyle(ring).animationDuration) * 1000 || 5000;
-        setTimeout(() => {
-            if ('requestIdleCallback' in window) {
-                requestIdleCallback(() => wrap.remove(), { timeout: 1000 });
-            } else {
-                wrap.remove();
-            }
-        }, duration);
+        setTimeout(() => wrap.remove(), duration);
 	}
 
     function createShockwaveRingEffect() {
@@ -5247,7 +5241,7 @@ update() {
 			// 中間あたり（残り8〜12手のタイミング）でランダム出現
 			allClearSpawnCount = CONFIG.ALLCLEAR_SPAWN_COUNT_MIN + Math.floor(Math.random() * CONFIG.ALLCLEAR_SPAWN_COUNT_RANGE);
 
-			// createRainbowShockwaveEffect(); // 🔧 検証用に一時無効化（波紋なしでも重いか確認）
+			createRainbowShockwaveEffect();
 
 			updateRainbowUI();
 		}
