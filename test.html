@@ -486,6 +486,7 @@ transform: scale(1);
     inset: 0;
     pointer-events: none;
     z-index: 60;
+    filter: blur(10px);
 }
 /* SEVEN COLORS開始時：左枠中心から広がる虹色波紋 */
 .rainbow-shockwave-ring {
@@ -505,7 +506,6 @@ transform: scale(1);
     mask-repeat: no-repeat, no-repeat;
     mask-composite: exclude;
     pointer-events: none;
-    filter: blur(10px); /* 虹色波紋のぼかし */
     z-index: 60;
     animation: rainbowWaveExpand 7.0s cubic-bezier(0.1, 0.8, 0.2, 1) forwards; /* 虹色波紋の速度 */
 }
