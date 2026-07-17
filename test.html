@@ -3,13 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver10.4.0)</title>
+<title>ナナイロパネル／Rainbow Panels (ver10.4.1)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
 <style>
 :root {
 --font-main-ui: 'Nunito', sans-serif; /* メインUIフォント：ここを変更するとUI全体に反映 */
+}
+html {
+    scrollbar-width: none; /* 🔧 Firefox：スクロールバー非表示（スクロール自体は可能） */
+}
+html::-webkit-scrollbar {
+    display: none; /* 🔧 Chrome/Edge/Safari：スクロールバー非表示（スクロール自体は可能） */
 }
 body {
     background-color: #CAF5FF;
@@ -3258,8 +3264,17 @@ update() {
 		updateOptionsUI();
 	}
 
+	// 🔧 モーダル表示中は背景（body）のスクロールを無効化する共通処理
+	function lockBodyScroll() {
+		document.body.style.overflow = 'hidden';
+	}
+	function unlockBodyScroll() {
+		document.body.style.overflow = '';
+	}
+
 	function openOptionsModal() {
 		updateOptionsUI();
+		lockBodyScroll();
 		const modal = document.getElementById('options-modal');
 		modal.style.display = 'flex';
 		setTimeout(() => {
@@ -3269,6 +3284,7 @@ update() {
 	}
 
 	function closeOptionsModal() {
+		unlockBodyScroll();
 		const modal = document.getElementById('options-modal');
 		modal.style.opacity = '0';
 		document.getElementById('options-modal-content').style.transform = 'scale(0.9)';
@@ -3276,6 +3292,7 @@ update() {
 	}
 
 	function openGuideModal() {
+		lockBodyScroll();
 		const modal = document.getElementById('guide-modal');
 		modal.style.display = 'flex';
 		setTimeout(() => {
@@ -3285,6 +3302,7 @@ update() {
 	}
 
 	function closeGuideModal() {
+		unlockBodyScroll();
 		const modal = document.getElementById('guide-modal');
 		modal.style.opacity = '0';
 		document.getElementById('guide-modal-content').style.transform = 'scale(0.9)';
@@ -3292,6 +3310,7 @@ update() {
 	}
 
 	function openAboutModal() {
+		lockBodyScroll();
 		const modal = document.getElementById('about-modal');
 		const verMatch = document.title.match(/\(([^)]+)\)/); // 🔧 <title>の括弧内(ver10.2.2など)を自動取得
 		document.getElementById('about-version').textContent = verMatch ? verMatch[1] : '';
@@ -3303,6 +3322,7 @@ update() {
 	}
 
 	function closeAboutModal() {
+		unlockBodyScroll();
 		const modal = document.getElementById('about-modal');
 		modal.style.opacity = '0';
 		document.getElementById('about-modal-content').style.transform = 'scale(0.9)';
@@ -4529,7 +4549,7 @@ update() {
         gameContainer.appendChild(wrap);
         const duration = parseFloat(getComputedStyle(ring).animationDuration) * 1000 || 5000;
         setTimeout(() => wrap.remove(), duration);
-	}
+    }
 
     function createShockwaveRingEffect() {
         const skillBox = document.getElementById('skill-box');
