@@ -507,14 +507,13 @@ transform: scale(1);
     mask-composite: exclude;
     pointer-events: none;
     z-index: 60;
-    animation: rainbowWaveExpand 4.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards; /* 虹色波紋の速度 */
+    animation: rainbowWaveExpand 4.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards, /* 虹色波紋の速度・見た目の動き */
+               rainbowMaskShrink 4.5s linear forwards; /* 枠の太さの変化（最初の2秒はなめらか、以降は間引き） */
 }
 @keyframes rainbowWaveExpand {
 0% {
 transform: translate(-50%, -50%) scale(0.893); /* 112%基準で100%相当になる縮小率 */
 opacity: 0;
-mask-size: calc(100% - 80px) calc(100% - 80px), 100% 100%; /* 虹色波紋 開始時の枠の太さ（元のpadding:40pxと同じ計算） */
--webkit-mask-size: calc(100% - 80px) calc(100% - 80px), 100% 100%;
 }
 20% { /* 虹色波紋のフェードイン率 */
 opacity: 0.9; /* 虹色波紋の開始時不透明度 */
@@ -522,6 +521,20 @@ opacity: 0.9; /* 虹色波紋の開始時不透明度 */
 100% {
 transform: translate(-50%, -50%) scale(1);
 opacity: 0;
+}
+}
+@keyframes rainbowMaskShrink {
+0% {
+mask-size: calc(100% - 80px) calc(100% - 80px), 100% 100%; /* 虹色波紋 開始時の枠の太さ（元のpadding:40pxと同じ計算） */
+-webkit-mask-size: calc(100% - 80px) calc(100% - 80px), 100% 100%;
+animation-timing-function: cubic-bezier(0.1, 0.8, 0.2, 1); /* 最初の変化はなめらかに（0%→44%区間に適用） */
+}
+44% { /* 4.5秒中の約2秒地点 */
+mask-size: calc(100% - 4px) calc(100% - 4px), 100% 100%; /* この時点でほぼ最終の太さに到達済み */
+-webkit-mask-size: calc(100% - 4px) calc(100% - 4px), 100% 100%;
+animation-timing-function: steps(4); /* ここから先は変化がほぼ無いので4段階に間引く */
+}
+100% {
 mask-size: calc(100% - 2px) calc(100% - 2px), 100% 100%; /* 元のpadding:1pxと同じ計算 */
 -webkit-mask-size: calc(100% - 2px) calc(100% - 2px), 100% 100%;
 }
