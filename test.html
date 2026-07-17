@@ -497,12 +497,15 @@ transform: scale(1);
     height: 112%;
     border-radius: 24px;
     background: linear-gradient(135deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff7675, #ff4757);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+    -webkit-mask-position: center, center;
+    -webkit-mask-repeat: no-repeat, no-repeat;
     -webkit-mask-composite: xor;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+    mask-position: center, center;
+    mask-repeat: no-repeat, no-repeat;
     mask-composite: exclude;
     pointer-events: none;
-    box-sizing: border-box;
     filter: blur(10px); /* 虹色波紋のぼかし */
     z-index: 60;
     animation: rainbowWaveExpand 7.0s cubic-bezier(0.1, 0.8, 0.2, 1) forwards; /* 虹色波紋の速度 */
@@ -511,7 +514,8 @@ transform: scale(1);
 0% {
 transform: translate(-50%, -50%) scale(0.893); /* 112%基準で100%相当になる縮小率 */
 opacity: 0;
-padding: 40px; /* 虹色波紋 開始時の枠の太さ */
+mask-size: calc(100% - 80px) calc(100% - 80px), 100% 100%; /* 虹色波紋 開始時の枠の太さ（元のpadding:40pxと同じ計算） */
+-webkit-mask-size: calc(100% - 80px) calc(100% - 80px), 100% 100%;
 }
 20% { /* 虹色波紋のフェードイン率 */
 opacity: 0.9; /* 虹色波紋の開始時不透明度 */
@@ -519,7 +523,8 @@ opacity: 0.9; /* 虹色波紋の開始時不透明度 */
 100% {
 transform: translate(-50%, -50%) scale(1);
 opacity: 0;
-padding: 1px;
+mask-size: calc(100% - 2px) calc(100% - 2px), 100% 100%; /* 元のpadding:1pxと同じ計算 */
+-webkit-mask-size: calc(100% - 2px) calc(100% - 2px), 100% 100%;
 }
 }
 @keyframes waveExpand {
@@ -1106,7 +1111,7 @@ canvas {
       </div>
       <div class="debug-row">
         <div class="debug-btns">
-          <button onclick="debugTriggerLevelRainbow()" style="color:#c175ff;">SEVEN COLORS発動</button>
+          <button onclick="debugTriggerLevelRainbow()" style="color:#c175ff;">ナナイロモード発動</button>
         </div>
       </div>
     </div>
@@ -1320,8 +1325,13 @@ canvas {
     <div style="position: sticky; top: -28px; left: -24px; margin: -28px 0 4px -24px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
       <button onclick="closeGuideModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
     </div>
-    <h3 style="margin: 0 0 16px 0; color: #2c3e50; font-size: 18px; font-weight: 900; font-family: var(--font-main-ui);">📖 あそびかた</h3>
+   <h3 style="margin: 0 0 16px 0; color: #2c3e50; font-size: 18px; font-weight: 900; font-family: var(--font-main-ui);">📖 あそびかた</h3>
 <div class="description">
+  <div class="special-panel-box" style="margin: 0 auto 8px auto; background-color: #ffffff; border: 1px solid #FF6700; text-align: center;">
+    <strong style="color: #FF6700;">💾 オートセーブ機能つき！<br>
+    ブラウザを閉じても続きから遊べるよ</strong>
+  </div>
+  <br>
 	<strong>パネルをクリック／タップして<br>
 	隣のパネルと入れ替えて同じ色を縦横3つ揃えよう！</strong><br>
 	連鎖するとレインボーゲージが貯まって<br>
@@ -1590,15 +1600,15 @@ const CONFIG = {
         // pace:      お邪魔パネルが出現するまでの手数間隔
 		LEVELS: [
 			{ threshold:  0, pace: 14 }, // レベル1
-			{ threshold:  4, pace: 12 }, // レベル2
-			{ threshold:  8, pace: 11 }, // レベル3
-			{ threshold: 12, pace: 10 }, // レベル4
-			{ threshold: 17, pace:  9 }, // レベル5
-			{ threshold: 22, pace:  8 }, // レベル6
-			{ threshold: 27, pace:  7 }, // レベル7
-			{ threshold: 33, pace:  6 }, // レベル8
-			{ threshold: 39, pace:  5 }, // レベル9
-			{ threshold: 46, pace:  4 }, // レベル10
+			{ threshold:  4, pace: 13 }, // レベル2
+			{ threshold:  8, pace: 12 }, // レベル3
+			{ threshold: 13, pace: 11 }, // レベル4
+			{ threshold: 18, pace: 10 }, // レベル5
+			{ threshold: 23, pace:  9 }, // レベル6
+			{ threshold: 29, pace:  8 }, // レベル7
+			{ threshold: 35, pace:  7 }, // レベル8
+			{ threshold: 42, pace:  6 }, // レベル9
+			{ threshold: 50, pace:  5 }, // レベル10
 		],
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2805,7 +2815,8 @@ update() {
     };
     const SIMPLE_ICON_OPACITY = 0.4;            // 🔧 シンプルアイコンの透明度（0〜1・基準値）
     const SIMPLE_ICON_OPACITY_OFFSET = {
-        2: 0.20, // 🔧 緑パネル(teruteru)：背景色との兼ね合いで白が薄く見えるため、基準値+0.15で少し濃くする
+        1: 0.25, // 🔧 黄パネル(yotuba)：四つ葉が薄く見えるため、基準値に+して少し濃くする
+        2: 0.20, // 🔧 緑パネル(teruteru)：背景色との兼ね合いで白が薄く見えるため、基準値に+して少し濃くする
     };
     function getSimpleIconOpacity(type) {
         const offset = SIMPLE_ICON_OPACITY_OFFSET[type] || 0;
