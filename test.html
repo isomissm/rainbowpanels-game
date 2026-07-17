@@ -4516,8 +4516,13 @@ update() {
         wrap.appendChild(ring);
         gameContainer.appendChild(wrap);
         const duration = parseFloat(getComputedStyle(ring).animationDuration) * 1000 || 5000;
-        setTimeout(() => wrap.remove(), duration);
-    }
+        setTimeout(() => {
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(() => wrap.remove(), { timeout: 1000 });
+            } else {
+                wrap.remove();
+            }
+        }, duration);
 
     function createShockwaveRingEffect() {
         const skillBox = document.getElementById('skill-box');
