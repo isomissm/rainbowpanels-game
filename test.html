@@ -719,9 +719,12 @@ opacity: 0;
 .guide-td-icon {
     padding: 5px 6px 5px 0;
     vertical-align: middle;
+    width: 78px; /* 🔧 アイコン＋名前列の固定幅。名前が長い「七色の玉」でも収まるように調整可能 */
+    white-space: nowrap;
 }
 .guide-td-text {
     padding: 5px 0;
+    vertical-align: middle;
 }
 /*罫線のデザイン*/
 .desc-divider {
@@ -1384,24 +1387,24 @@ canvas {
     <table style="border-collapse: collapse; line-height: 1.2;">
       <!-- 説明文白枠内の行間*/ -->
       <tr>
-        <td class="guide-td-icon"><span class="mini-dark-img"></span></td>
-                <td class="guide-td-text"><strong>闇玉</strong>：カウントが0になると周囲を<span class="mini-obstacle-img">
+        <td class="guide-td-icon"><span class="mini-dark-img"></span><strong>闇玉</strong>：</td>
+        <td class="guide-td-text">カウントが0になると周囲を<span class="mini-obstacle-img">
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
           </svg>
           </span>お邪魔パネルに変えてしまう </td>
       </tr>
       <tr>
-        <td class="guide-td-icon"><span class="mini-rainbow-img"></span></td>
-        <td class="guide-td-text"><strong>虹玉</strong>：BURSTカウンター(🌈)が1つ増える</td>
+        <td class="guide-td-icon"><span class="mini-rainbow-img"></span><strong>虹玉</strong>：</td>
+        <td class="guide-td-text">BURSTカウンター(🌈)が1つ増える</td>
       </tr>
       <tr>
         <td class="guide-td-icon"><span class="mini-allclear-img">
           <svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600">
             <polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/>
           </svg>
-          </span></td>
-        <td class="guide-td-text"><strong>雷玉</strong>：
+          </span><strong>雷玉</strong>：</td>
+        <td class="guide-td-text">
 <span class="mini-obstacle-img">
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
@@ -1410,30 +1413,30 @@ canvas {
       </tr>
       
       <tr>
-        <td class="guide-td-icon"><span class="mini-sunny-img"></span></td>
-        <td class="guide-td-text"><strong>晴玉</strong>：周囲5×5マスの<span class="mini-obstacle-img">
+        <td class="guide-td-icon"><span class="mini-sunny-img"></span><strong>晴玉</strong>：</td>
+        <td class="guide-td-text">周囲5×5マスの<span class="mini-obstacle-img">
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
           </svg>
           </span>お邪魔パネルが🟥赤パネルに変わる<br>凍っているパネルが解ける</td>
       </tr>
       <tr>
-        <td class="guide-td-icon"><span class="mini-rainy-img"></span></td>
-        <td class="guide-td-text"><strong>雨玉</strong>：色パネルがランダムに🟦青パネルに変わる</td>
+        <td class="guide-td-icon"><span class="mini-rainy-img"></span><strong>雨玉</strong>：</td>
+        <td class="guide-td-text">色パネルがランダムに🟦青パネルに変わる</td>
       </tr>
       <tr>
-        <td class="guide-td-icon"><span class="mini-snow-img"></span></td>
-        <td class="guide-td-text"><strong>雪玉</strong>：カウントが0になると色パネルがランダムに凍ってしまう<br>
+        <td class="guide-td-icon"><span class="mini-snow-img"></span><strong>雪玉</strong>：</td>
+        <td class="guide-td-text">カウントが0になると色パネルがランダムに凍ってしまう<br>
 		（凍ったパネルは移動できない・色パネル消去の隣接か手数経過で解ける）</td>
       </tr>
 		
 		<tr>
-        <td class="guide-td-icon"><span class="mini-almighty-img"></span></td>
-        <td class="guide-td-text"><strong>プリズム</strong>：どの色のパネルとも揃えられる！</td>
+        <td class="guide-td-icon"><span class="mini-almighty-img"></span><strong>プリズム</strong>：</td>
+        <td class="guide-td-text">どの色のパネルとも揃えられる！</td>
       </tr>
       <tr>
-        <td class="guide-td-icon"></td>
-        <td class="guide-td-text"><strong>七色の玉</strong>：色パネルをたくさん消すと同色の玉が出現！七色集めると…!?</td>
+        <td class="guide-td-icon"><strong>七色の玉</strong>：</td>
+        <td class="guide-td-text">色パネルをたくさん消すと同色の玉が出現！七色集めると…!?</td>
       </tr>
     </table>
   </div>
