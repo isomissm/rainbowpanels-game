@@ -50,7 +50,7 @@ body {
     border-radius: 10px;
     margin-bottom: 25px;
     font-size: 12px;
-    display: flex;  /* デバッグパネル表示flex・非表示none */
+    display: none;  /* デバッグパネル表示flex・非表示none */
     align-items: flex-start;
     gap: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -709,11 +709,19 @@ opacity: 0;
 }
 .description {
     font-size: 14px;
-    font-weight: bold;
+    font-weight: normal;
     color: #4b5563;
     margin-top: 25px;
     text-align: center;
     line-height: 1.8;
+}
+/* あそびかたモーダル：闇玉〜七色の玉リストの行間調整用（この2つを直せば全8行に反映） */
+.guide-td-icon {
+    padding: 5px 6px 5px 0;
+    vertical-align: middle;
+}
+.guide-td-text {
+    padding: 5px 0;
 }
 /*罫線のデザイン*/
 .desc-divider {
@@ -1324,7 +1332,7 @@ canvas {
 <div id="panel-image-modal-overlay">
   <div id="panel-image-modal">
     <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">🖼️ パネル画像設定</h3>
-    <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: bold; color: #4b5563;">好きな画像をパネルの絵柄に差し替えられます<br>※透過PNGも使えるよ！</p>
+   <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: normal; color: #4b5563;">好きな画像をパネルの絵柄に差し替えられます<br>※透過PNGも使えるよ！</p>
 	<p style="margin: 0 0 16px 0; font-size: 12px; color: #D92929;">画像はご利用の端末（PC・スマホなど）のみで使用されます<br>インターネット上には送信されません</p>
 
     <input type="file" id="panel-image-bulk-input" accept="image/png,image/jpeg" multiple style="display:none;">
@@ -1349,13 +1357,13 @@ canvas {
     <strong style="color: #FF6700;">💾 オートセーブ機能つき！<br>
     ブラウザを閉じても続きから遊べるよ</strong>
   </div>
-  <br>
-	<strong>パネルをクリック／タップして<br>
-	隣のパネルと入れ替えて同じ色を縦横3つ揃えよう！</strong><br>
-	連鎖するとレインボーゲージが貯まって<br>
-	BURSTカウンター(🌈)が増えるよ<br>
-  <hr class="desc-divider">
-  <strong>《色パネルを消した時に隣接で一緒に消えるパネル》</strong><br>
+	<div style="line-height: 1.3; margin-top: 14px; font-size: 16px;">パネルをクリック／タップして<br>
+	隣のパネルと入れ替えて<br>
+	同じ色を縦横3つ揃えよう！</div>
+	<div style="line-height: 1.3; margin-top: 6px;">連鎖するとレインボーゲージが貯まって<br>
+	BURSTカウンター(🌈)が増えるよ</div>
+  <hr class="desc-divider" style="margin: 10px auto;">
+  <span style="line-height: 1.3; display: inline-block;"><strong>色パネルを揃えた時に隣接していると<br>一緒に消えるパネル</strong></span><br>
   <span class="mini-dark-img"></span>闇玉・
   <span class="mini-rainbow-img"></span>虹玉・
   <span class="mini-allclear-img"><svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600"><polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/></svg></span>雷玉<br>
@@ -1364,7 +1372,7 @@ canvas {
   <span class="mini-snow-img"></span>雪玉<br>
   七色の玉・<span class="mini-star-img"></span>流れ星<br>
   <hr class="desc-divider">
-  <strong>《RAINBOW BURST! ボタンで選んで消せるパネル》</strong><br>
+  <span style="line-height: 1.3; display: inline-block;"><strong>RAINBOW BURST!ボタンで<br>選んで直接消せるパネル</strong></span><br>
   <span class="mini-obstacle-img"><svg width="14" height="14" viewBox="0 0 85 85" fill="white"><path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/></svg></span>お邪魔パネル・
   <span class="mini-dark-img"></span>闇玉・
   <span class="mini-allclear-img"><svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600"><polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/></svg></span>雷玉<br>
@@ -1376,24 +1384,24 @@ canvas {
     <table style="border-collapse: collapse; line-height: 1.2;">
       <!-- 説明文白枠内の行間*/ -->
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-dark-img"></span></td>
-        <td style="padding: 2px 0;">闇玉：カウントが0になると周囲を<span class="mini-obstacle-img">
+        <td class="guide-td-icon"><span class="mini-dark-img"></span></td>
+        <td class="guide-td-text"><strong>闇玉</strong>：カウントが0になると周囲を<span class="mini-obstacle-img">
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
           </svg>
           </span>お邪魔パネルに変えてしまう </td>
       </tr>
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-rainbow-img"></span></td>
-        <td style="padding: 2px 0;">虹玉：BURSTカウンター(🌈)が増える</td>
+        <td class="guide-td-icon"><span class="mini-rainbow-img"></span></td>
+        <td class="guide-td-text"><strong>虹玉</strong>：BURSTカウンター(🌈)が増える</td>
       </tr>
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-allclear-img">
+        <td class="guide-td-icon"><span class="mini-allclear-img">
           <svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600">
             <polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/>
           </svg>
           </span></td>
-        <td style="padding: 2px 0;">雷玉：
+        <td class="guide-td-text"><strong>雷玉</strong>：
 <span class="mini-obstacle-img">
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
@@ -1402,39 +1410,41 @@ canvas {
       </tr>
       
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-sunny-img"></span></td>
-        <td style="padding: 2px 0;">晴玉：周囲5×5マスの<span class="mini-obstacle-img">
+        <td class="guide-td-icon"><span class="mini-sunny-img"></span></td>
+        <td class="guide-td-text"><strong>晴玉</strong>：周囲5×5マスの<span class="mini-obstacle-img">
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
           </svg>
           </span>お邪魔パネルを🟥赤パネルに変える<br>凍っているパネルが解ける</td>
       </tr>
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-rainy-img"></span></td>
-        <td style="padding: 2px 0;">雨玉：パネルをランダムに🟦青パネルに変える</td>
+        <td class="guide-td-icon"><span class="mini-rainy-img"></span></td>
+        <td class="guide-td-text"><strong>雨玉</strong>：パネルをランダムに🟦青パネルに変える</td>
       </tr>
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-snow-img"></span></td>
-        <td style="padding: 2px 0;">雪玉：カウントが0になるとパネルがランダムに凍ってしまう<br>
+        <td class="guide-td-icon"><span class="mini-snow-img"></span></td>
+        <td class="guide-td-text"><strong>雪玉</strong>：カウントが0になるとパネルがランダムに凍ってしまう<br>
 		（凍ったパネルは移動できない・隣接で解ける）</td>
       </tr>
 		
 		<tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-almighty-img"></span></td>
-        <td style="padding: 2px 0;">プリズム：どの色のパネルとも揃えられる！</td>
+        <td class="guide-td-icon"><span class="mini-almighty-img"></span></td>
+        <td class="guide-td-text"><strong>プリズム</strong>：どの色のパネルとも揃えられる！</td>
       </tr>
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"></td>
-        <td style="padding: 2px 0;">七色の玉：パネルをたくさん消すと同色の玉が出現。七色集めると…!?</td>
+        <td class="guide-td-icon"></td>
+        <td class="guide-td-text"><strong>七色の玉</strong>：パネルをたくさん消すと同色の玉が出現。七色集めると…!?</td>
       </tr>
     </table>
   </div>
 	<br>
   <div class="special-panel-box" style="margin-top: 8px;">
     <strong>《昼モード／夜モード》</strong><br>
+    <span style="line-height: 1.3; display: inline-block;">
     スコアが上がると夜モードが発動！<br>
     流れ星<span class="mini-star-img"></span>を3つ集めると昼モードに戻るよ<br>
     夜モード中は七色の玉、虹玉、プリズムパネルが出現しなくなるので注意！
+    </span>
   </div>
 </div>
     <button onclick="closeGuideModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer; margin-top: 20px;">閉じる</button>
@@ -1455,7 +1465,7 @@ canvas {
 <div id="ranking-reset-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="ranking-reset-modal-content">
     <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">ランキングをリセットする？</h3>
-    <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: bold; line-height: 1.5;">これまでのスコア記録を消して全部0に戻します。<br>
+    <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: normal; line-height: 1.5;">これまでのスコア記録を消して全部0に戻します。<br>
       本当に消していいですか？</p>
     <div style="display: flex; gap: 12px; justify-content: center;">
       <button onclick="closeRankingResetModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer;">やっぱりまだ<br>
@@ -1469,13 +1479,13 @@ canvas {
 <div id="reset-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="reset-modal-content">
     <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">最初からやりなおす？</h3>
-    <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: bold; line-height: 1.5;">現在のスコアやパネルの配置などが<br>
+   <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: normal; line-height: 1.5;">現在のスコアやパネルの配置などが<br>
       全てリセットされます</p>
     <div style="display: flex; gap: 12px; justify-content: center;">
       <button onclick="closeResetModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer;">やっぱり<br>
       今のゲームを続ける</button>
-      <button onclick="confirmResetGame()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #ff7675; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">今のゲームを<br>
-      リセットしてやりなおす！</button>
+      <button onclick="confirmResetGame()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #ff7675; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">リセットして<br>
+      最初からやりなおす！</button>
     </div>
   </div>
 </div>
@@ -1483,7 +1493,7 @@ canvas {
 <div id="resume-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="resume-modal-content">
     <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">前回の続きがあるよ</h3>
-    <p id="resume-modal-detail" style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: bold; line-height: 1.5;">中断したところから再開する？</p>
+    <p id="resume-modal-detail" style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: normal; line-height: 1.5;">中断したところから再開する？</p>
     <div style="display: flex; gap: 12px; justify-content: center;">
       <button onclick="startNewGameFromModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #ff7675; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">最初から<br>
       始める</button>
@@ -1509,9 +1519,9 @@ canvas {
     <div style="text-align: left; margin-bottom: 20px;">
       <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
         <input type="checkbox" id="opt-reduce-motion" onchange="toggleReduceMotion()" style="width: 18px; height: 18px; cursor: pointer;">
-        <span style="font-size: 12px; font-weight: 900; color: #475569;">
-          <span style="font-size: 14px;">モーション減少</span><br>
-          （お邪魔パネルの揺れ・パネルの跳ねを止める）
+        <span style="font-size: 12px; color: #475569;">
+          <span style="font-size: 14px; font-weight: 900;">モーション減少</span><br>
+          <span style="font-weight: normal;">（お邪魔パネルの揺れ・パネルの跳ねを止める）</span>
         </span>
       </label>
     </div>
