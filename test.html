@@ -719,7 +719,6 @@ opacity: 0;
 .guide-td-icon {
     padding: 5px 6px 5px 0;
     vertical-align: middle;
-    width: 78px; /* 🔧 アイコン＋名前列の固定幅。名前が長い「七色の玉」でも収まるように調整可能 */
     white-space: nowrap;
 }
 .guide-td-text {
@@ -1429,13 +1428,14 @@ canvas {
         <td class="guide-td-text">カウントが0になると色パネルがランダムに凍ってしまう<br>
 		（凍ったパネルは移動できない・色パネル消去の隣接か手数経過で解ける）</td>
       </tr>
-		
+    </table>
+    <table style="border-collapse: collapse; line-height: 1.2; margin-top: 4px;">
 		<tr>
         <td class="guide-td-icon"><span class="mini-almighty-img"></span><strong>プリズム</strong>：</td>
         <td class="guide-td-text">どの色のパネルとも揃えられる！</td>
       </tr>
       <tr>
-        <td class="guide-td-icon"><strong>七色の玉</strong>：</td>
+        <td class="guide-td-icon">🌈<strong>七色の玉</strong>：</td>
         <td class="guide-td-text">色パネルをたくさん消すと同色の玉が出現！七色集めると…!?</td>
       </tr>
     </table>
