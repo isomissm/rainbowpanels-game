@@ -3,13 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver9.1.2)</title>
+<title>ナナイロパネル／Rainbow Panels (ver10.4.2)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&display=swap" rel="stylesheet">
 <style>
 :root {
 --font-main-ui: 'Nunito', sans-serif; /* メインUIフォント：ここを変更するとUI全体に反映 */
+}
+html {
+    scrollbar-width: none; /* 🔧 Firefox：スクロールバー非表示（スクロール自体は可能） */
+}
+html::-webkit-scrollbar {
+    display: none; /* 🔧 Chrome/Edge/Safari：スクロールバー非表示（スクロール自体は可能） */
 }
 body {
     background-color: #CAF5FF;
@@ -75,6 +81,11 @@ body {
 .debug-btns button:hover {
     background: #4e6a85;
 }
+/* top-button-row と main-layout をまとめて、幅を main-layout に自動追従させる */
+#top-area {
+    display: flex;
+    flex-direction: column;
+}
 /* メインコンテナ */
 #main-layout {
     position: relative;
@@ -124,10 +135,25 @@ canvas {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    transition: background-color 0.6s ease, border-color 0.6s ease;
     font-weight: 900;
     font-size: 16px;
     color: #2c3e50;
     box-sizing: border-box;
+}
+#level-status-bar.level-up-flash {
+    background-color: #AFA9EC;
+    border-color: #AFA9EC;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.status-level-val.level-up-bounce {
+    display: inline-block;
+    animation: levelUpBounce 1.1s cubic-bezier(0.15, 0.6, 0.3, 1);
+}
+@keyframes levelUpBounce {
+    0%   { transform: scale(1.4); }
+    20%  { transform: scale(1.38); }
+    100% { transform: scale(1); }
 }
 .status-level-val {
     color: #6c5ce7;
@@ -311,7 +337,7 @@ canvas {
     box-sizing: border-box;
 }
 .ui-section-title {
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 900;
     color: #4b5563;
     letter-spacing: 0.08em;
@@ -348,7 +374,7 @@ canvas {
     display: none;
 }
 .score-val {
-    font-size: 36px;
+    font-size: 28px;
     font-weight: 900;
     color: #4a90e2;
     text-shadow: 1px 1px 0px #fff;
@@ -357,7 +383,7 @@ canvas {
     font-variant-numeric: tabular-nums;
 }
 .moves-val {
-    font-size: 52px;
+    font-size: 36px;
     font-weight: 900;
     color: #ff7675;
     text-shadow: 1px 1px 0px #fff;
@@ -405,7 +431,7 @@ background-position: -200% 0%;
     background: #f8fafc;
     border: none;
     border-radius: 20px;
-    padding: 14px 14px; /* 右枠の白枠 隙間の調整（マージン・行間） */
+    padding: 16px 14px; /* 右枠の白枠 隙間の調整（マージン・行間） */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -492,21 +518,23 @@ transform: scale(1);
     height: 112%;
     border-radius: 24px;
     background: linear-gradient(135deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff7675, #ff4757);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+    -webkit-mask-position: center, center;
+    -webkit-mask-repeat: no-repeat, no-repeat;
     -webkit-mask-composite: xor;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+    mask-position: center, center;
+    mask-repeat: no-repeat, no-repeat;
     mask-composite: exclude;
     pointer-events: none;
-    box-sizing: border-box;
-    filter: blur(10px); /* 虹色波紋のぼかし */
     z-index: 60;
-    animation: rainbowWaveExpand 7.0s cubic-bezier(0.1, 0.8, 0.2, 1) forwards; /* 虹色波紋の速度 */
+    animation: rainbowWaveExpand 5.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards, /* 虹色波紋の速度・見た目の動き */
+               rainbowMaskShrink 5.5s linear forwards; /* 枠の太さの変化（最初の2秒はなめらか、以降は間引き） */
 }
 @keyframes rainbowWaveExpand {
 0% {
 transform: translate(-50%, -50%) scale(0.893); /* 112%基準で100%相当になる縮小率 */
 opacity: 0;
-padding: 40px; /* 虹色波紋 開始時の枠の太さ */
 }
 20% { /* 虹色波紋のフェードイン率 */
 opacity: 0.9; /* 虹色波紋の開始時不透明度 */
@@ -514,7 +542,22 @@ opacity: 0.9; /* 虹色波紋の開始時不透明度 */
 100% {
 transform: translate(-50%, -50%) scale(1);
 opacity: 0;
-padding: 1px;
+}
+}
+@keyframes rainbowMaskShrink {
+0% {
+mask-size: calc(100% - 80px) calc(100% - 80px), 100% 100%; /* 虹色波紋 開始時の枠の太さ（元のpadding:40pxと同じ計算） */
+-webkit-mask-size: calc(100% - 80px) calc(100% - 80px), 100% 100%;
+animation-timing-function: cubic-bezier(0.1, 0.8, 0.2, 1); /* 最初の変化はなめらかに（0%→44%区間に適用） */
+}
+44% {
+mask-size: calc(100% - 4px) calc(100% - 4px), 100% 100%; /* この時点でほぼ最終の太さに到達済み */
+-webkit-mask-size: calc(100% - 4px) calc(100% - 4px), 100% 100%;
+animation-timing-function: steps(4); /* ここから先は変化がほぼ無いので4段階に間引く */
+}
+100% {
+mask-size: calc(100% - 2px) calc(100% - 2px), 100% 100%; /* 元のpadding:1pxと同じ計算 */
+-webkit-mask-size: calc(100% - 2px) calc(100% - 2px), 100% 100%;
 }
 }
 @keyframes waveExpand {
@@ -538,6 +581,19 @@ border-width: 1px;
     pointer-events: none;
     z-index: -1;
     transition: opacity 1.5s ease;
+}
+/* 🌤️ 昼背景・下部の薄青グラデーション（夜モード時はフェードして消える） */
+#day-sky-glow {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 45vh;
+    pointer-events: none;
+    z-index: -1;
+    background: linear-gradient(to top, rgba(222, 250, 255, 0.5) 0%, rgba(222, 250, 255, 0) 100%);
+    opacity: 1;
+    transition: opacity 2.5s ease;
 }
 /* 虹玉とゲージ貯まった時に飛んでいく●のグラフィック */
 .charge-particle {
@@ -621,7 +677,7 @@ opacity: 0;
 #allclear-overlay.active {
     background: rgba(0, 0, 0, 0.6);
 }
-/* ゲームオーバー暗幕：下部レベルバーまで綺麗に覆い、バランスよく縦並びにする */
+/* GAMEOVER・ランキング画面の黒枠設定（黒画面） */
 #overlay {
     position: absolute;
     top: 0;
@@ -634,11 +690,13 @@ opacity: 0;
     align-items: center;
     justify-content: flex-start; /* 上詰めで余白をコントロール */
     padding-top: 20px;
-    border-radius: 20px;
+    border-radius: 12px;
     color: white;
     z-index: 10;
     text-align: center;
     box-sizing: border-box;
+    opacity: 0;
+    transition: opacity 0.2s ease;
 }
 /* 10位までスクロールなしで綺麗に収まる固定ランキングボックス */
 #ranking-box {
@@ -666,11 +724,21 @@ opacity: 0;
 }
 .description {
     font-size: 14px;
-    font-weight: bold;
+    font-weight: normal;
     color: #4b5563;
     margin-top: 25px;
     text-align: center;
     line-height: 1.8;
+}
+/* あそびかたモーダル：闇玉〜七色の玉リストの行間調整用（この2つを直せば全8行に反映） */
+.guide-td-icon {
+    padding: 5px 6px 5px 0;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+.guide-td-text {
+    padding: 5px 0;
+    vertical-align: middle;
 }
 /*罫線のデザイン*/
 .desc-divider {
@@ -703,10 +771,10 @@ opacity: 0;
     opacity: 1;
     transform: none;
 }
-/* パネル画像差し替えボタン（リセットボタンと同デザイン、色違い） */
-#panel-image-open-btn {
+/* パネル画像差し替えボタン（リセットボタンと同デザイン、色違い）※メイン画面・オプション画面共通で使うクラス */
+.panel-image-btn {
     margin-top: 16px;
-    padding: 16px 45px;
+    padding: 12px 45px; /* 画像を差し替えるボタンのサイズ 高さと幅 */
     background: #3D9DFF;
     color: #fff;
     border: none;
@@ -716,10 +784,10 @@ opacity: 0;
     font-weight: 900;
     transition: opacity 0.1s, transform 0.1s;
 }
-#panel-image-open-btn:hover {
+.panel-image-btn:hover {
     opacity: 0.9;
 }
-#panel-image-open-btn:active {
+.panel-image-btn:active {
     transform: scale(0.97);
 }
 .reset-btn-spacer {
@@ -825,15 +893,12 @@ body {
 #right-ui-top .ui-section-title {
     text-align: center;
     margin-bottom: 2px;
-    font-size: 16px;
 }
 .score-val {
-    font-size: 28px;
     margin-bottom: 0;
     text-align: center;
 }
 .moves-val {
-    font-size: 36px;
     margin-bottom: 0;
     text-align: center;
 }
@@ -923,9 +988,6 @@ canvas {
     padding: 3px 10px;
     cursor: pointer;
 }
-#panel-image-open-btn.reset-btn-mobile {
-    margin-top: 10px;
-}
 .reset-btn-spacer {
     height: 12px; /* リセットボタン上のスペース（スマホレイアウト） */
 }
@@ -952,14 +1014,13 @@ canvas {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.5);
-    z-index: 200;
+    z-index: 1100;
     justify-content: center;
     align-items: flex-start;
     padding-top: 12px; /* 画像アップロードの白枠の上の隙間 */
     box-sizing: border-box;
-}
-#panel-image-modal-overlay.show {
-    display: flex;
+    opacity: 0;
+    transition: opacity 0.2s ease;
 }
 #panel-image-modal {
     background: #fff;
@@ -970,6 +1031,8 @@ canvas {
     max-height: 97vh; /*画像アップロード枠全体の縦長さ*/
     overflow-y: auto;
     box-sizing: border-box;
+    transform: scale(0.9);
+    transition: transform 0.2s ease;
 }
 .panel-image-row {
     display: flex;
@@ -999,7 +1062,7 @@ canvas {
     flex-shrink: 0;
 }
 .panel-image-label {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 900;
     color: #475569;
     width: 28px;
@@ -1058,16 +1121,24 @@ canvas {
     border-radius: 14px;
     background: #ff7675;
     color: #fff;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 900;
     padding: 10px 0;
     cursor: pointer;
 }
 
+/* PC表示だけ、GAME OVERの黒枠が盤面下に少し足りない分を延長 */
+@media (min-width: 769px) {
+    #overlay {
+        height: calc(100% + 15px + 57px); /*最後の数値がサイズ調整用*/
+    }
+}
+	
 </style>
 </head>
 
 <body>
+<div id="day-sky-glow"></div>
 <!-- デバッグパネル内部のレイアウト -->
 <div id="debug-panel">
   <div id="debug-left" style="display:flex; flex-direction:column; gap:10px;">
@@ -1083,7 +1154,7 @@ canvas {
       </div>
       <div class="debug-row">
         <div class="debug-btns">
-          <button onclick="debugTriggerLevelRainbow()" style="color:#c175ff;">SEVEN COLORS発動</button>
+          <button onclick="debugTriggerLevelRainbow()" style="color:#c175ff;">ナナイロモード発動</button>
         </div>
       </div>
     </div>
@@ -1116,6 +1187,9 @@ canvas {
         <button onclick="setDebugLevel(5)">LV 5</button>
         <button onclick="setDebugLevel(6)">LV 6</button>
         <button onclick="setDebugLevel(7)">LV 7</button>
+        <button onclick="setDebugLevel(8)">LV 8</button>
+        <button onclick="setDebugLevel(9)">LV 9</button>
+        <button onclick="setDebugLevel(10)">LV 10</button>
       </div>
     </div>
     <div class="debug-row"> <span>OBSTACLE (■):</span>
@@ -1152,7 +1226,10 @@ canvas {
   </div>
 </div>
 <!-- ⚙️ ゲーム画面の外、デバッグパネルの下に置く専用のボタン行（後々ここにボタンが増える予定） -->
-<div id="top-button-row" style="width: 100%; display: flex; justify-content: flex-end; gap: 8px; box-sizing: border-box; margin-bottom: 10px;">
+<div id="top-area">
+<div id="top-button-row" style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; box-sizing: border-box; margin-bottom: 10px;">
+  <button id="about-open-btn" onclick="openAboutModal()" aria-label="このゲームについて" style="border: none; border-radius: 14px; background: transparent; color: #64748b; font-size: 12px; font-weight: 700; padding: 6px 4px; cursor: pointer; white-space: nowrap; font-family: var(--font-main-ui); margin-right: auto;">ℹ️ このゲームについて</button>
+  <button id="guide-open-btn" onclick="openGuideModal()" aria-label="あそびかた" style="border: none; border-radius: 14px; background: #3D9DFF; color: #ffffff; box-shadow: 0 3px 8px rgba(61,157,255,0.35); font-size: 14px; font-weight: 900; padding: 6px 10px; cursor: pointer; white-space: nowrap; font-family: var(--font-main-ui);">📖 あそびかた</button>
   <button id="options-open-btn" onclick="openOptionsModal()" aria-label="オプション" style="border: none; border-radius: 14px; background: #3D9DFF; color: #ffffff; box-shadow: 0 3px 8px rgba(61,157,255,0.35); font-size: 14px; font-weight: 900; padding: 6px 10px; cursor: pointer; white-space: nowrap; font-family: var(--font-main-ui);">⚙️ OPTION</button>
 </div>
 <div id="main-layout">
@@ -1193,9 +1270,9 @@ canvas {
         </div>
         <div style="font-size:11px; font-weight:900; margin-bottom:4px; color:#cbd5e1; text-align:left; width:85%; max-width:270px; letter-spacing: 0.05em;">🌈 TOP 10 RANKING</div>
         <div id="ranking-box" style="width: 85%; max-width: 270px; height: auto; overflow: hidden; margin-bottom: 12px; display: flex; flex-direction: column; gap: 2px;"> </div>
-        <button id="retry-btn" onclick="initGame()" style="padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:13px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">もう一度プレイする</button>
+        <button id="retry-btn" onclick="initGame()" style="padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:12px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">もう一度プレイする</button>
         <button id="reset-ranking-btn" onclick="confirmResetRanking()" style="margin-top:12px; margin-bottom:10px; padding:6px 16px; border-radius:20px; border:1.5px solid rgba(255,255,255,0.3); cursor:pointer; font-weight:700; font-size:11px; background:transparent; color:#cbd5e1;">ランキングをリセットする</button>
-        <button id="back-to-game-btn" onclick="closeRankingScreen()" style="display:none; padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:13px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">ゲームに戻る</button>
+        <button id="back-to-game-btn" onclick="closeRankingScreen()" style="display:none; padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:12px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">ゲームに戻る</button>
       </div>
     </div>
     <div id="level-status-bar"> <span id="status-level" class="status-level-val">LEVEL 1</span> <span class="status-next-label">Next
@@ -1262,16 +1339,17 @@ canvas {
     </div>
   </div>
 </div>
+</div>
 <div id="best-score-mobile" class="best-score-label-mobile">BEST: 0000</div>
 <button id="view-ranking-btn-mobile" onclick="showRankingScreen()" class="view-ranking-btn view-ranking-btn-mobile">🏆 ランキングを見る</button>
 <div class="reset-btn-spacer"></div>
 <button id="reset-btn" onclick="openResetModal()" class="reset-btn-mobile">ゲームをリセットする</button>
-<button id="panel-image-open-btn" onclick="openPanelImageModal()" class="reset-btn-mobile">パネルの画像を差し替える（png）</button>
+<div class="panel-image-btn-slot"></div>
 <!-- 🖼️ パネル画像差し替えモーダル -->
 <div id="panel-image-modal-overlay">
   <div id="panel-image-modal">
     <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">🖼️ パネル画像設定</h3>
-    <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: bold; color: #4b5563;">好きな画像をパネルの絵柄に差し替えられます<br>※透過PNGも使えるよ！</p>
+   <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: normal; color: #4b5563;">好きな画像をパネルの絵柄に差し替えられます<br>※透過PNGも使えるよ！</p>
 	<p style="margin: 0 0 16px 0; font-size: 12px; color: #D92929;">画像はご利用の端末（PC・スマホなど）のみで使用されます<br>インターネット上には送信されません</p>
 
     <input type="file" id="panel-image-bulk-input" accept="image/png,image/jpeg" multiple style="display:none;">
@@ -1281,17 +1359,28 @@ canvas {
     <div id="panel-image-rows"></div>
 
     <button id="panel-image-remove-all-btn" onclick="removeAllCustomPanelImages()">全ての画像を削除する</button>
-    <button onclick="closePanelImageModal()" style="display:block; width:220px; margin:10px auto 0 auto; border:none; border-radius:14px; background:#cbd5e1; color:#475569; font-size:13px; font-weight:900; padding:10px 0; cursor:pointer;">閉じる</button>
+    <button onclick="closePanelImageModal()" style="display:block; width:220px; margin:10px auto 0 auto; border:none; border-radius:14px; background:#cbd5e1; color:#475569; font-size:12px; font-weight:900; padding:10px 0; cursor:pointer;">閉じる</button>
   </div>
 </div>
-<!-- ゲームの説明文 -->
+<!-- 📖 あそびかたモーダル -->
+<div id="guide-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
+  <div style="background: white; padding: 28px 24px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 420px; width: 88%; max-height: 85vh; overflow-y: auto; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box;" id="guide-modal-content">
+    <div style="position: sticky; top: -28px; left: -24px; margin: -28px 0 4px -24px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
+      <button onclick="closeGuideModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
+    </div>
+   <h3 style="margin: 0 0 16px 0; color: #2c3e50; font-size: 18px; font-weight: 900; font-family: var(--font-main-ui);">📖 あそびかた</h3>
 <div class="description">
-	<strong>パネルをクリック／タップして<br>
-	隣のパネルと入れ替えて同じ色を縦横3つ揃えよう！</strong><br>
-	連鎖するとレインボーゲージが貯まって<br>
-	BURSTカウンター(🌈)が増えるよ<br>
-  <hr class="desc-divider">
-  <strong>《色パネルを消した時に隣接で一緒に消えるパネル》</strong><br>
+  <div class="special-panel-box" style="margin: 0 auto 8px auto; background-color: #ffffff; border: 1px solid #FF6700; text-align: center;">
+    <strong style="color: #FF6700;">💾 オートセーブ機能つき！<br>
+    ブラウザを閉じても続きから遊べるよ</strong>
+  </div>
+	<div style="line-height: 1.3; margin-top: 14px; font-size: 16px;">パネルをクリック／タップして<br>
+	隣のパネルと入れ替えて<br>
+	同じ色を縦横3つ揃えよう！</div>
+	<div style="line-height: 1.3; margin-top: 6px;">連鎖するとレインボーゲージが貯まって<br>
+	BURSTカウンター(🌈)が増えるよ</div>
+  <hr class="desc-divider" style="margin: 10px auto;">
+  <span style="line-height: 1.3; display: inline-block;"><strong>色パネルを揃えた時に隣接していると<br>一緒に消えるパネル</strong></span><br>
   <span class="mini-dark-img"></span>闇玉・
   <span class="mini-rainbow-img"></span>虹玉・
   <span class="mini-allclear-img"><svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600"><polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/></svg></span>雷玉<br>
@@ -1300,7 +1389,7 @@ canvas {
   <span class="mini-snow-img"></span>雪玉<br>
   七色の玉・<span class="mini-star-img"></span>流れ星<br>
   <hr class="desc-divider">
-  <strong>《RAINBOW BURST! ボタンで選んで消せるパネル》</strong><br>
+  <span style="line-height: 1.3; display: inline-block;"><strong>RAINBOW BURST!ボタンで<br>選んで直接消せるパネル</strong></span><br>
   <span class="mini-obstacle-img"><svg width="14" height="14" viewBox="0 0 85 85" fill="white"><path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/></svg></span>お邪魔パネル・
   <span class="mini-dark-img"></span>闇玉・
   <span class="mini-allclear-img"><svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600"><polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/></svg></span>雷玉<br>
@@ -1312,24 +1401,24 @@ canvas {
     <table style="border-collapse: collapse; line-height: 1.2;">
       <!-- 説明文白枠内の行間*/ -->
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-dark-img"></span></td>
-        <td style="padding: 2px 0;">闇玉：カウントが0になると周囲を<span class="mini-obstacle-img">
+        <td class="guide-td-icon"><span class="mini-dark-img"></span><strong>闇玉</strong>：</td>
+        <td class="guide-td-text">カウントが0になると周囲を<span class="mini-obstacle-img">
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
           </svg>
           </span>お邪魔パネルに変えてしまう </td>
       </tr>
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-rainbow-img"></span></td>
-        <td style="padding: 2px 0;">虹玉：BURSTカウンター(🌈)が増える</td>
+        <td class="guide-td-icon"><span class="mini-rainbow-img"></span><strong>虹玉</strong>：</td>
+        <td class="guide-td-text">BURSTカウンター(🌈)が1つ増える</td>
       </tr>
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-allclear-img">
+        <td class="guide-td-icon"><span class="mini-allclear-img">
           <svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600">
             <polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/>
           </svg>
-          </span></td>
-        <td style="padding: 2px 0;">雷玉：
+          </span><strong>雷玉</strong>：</td>
+        <td class="guide-td-text">
 <span class="mini-obstacle-img">
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
@@ -1338,46 +1427,66 @@ canvas {
       </tr>
       
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-sunny-img"></span></td>
-        <td style="padding: 2px 0;">晴玉：周囲5×5マスの<span class="mini-obstacle-img">
+        <td class="guide-td-icon"><span class="mini-sunny-img"></span><strong>晴玉</strong>：</td>
+        <td class="guide-td-text">周囲5×5マスの<span class="mini-obstacle-img">
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
           </svg>
-          </span>お邪魔パネルを🟥赤パネルに変える<br>凍っているパネルが解ける</td>
+          </span>お邪魔パネルが🟥赤パネルに変わる<br>凍っているパネルが解ける</td>
       </tr>
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-rainy-img"></span></td>
-        <td style="padding: 2px 0;">雨玉：パネルをランダムに🟦青パネルに変える</td>
+        <td class="guide-td-icon"><span class="mini-rainy-img"></span><strong>雨玉</strong>：</td>
+        <td class="guide-td-text">色パネルがランダムに🟦青パネルに変わる</td>
       </tr>
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-snow-img"></span></td>
-        <td style="padding: 2px 0;">雪玉：カウントが0になるとパネルがランダムに凍ってしまう<br>
-		（凍ったパネルは移動できない・隣接で解ける）</td>
+        <td class="guide-td-icon"><span class="mini-snow-img"></span><strong>雪玉</strong>：</td>
+        <td class="guide-td-text">カウントが0になると色パネルがランダムに凍ってしまう<br>
+		（凍ったパネルは移動できない・色パネル消去の隣接か手数経過で解ける）</td>
       </tr>
-		
+    </table>
+    <table style="border-collapse: collapse; line-height: 1.2; margin-top: 4px;">
 		<tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"><span class="mini-almighty-img"></span></td>
-        <td style="padding: 2px 0;">プリズム：どの色のパネルとも揃えられる！</td>
+        <td class="guide-td-icon"><span class="mini-almighty-img"></span><strong>プリズム</strong>：</td>
+        <td class="guide-td-text">どの色のパネルとも揃えられる！</td>
       </tr>
       <tr>
-        <td style="padding: 2px 6px 2px 0; vertical-align: middle;"></td>
-        <td style="padding: 2px 0;">七色の玉：パネルをたくさん消すと同色の玉が出現。七色集めると…!?</td>
+        <td class="guide-td-icon">🌈<strong>七色の玉</strong>：</td>
+        <td class="guide-td-text">色パネルをたくさん消すと同色の玉が出現！七色集めると…!?</td>
       </tr>
     </table>
   </div>
 	<br>
   <div class="special-panel-box" style="margin-top: 8px;">
     <strong>《昼モード／夜モード》</strong><br>
+    <span style="line-height: 1.3; display: inline-block;">
     スコアが上がると夜モードが発動！<br>
     流れ星<span class="mini-star-img"></span>を3つ集めると昼モードに戻るよ<br>
     夜モード中は七色の玉、虹玉、プリズムパネルが出現しなくなるので注意！
+    </span>
+  </div>
+</div>
+    <button onclick="closeGuideModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer; margin-top: 20px;">閉じる</button>
+  </div>
+</div>
+<!-- ℹ️ このゲームについてモーダル -->
+<div id="about-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
+  <div style="background: white; padding: 28px 24px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 360px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box;" id="about-modal-content">
+    <h3 style="margin: 0 0 6px 0; color: #2c3e50; font-size: 20px; font-weight: 900; font-family: var(--font-main-ui);">🌈 ナナイロパネル</h3>
+    <p style="margin: 0 0 4px 0; color: #64748b; font-size: 13px; font-weight: 700; font-family: var(--font-main-ui);">Rainbow Panels</p>
+    <p id="about-version" style="margin: 0 0 20px 0; color: #2c3e50; font-size: 14px; font-weight: 700;"></p>
+    <!-- ©クレジット表記 -->
+    <p style="margin: 0 0 20px 0; color: #64748b; font-size: 13px;">© 2026 by isomi_ssm</p>
+    <!-- Xのリンクボタン -->
+    <a href="https://x.com/isomi_ssm" target="_blank" rel="noopener" style="display: inline-block; margin-bottom: 20px; padding: 8px 16px; border-radius: 999px; background: #f1f5f9; color: #2c3e50; font-size: 13px; font-weight: 700; text-decoration: none;">🔗 X (@isomi_ssm)</a><br>
+    <!-- Xのリンクボタンここまで -->
+    <button onclick="closeAboutModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer;">閉じる</button>
   </div>
 </div>
 <!-- ランキングをリセットするダイアログ -->
 <div id="ranking-reset-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="ranking-reset-modal-content">
     <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">ランキングをリセットする？</h3>
-    <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: bold; line-height: 1.5;">これまでのスコア記録を消して全部0に戻します。<br>
+    <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: normal; line-height: 1.5;">これまでのスコア記録を消して全部0に戻します。<br>
       本当に消していいですか？</p>
     <div style="display: flex; gap: 12px; justify-content: center;">
       <button onclick="closeRankingResetModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer;">やっぱりまだ<br>
@@ -1391,13 +1500,13 @@ canvas {
 <div id="reset-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="reset-modal-content">
     <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">最初からやりなおす？</h3>
-    <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: bold; line-height: 1.5;">現在のスコアやパネルの配置などが<br>
+   <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: normal; line-height: 1.5;">現在のスコアやパネルの配置などが<br>
       全てリセットされます</p>
-    <div style="display: flex; gap: 12px; justify-content: center;">
-      <button onclick="closeResetModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer;">やっぱり<br>
+    <div style="display: flex; gap: 8px; justify-content: center;">
+      <button onclick="confirmResetGame()" style="flex: 1; padding: 12px 4px; border: none; border-radius: 15px; background: #ff7675; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">リセットして<br>
+      最初からやりなおす！</button>
+      <button onclick="closeResetModal()" style="flex: 1; padding: 12px 4px; border: none; border-radius: 15px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer;">やっぱり<br>
       今のゲームを続ける</button>
-      <button onclick="confirmResetGame()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #ff7675; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">今のゲームを<br>
-      リセットしてやりなおす！</button>
     </div>
   </div>
 </div>
@@ -1405,7 +1514,7 @@ canvas {
 <div id="resume-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="resume-modal-content">
     <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">前回の続きがあるよ</h3>
-    <p id="resume-modal-detail" style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: bold; line-height: 1.5;">中断したところから再開する？</p>
+    <p id="resume-modal-detail" style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: normal; line-height: 1.5;">中断したところから再開する？</p>
     <div style="display: flex; gap: 12px; justify-content: center;">
       <button onclick="startNewGameFromModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #ff7675; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">最初から<br>
       始める</button>
@@ -1421,19 +1530,19 @@ canvas {
 
     <div style="text-align: left; margin-bottom: 20px;">
       <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">アニメーション速度</div>
-      <div style="display: flex; gap: 6px;">
-        <button id="opt-speed-none" onclick="setAnimSpeed('none')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">なし</button>
-        <button id="opt-speed-normal" onclick="setAnimSpeed('normal')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">ふつう</button>
-        <button id="opt-speed-fast" onclick="setAnimSpeed('fast')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">はやい</button>
+	<div style="display: flex; gap: 6px;">
+        <button id="opt-speed-none" onclick="setAnimSpeed('none')" style="flex: 0 0 calc((100% - 12px) / 3); padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; line-height: 1; cursor: pointer;">なし</button>
+        <button id="opt-speed-normal" onclick="setAnimSpeed('normal')" style="flex: 0 0 calc((100% - 12px) / 3); padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; line-height: 1; cursor: pointer;">ふつう</button>
+        <button id="opt-speed-fast" onclick="setAnimSpeed('fast')" style="flex: 0 0 calc((100% - 12px) / 3); padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; line-height: 1; cursor: pointer;">はやい</button>
       </div>
     </div>
 
     <div style="text-align: left; margin-bottom: 20px;">
       <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
         <input type="checkbox" id="opt-reduce-motion" onchange="toggleReduceMotion()" style="width: 18px; height: 18px; cursor: pointer;">
-        <span style="font-size: 12px; font-weight: 900; color: #475569;">
-          <span style="font-size: 14px;">モーション減少</span><br>
-          （お邪魔パネルの揺れ・パネルの跳ねを止める）
+        <span style="font-size: 12px; color: #475569;">
+          <span style="font-size: 14px; font-weight: 900;">モーション減少</span><br>
+          <span style="font-weight: normal;">（お邪魔パネルの揺れ・パネルの跳ねを止める）</span>
         </span>
       </label>
     </div>
@@ -1446,6 +1555,18 @@ canvas {
     </div>
 
     <div style="text-align: left; margin-bottom: 8px;">
+      <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">アイコン</div>
+      <div style="display: flex; gap: 6px;">
+        <button id="opt-icon-cute" onclick="setIconStyle('cute')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">
+          かわいい
+        </button>
+        <button id="opt-icon-simple" onclick="setIconStyle('simple')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">
+          シンプル
+        </button>
+      </div>
+    </div>
+
+    <div style="text-align: left; margin-bottom: 8px; margin-top: 16px;">
       <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">七色の玉の形</div>
       <div style="display: flex; gap: 6px;">
         <button id="opt-shape-circle" onclick="setBallShape('circle')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
@@ -1461,12 +1582,15 @@ canvas {
           六角形
         </button>
       </div>
+      <div class="panel-image-btn-slot" style="margin-top: 24px; text-align: center;"></div>
     </div>
 
-    <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px;">
-      <button onclick="resetUserSettingsToDefault()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 12px; cursor: pointer;">初期設定に戻す</button>
-      <button onclick="closeOptionsModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #3D9DFF; color: white; font-weight: 900; font-size: 12px; cursor: pointer; box-shadow: 0 4px 10px rgba(61,157,255,0.3);">閉じる</button>
+    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 32px 0;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+      <button onclick="resetUserSettingsToDefault()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #ff7675; color: #FFFFFF; font-weight: 700; font-size: 14px; cursor: pointer;">初期設定に戻す</button>
+      <button onclick="closeOptionsModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer;">閉じる</button>
     </div>
+
   </div>
 </div>
 <p style="text-align: center; color: #64748b; font-size: 14px; margin-top: 16px;"> © 2026 ナナイロパネル／Rainbow Panels by isomi_ssm </p>
@@ -1478,6 +1602,9 @@ canvas {
 	 * 「LEVEL RAINBOW」→「SEVEN COLORS」に表示名を変更済み
 	 * 変数名（isLevelRainbow, levelRainbowCount, LEVEL_RAINBOW_DURATIONなど）は
 	 * 変更リスクを避けるため内部処理上はそのまま維持している
+	 * 
+	 * ※SEVEN COLORSモードは「ナナイロモード」記載にする
+	 * 
 	 ************************************************************/
 
 /* コンフィグ */
@@ -1490,7 +1617,7 @@ const CONFIG = {
 		CELL_SIZE:         55,   // 1マスのサイズ（ピクセル）
 		INITIAL_MOVES:      3,   // マッチ成立時に回復する手数
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🎬 パネル移動アニメーション設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SWAP_ANIM_DURATION:          240,  // パネル入れ替えアニメの所要時間（ms）
@@ -1521,14 +1648,19 @@ const CONFIG = {
         // threshold: お邪魔パネルの累計ドロップ数がこの値を超えるとレベルアップ
         // pace:      お邪魔パネルが出現するまでの手数間隔
 		LEVELS: [
-			{ threshold:  0, pace: 12 }, // レベル1
-			{ threshold:  3, pace: 10 }, // レベル2
-			{ threshold:  6, pace:  9 }, // レベル3
-			{ threshold: 10, pace:  8 }, // レベル4
-			{ threshold: 14, pace:  7 }, // レベル5
-			{ threshold: 19, pace:  6 }, // レベル6
-			{ threshold: 25, pace:  5 }, // レベル7
+			{ threshold:  0, pace: 14 }, // レベル1
+			{ threshold:  4, pace: 13 }, // レベル2
+			{ threshold:  8, pace: 12 }, // レベル3
+			{ threshold: 13, pace: 11 }, // レベル4
+			{ threshold: 18, pace: 10 }, // レベル5
+			{ threshold: 23, pace:  9 }, // レベル6
+			{ threshold: 29, pace:  8 }, // レベル7
+			{ threshold: 35, pace:  7 }, // レベル8
+			{ threshold: 42, pace:  6 }, // レベル9
+			{ threshold: 50, pace:  5 }, // レベル10
 		],
+		LEVEL_UP_FLASH_DURATION:  900,  // レベルアップ時、枠の背景フラッシュが消えるまで(ms)
+		LEVEL_UP_BOUNCE_DURATION: 800,  // レベルアップ時、LEVEL文字が弾む演出の長さ(ms)
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ⭐ RAINBOW BURSTスキル設定
@@ -1570,6 +1702,10 @@ const CONFIG = {
 		SNOWY_FRAME_DURATION:  150,  // 雪エフェクトの表示時間（フレーム数）※雨より長め
 		SNOWY_FLAKE_COUNT:      10,  // 雪片の生成数
 
+	
+	    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		SPECIAL_BALL_GLOW_SPEED: 1.1,  // 晴玉・雨玉・雪玉の発光（明滅）周期の速さ。数値が大きいほど速い（元は1.8）
+
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌈 SEVEN COLORS設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1591,6 +1727,17 @@ const CONFIG = {
 		NIGHT_DARK_FAST_COUNT:      3, // 夜中の高速闇玉カウント（通常5）
 		NIGHT_STAR_NEEDED:          3, // 昼に戻るために必要な星の数
 		NIGHT_COLOR_BOOST:          5, // 夜中の青・藍・紫の出現率ボーナス（0=均等 数値を増やすほど青・藍・紫が出やすくなる）
+	
+		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🌙 パネル選択設定
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		SELECTION_BORDER_DARK_DAY:   "10, 12, 15",    // 選択パネル枠線・暗い側の色（昼）※ほぼ黒
+		SELECTION_BORDER_LIGHT_DAY:  "255, 255, 255", // 選択パネル枠線・明るい側の色（昼）※純白
+		SELECTION_BORDER_DARK_NIGHT:  "3, 3, 8",      // 選択パネル枠線・暗い側の色（夜）※ほぼ黒
+		SELECTION_BORDER_LIGHT_NIGHT: "225, 222, 255",// 選択パネル枠線・明るい側の色（夜）
+		SELECTION_BORDER_LOOP_SHARPNESS: 0.6, // 1で対称、1より小さいほど明るい側が長く続く（0.4〜0.8あたりで調整）
+		SELECTION_BORDER_ALPHA_MIN: 0.5, // フチの透明度・下限（元は0.2）
+		SELECTION_BORDER_ALPHA_MAX: 0.9, // フチの透明度・上限（元は0.8）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🟥 特殊パネルの出現スコア閾値
@@ -1619,15 +1766,16 @@ const CONFIG = {
 			"koma01.png", "koma02.png", "koma03.png", "koma04.png",
 			"koma05.png", "koma06.png", "koma07.png"
 		],
-
+		
+		// 通常パネル（色パネル）のカラー設定
 		COLORS: [
-			"#ff7675", // 0: 赤
+			"#FF6A69", // 0: 赤
 			"#ffe53b", // 1: 黄
-			"#55EFCB", // 2: 緑
-			"#66B5FF", // 3: 青
-			"#c175ff", // 4: 紫
+			"#18E5B4", // 2: 緑
+			"#60B2FF", // 3: 青
+			"#C775FF", // 4: 紫
 			"#ff9300", // 5: オレンジ
-			"#6962FC", // 6: 藍色
+			"#6E67FF", // 6: 藍色
 		],
 
 		SYMBOLS: [
@@ -1639,6 +1787,17 @@ const CONFIG = {
 			"✿", // 5: オレンジ
 			"☆", // 6: 藍色
 		],
+
+		// 🔧 パネルアイコン画像（SVGアイコン）の表示サイズ
+		PANEL_ICON_SIZE: [
+			42, // 0: 赤（ohisama）
+			36, // 1: 黄（yotuba）
+			38, // 2: 緑（teruteru）
+			36, // 3: 青（amatubu）
+			32, // 4: 紫（nagarebosi）
+			34, // 5: 橙（hana）
+			36, // 6: 藍（tuki）
+		], 
 		
 		// ⭐ 星玉消去時の散る色（星パネルのグラデーションに合わせた色味）
 		STAR_PARTICLE_COLORS: ["#fffde7", "#ffe53b", "#ffc400", "#e6a800"], 
@@ -1693,7 +1852,8 @@ const CONFIG = {
         bgmVolume:    80,       // 0-100（音源実装後に接続予定。現状は値の保持のみ）
         seVolume:     80,       // 0-100（同上）
         reduceMotion: false,    // trueで、お邪魔パネル出現時の震え等「追加の演出」を抑える（パネル移動アニメの速度とは別軸）
-        ballShape:    'circle'  // 'circle' | 'magatama' | 'hexagon'
+        ballShape:    'circle', // 'circle' | 'magatama' | 'hexagon'
+        iconStyle:    'cute'    // 'cute'（カラフルアイコン） | 'simple'（白抜き半透明アイコン）
     };
 	
     // CONFIGのベース値（速度プリセットを切り替えるたびに、ここから再計算する）
@@ -1798,6 +1958,7 @@ const CONFIG = {
         score = s.score; moves = s.moves; gameElapsedTime = s.gameElapsedTime || 0;
         totalSpentMoves = s.totalSpentMoves || 0;
         obstacleDropCount = s.obstacleDropCount || 0;
+        previousLevel = null; // 🎚️ 再開読み込み時も演出を発火させない
         movesUntilNextObstacle = s.movesUntilNextObstacle;
         darkSpawnCount = s.darkSpawnCount || 0; darkActivatedCount = s.darkActivatedCount || 0; darkClearedCount = s.darkClearedCount || 0;
         isNightMode = !!s.isNightMode; nightStarCount = s.nightStarCount || 0; nightTriggered = !!s.nightTriggered; nightNextThreshold = s.nightNextThreshold || 0;
@@ -1824,6 +1985,8 @@ const CONFIG = {
         document.body.style.backgroundColor = isNightMode ? '#241E58' : '#CAF5FF';
         const gc = document.getElementById('game-container');
         if (gc) { gc.style.transition = 'none'; gc.style.backgroundColor = isNightMode ? '#3E3E78' : '#ffffff'; }
+        const skyGlow = document.getElementById('day-sky-glow');
+        if (skyGlow) { skyGlow.style.transition = 'none'; skyGlow.style.opacity = isNightMode ? '0' : '1'; }
         document.querySelectorAll('.night-star-bg').forEach(el => el.remove());
         if (isNightMode) spawnNightBgStars();
 
@@ -1873,6 +2036,7 @@ const CONFIG = {
     
     let totalSpentMoves = 0;      
     let obstacleDropCount = 0;    
+    let previousLevel = null; // 🎚️ レベルアップ演出の判定用（nullの間は演出を発火しない）    
     let movesUntilNextObstacle = 10; 
 
     // 🌙 闇玉統計
@@ -2664,8 +2828,64 @@ update() {
         images.push(img);
     });
 
-    // 晴玉・雨玉・雲パネル用のアイコン（SVGをコードに直接埋め込み）
-    const SUNNY_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><g fill="#FF6E00"><circle cx="42.5" cy="42.7" r="17"/><rect x="40.3" y="6.5" width="4.4" height="11.8"/><rect x="18.8" y="15.4" width="4.4" height="11.8" transform="translate(-8.9 21.1) rotate(-45)"/><rect x="9.9" y="36.9" width="4.4" height="11.8" transform="translate(-30.7 54.9) rotate(-90)"/><rect x="18.8" y="58.4" width="4.4" height="11.8" transform="translate(-9.5 124.5) rotate(-135)"/><rect x="40.3" y="67.2" width="4.4" height="11.8" transform="translate(85.1 146.2) rotate(180)"/><rect x="61.8" y="58.3" width="4.4" height="11.8" transform="translate(154.7 64.3) rotate(135)"/><rect x="70.7" y="36.8" width="4.4" height="11.8" transform="translate(115.6 -30.2) rotate(90)"/><rect x="61.8" y="15.3" width="4.4" height="11.8" transform="translate(33.7 -39) rotate(45)"/></g></svg>';
+	// 🎨 パネルアイコン画像のSVG（Illustratorで作成したSVGをコードに直接埋め込み）
+	
+    // 🌞 ohisama SVGは色を差し替えられるようテンプレート化（赤パネルと晴玉で別々の色を指定できる）
+    const makeOhisamaSVG = (color) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><circle cx="42.5" cy="42.46" r="14.13" fill="' + color + '"/><rect x="39.52" y="12.38" width="5.96" height="9.8" fill="' + color + '"/><rect x="21.66" y="19.78" width="5.96" height="9.8" transform="translate(-10.24 24.65) rotate(-45)" fill="' + color + '"/><rect x="14.25" y="37.64" width="5.96" height="9.8" transform="translate(-25.31 59.77) rotate(-90)" fill="' + color + '"/><rect x="21.75" y="55.42" width="5.96" height="9.8" transform="translate(-.44 120.45) rotate(-135)" fill="' + color + '"/><rect x="39.6" y="62.83" width="5.96" height="9.8" transform="translate(85.17 135.45) rotate(180)" fill="' + color + '"/><rect x="57.43" y="55.4" width="5.96" height="9.8" transform="translate(145.76 60.21) rotate(135)" fill="' + color + '"/><rect x="64.79" y="37.56" width="5.96" height="9.8" transform="translate(110.23 -25.31) rotate(90)" fill="' + color + '"/><rect x="57.36" y="19.73" width="5.96" height="9.8" transform="translate(35.09 -35.45) rotate(45)" fill="' + color + '"/></svg>';
+
+    const PANEL_OHISAMA_COLOR = '#FFC229'; // 🔧 赤パネルのアイコン色
+    const SUNNY_OHISAMA_COLOR = '#ff9300'; // 🔧 晴玉のアイコン色（ここを変えれば赤パネルと別の色にできる）
+
+    // CONFIG.COLORSと同じ並び順（0:赤 1:黄 2:緑 3:青 4:紫 5:橙 6:藍）
+    const TYPE_ICON_SVGS = [
+        makeOhisamaSVG(PANEL_OHISAMA_COLOR), // 0: 赤 ohisama
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path d="M71.61,43.13c-3.04-3.21-7.35-4.74-12.26-5.37,4.91-.71,9.21-2.32,12.2-5.58,7.14-7.79-1.44-17.35-6.08-16.09,1.27-4.66-8.3-13.22-16.09-6.08-3.49,3.2-5.09,7.91-5.71,13.26-.62-5.36-2.21-10.07-5.71-13.28-7.79-7.14-17.35,1.44-16.09,6.08-4.66-1.27-13.22,8.3-6.08,16.09,2.7,2.95,6.47,4.54,10.8,5.34-4.36.62-8.2,2.05-11.02,4.88-7.47,7.48.71,17.4,5.4,16.33-1.46,4.6,7.74,13.55,15.82,6.76,2.37-2,3.95-4.69,5.01-7.79.37,9.23,2.35,18.13,5.57,22.18l3.45-2.22c-3.22-4.7-5.07-11.67-5.75-19.73.98,3.07,2.47,5.74,4.75,7.76,7.91,7.01,17.32-1.73,15.98-6.35,4.68,1.19,13.08-8.52,5.81-16.19Z" fill="#7ABD2C"/></svg>', // 1: 黄 yotuba
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path d="M51.67,45.63c7.11-3.03,12.02-9.5,12.02-17.7,0-11.48-9.59-20.78-21.41-20.78s-21.41,9.3-21.41,20.78c0,8.51,5.28,15.17,12.84,18.04-3.25,7.89-9.49,18.47-14.57,24.66,5,.68,8.07,2.28,10.24,4.15,3,2.58,6.47,3.97,10.58,2.9,4.61-1.2,7-1.69,12.3-.34,4.03,1.02,9.05-5.98,14.66-8.63-5.15-4.86-12.09-16.2-15.23-23.08Z" fill="#f8fbfb"/><g><circle cx="32.85" cy="27.83" r="2.35" fill="#656464"/><circle cx="52.21" cy="27.17" r="2.35" fill="#656464"/></g></svg>', // 2: 緑 teruteru
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path d="M41.98,77.02c10.84,0,18.86-9.04,18.86-19.23,0-13.77-9.87-31.66-18.86-49.6-8.98,17.94-18.86,35.83-18.86,49.6,0,10.19,8.02,19.23,18.86,19.23Z" fill="#AAEBFF"/></svg>', // 3: 青 amatubu
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path d="M44.27,8.41l10.25,20.52,22.68,3.41c1.51.23,2.12,2.09,1.03,3.16l-16.34,16.09,3.77,22.62c.25,1.51-1.33,2.66-2.69,1.95l-20.35-10.57-20.35,10.57c-1.36.71-2.94-.44-2.69-1.95l3.77-22.62L6.99,35.5c-1.09-1.07-.49-2.93,1.03-3.16l22.68-3.41,10.25-20.52c.68-1.37,2.64-1.37,3.32,0Z" fill="#FFF8BA"/></svg>', // 4: 紫 nagarebosi
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path d="M63.91,47.46c14.03-2.76,14.85-12.15,13.74-15.57-1.11-3.41-7.29-10.53-20.26-4.52-1.9.88-4.03,2.26-6.15,3.87.9-2.55,1.56-5.04,1.82-7.14,1.71-14.19-6.97-17.87-10.56-17.87s-12.27,3.68-10.56,17.87c.25,2.08.9,4.52,1.78,7.03-2.14-1.64-4.3-3.04-6.22-3.93-12.97-6.01-19.15,1.11-20.26,4.52-1.11,3.41-.29,12.81,13.74,15.57,2.05.4,4.57.54,7.22.49-2.22,1.54-4.22,3.15-5.66,4.7-9.73,10.48-4.87,18.56-1.96,20.67,2.9,2.11,12.09,4.24,19.05-8.25,1.02-1.83,1.92-4.19,2.69-6.74.77,2.59,1.69,4.99,2.72,6.84,6.96,12.49,16.15,10.36,19.05,8.25,2.9-2.11,7.77-10.19-1.96-20.67-1.42-1.53-3.38-3.12-5.56-4.63,2.7.06,5.26-.08,7.34-.49Z" fill="#fdfbf2"/><circle cx="42.44" cy="43.27" r="5.88" fill="#FFF15B"/></svg>', // 5: 橙 hana
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><path d="M46.8,8.22c4.62,5.83,7.39,13.21,7.39,21.23,0,18.9-15.32,34.22-34.22,34.22-2.45,0-4.84-.26-7.14-.75,6.27,7.94,15.98,13.05,26.88,13.05,18.91,0,34.24-15.33,34.24-34.24,0-16.48-11.65-30.24-27.16-33.5Z" fill="#B7C1F9"/></svg>', // 6: 藍 tuki
+    ];
+    const typeIconImages = TYPE_ICON_SVGS.map(svg => {
+        const img = new Image();
+        img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        img.onload = () => draw(); img.onerror = () => draw();
+        return img;
+    });
+
+    // 🔧 シンプルアイコン（白抜き＋半透明）用：元SVGのfill属性を全て指定色に置き換えて作る
+    // CONFIG.COLORSと同じ並び順（0:赤 1:黄 2:緑 3:青 4:紫 5:橙 6:藍）
+    function toSimpleIconSVG(svg, color, keepColors = []) {
+        return svg.replace(/fill="(#[0-9a-fA-F]{3,8})"/g, (match, original) => {
+            if (keepColors.includes(original.toLowerCase())) return match; // この色だけは置き換えず残す
+            return 'fill="' + color + '"';
+        });
+    }
+    const SIMPLE_ICON_COLOR = '#ffffff';        // 🔧 シンプルアイコンの基本色（白）
+    const SIMPLE_ICON_COLOR_YELLOW = '#7ABD2C'; // 🔧 黄パネルだけは白だと見えづらいので緑のまま（yotuba本来の色）
+    const SIMPLE_ICON_KEEP_COLORS = {
+        2: ['#656464'], // 🔧 緑パネル(teruteru)：目の色だけは白に置き換えず残す
+    };
+    const SIMPLE_ICON_OPACITY = 0.4;            // 🔧 シンプルアイコンの透明度（0〜1・基準値）
+    const SIMPLE_ICON_OPACITY_OFFSET = {
+        1: 0.25, // 🔧 黄パネル(yotuba)：四つ葉が薄く見えるため、基準値に+して少し濃くする
+        2: 0.20, // 🔧 緑パネル(teruteru)：背景色との兼ね合いで白が薄く見えるため、基準値に+して少し濃くする
+    };
+    function getSimpleIconOpacity(type) {
+        const offset = SIMPLE_ICON_OPACITY_OFFSET[type] || 0;
+        return Math.min(1, Math.max(0, SIMPLE_ICON_OPACITY + offset));
+    }
+    const simpleIconImages = TYPE_ICON_SVGS.map((svg, i) => {
+        const color = (i === 1) ? SIMPLE_ICON_COLOR_YELLOW : SIMPLE_ICON_COLOR;
+        const keep = SIMPLE_ICON_KEEP_COLORS[i] || [];
+        const img = new Image();
+        img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(toSimpleIconSVG(svg, color, keep));
+        img.onload = () => draw(); img.onerror = () => draw();
+        return img;
+    });
+
+    // 晴玉パネル用のアイコン（ohisamaと同形状・色は赤パネルと別指定）
+    const SUNNY_ICON_SVG = makeOhisamaSVG(SUNNY_OHISAMA_COLOR);
 
     const RAINY_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85 85"><g fill="#0068E5"><rect x="23.6" y="37.2" width="2.3" height="16.2" transform="translate(10.1 -4.2) rotate(12.2)"/><path d="M19.3,70.1c2.4.5,4.7-1.6,4.6-4.6,0-2.2-.9-6.2-1.6-9.2-1.9,2.4-4.3,5.7-5.3,7.7-1.3,2.7-.1,5.5,2.3,6.1Z"/><rect x="40.4" y="39.1" width="2.3" height="22" transform="translate(11.5 -7.6) rotate(12.2)"/><path d="M35.4,77.8c2.4.5,4.7-1.6,4.6-4.6,0-2.2-.9-6.2-1.6-9.2-1.9,2.4-4.3,5.7-5.3,7.7-1.3,2.7-.1,5.5,2.3,6.1Z"/><rect x="57.8" y="37.7" width="2.3" height="20.6" transform="translate(11.5 -11.4) rotate(12.2)"/><path d="M53,75c2.4.5,4.7-1.6,4.6-4.6,0-2.2-.9-6.2-1.6-9.2-1.9,2.4-4.3,5.7-5.3,7.7s-.1,5.5,2.3,6.1Z"/></g><path fill="#DCE7E7" d="M61.3,12.9c-2.3-10.1-20.3-12-25.6-2.8-6.3-2.3-13.5,2.2-13.8,7.5-11.5,2-10.3,16,2.9,14.9,2.6,4.6,12.1,6.5,17.1,3.2,4.8,4.2,15.8,3,18.4-1.8,14.1.3,17.5-18.4,1-21Z"/></svg>';
 
@@ -2674,7 +2894,7 @@ update() {
 	// 七色の玉のシェイプ（SVG：通常玉／勾玉／六角形シェイプ）をPath2D化
 	// 🔧 オプション画面から選べるよう、複数のシェイプをレジストリにまとめている
 	const BALL_SHAPES = {
-		circle:   "M 41, 42 m -35, 0 a 35,35 0 1,0 70,0 a 35,35 0 1,0 -70,0",
+		circle:   "M 41, 42 m -33, 0 a 33,33 0 1,0 66,0 a 33,33 0 1,0 -66,0",
 		magatama: "M67.47,35.96c0-14.3-10.5-26.6-24.8-26.9s-26.5,10.1-26.9,24.8c-.2,7.2,1.6,11.3,4,14.5,2.8,3.8,7.67,6.61,11.19,8.41s5.72,5.11,5.12,9.51c-.7,5.1-1.88,7.28.62,9.18,4.2,3.1,30.82-9.73,30.77-39.49Z",
 		hexagon:  "M40.84,7.19 L70.86,24.52 L70.86,59.18 L40.84,76.51 L10.82,59.18 L10.82,24.52 Z"
 	};
@@ -2860,11 +3080,32 @@ update() {
 
     function openPanelImageModal() {
         renderPanelImageRows();
-        document.getElementById('panel-image-modal-overlay').classList.add('show');
+        lockBodyScroll();
+        const modal = document.getElementById('panel-image-modal-overlay');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            document.getElementById('panel-image-modal').style.transform = 'scale(1)';
+        }, 10);
     }
+	
     function closePanelImageModal() {
-        document.getElementById('panel-image-modal-overlay').classList.remove('show');
+        unlockBodyScroll();
+        const modal = document.getElementById('panel-image-modal-overlay');
+        modal.style.opacity = '0';
+        document.getElementById('panel-image-modal').style.transform = 'scale(0.9)';
+        setTimeout(() => { modal.style.display = 'none'; }, 200);
     }
+	
+	// 🔧 「パネル画像を差し替える」ボタンの本体（ここが唯一の定義元）
+    const PANEL_IMAGE_BUTTON_HTML = '<button onclick="openPanelImageModal()" class="panel-image-btn">パネルの画像を差し替える<br>（ファイル選択）</button>';
+
+    function injectPanelImageButtons() {
+        document.querySelectorAll('.panel-image-btn-slot').forEach(slot => {
+            slot.innerHTML = PANEL_IMAGE_BUTTON_HTML;
+        });
+    }
+    injectPanelImageButtons();
 
     /* LOCAL STORAGE ハイスコアシステムの実装 */
     function loadRanking() {
@@ -2911,7 +3152,9 @@ update() {
         }
 
         renderRankingList();
-        document.getElementById('overlay').style.display = 'flex';
+        const overlayEl = document.getElementById('overlay');
+        overlayEl.style.display = 'flex';
+        setTimeout(() => { overlayEl.style.opacity = '1'; }, 10);
         document.getElementById('reset-btn').disabled = true;
     }
 
@@ -2941,6 +3184,7 @@ update() {
     }
 	
 	function showRankingScreen() {
+        window.scrollTo(0, 0); // 🔧 #overlayがposition:absoluteなので、開く前にスクロール位置をリセット
         if (!isGameOver) {
             isPaused = true;
             gameElapsedTime = gameStartTime ? Date.now() - gameStartTime : gameElapsedTime;
@@ -2953,35 +3197,49 @@ update() {
             document.getElementById('reset-btn').disabled = true;
         }
         renderRankingList();
-        document.getElementById('overlay').style.display = 'flex';
+        const overlayEl = document.getElementById('overlay');
+        overlayEl.style.display = 'flex';
+        setTimeout(() => { overlayEl.style.opacity = '1'; }, 10);
     }
 
     function closeRankingScreen() {
         isPaused = false;
         if (gameStartTime) gameStartTime = Date.now() - gameElapsedTime;
-        document.getElementById('overlay').style.display = 'none';
-        document.getElementById('back-to-game-btn').style.display = 'none';
-        document.getElementById('retry-btn').style.display = 'inline-block';
-        document.getElementById('reset-ranking-btn').style.display = 'inline-block';
-        document.querySelector('#overlay h2').style.display = 'block';
-        document.getElementById('final-score').style.display = 'block';
+        const overlayEl = document.getElementById('overlay');
+        overlayEl.style.opacity = '0';
+        setTimeout(() => {
+            overlayEl.style.display = 'none';
+            document.getElementById('back-to-game-btn').style.display = 'none';
+            document.getElementById('retry-btn').style.display = 'inline-block';
+            document.getElementById('reset-ranking-btn').style.display = 'inline-block';
+            document.querySelector('#overlay h2').style.display = 'block';
+            document.getElementById('final-score').style.display = 'block';
+        }, 200);
         document.getElementById('reset-btn').disabled = false;
     }
 
 	// ⚙️ オプションモーダルの表示内容を、現在のuserSettingsに合わせて更新する
 	function updateOptionsUI() {
+		const ACTIVE_COLOR = '#c175ff'; // 🔧 オプション選択タブの「選択中」色（実行系ボタンの青とは別系統にする）
 		['none', 'normal', 'fast'].forEach(key => {
 			const btn = document.getElementById('opt-speed-' + key);
 			if (!btn) return;
 			const active = userSettings.animSpeed === key;
-			btn.style.background = active ? '#3D9DFF' : '#f1f5f9';
+			btn.style.background = active ? ACTIVE_COLOR : '#f1f5f9';
 			btn.style.color = active ? '#fff' : '#475569';
 		});
 		['circle', 'magatama', 'hexagon'].forEach(key => {
 			const btn = document.getElementById('opt-shape-' + key);
 			if (!btn) return;
 			const active = userSettings.ballShape === key;
-			btn.style.background = active ? '#3D9DFF' : '#f1f5f9';
+			btn.style.background = active ? ACTIVE_COLOR : '#f1f5f9';
+			btn.style.color = active ? '#fff' : '#475569';
+		});
+		['cute', 'simple'].forEach(key => {
+			const btn = document.getElementById('opt-icon-' + key);
+			if (!btn) return;
+			const active = userSettings.iconStyle === key;
+			btn.style.background = active ? ACTIVE_COLOR : '#f1f5f9';
 			btn.style.color = active ? '#fff' : '#475569';
 		});
 		const reduceMotionCheckbox = document.getElementById('opt-reduce-motion');
@@ -3013,6 +3271,13 @@ update() {
 		updateOptionsUI();
 	}
 
+	function setIconStyle(key) {
+		userSettings.iconStyle = key;
+		saveUserSettings();
+		updateOptionsUI();
+		draw();
+	}
+
 	function toggleReduceMotion() {
 		const checkbox = document.getElementById('opt-reduce-motion');
 		userSettings.reduceMotion = checkbox.checked;
@@ -3037,30 +3302,78 @@ update() {
 		updateOptionsUI();
 	}
 
+	// 🔧 モーダル表示中は背景（body）のスクロールを無効化する共通処理
+	function lockBodyScroll() {
+		document.body.style.overflow = 'hidden';
+	}
+	function unlockBodyScroll() {
+		document.body.style.overflow = '';
+	}
+
 	function openOptionsModal() {
 		updateOptionsUI();
+		lockBodyScroll();
 		const modal = document.getElementById('options-modal');
 		modal.style.display = 'flex';
-		requestAnimationFrame(() => {
+		setTimeout(() => {
 			modal.style.opacity = '1';
 			document.getElementById('options-modal-content').style.transform = 'scale(1)';
-		});
+		}, 10);
 	}
 
 	function closeOptionsModal() {
+		unlockBodyScroll();
 		const modal = document.getElementById('options-modal');
 		modal.style.opacity = '0';
 		document.getElementById('options-modal-content').style.transform = 'scale(0.9)';
 		setTimeout(() => { modal.style.display = 'none'; }, 200);
 	}
 
+	function openGuideModal() {
+		lockBodyScroll();
+		const modal = document.getElementById('guide-modal');
+		modal.style.display = 'flex';
+		setTimeout(() => {
+			modal.style.opacity = '1';
+			document.getElementById('guide-modal-content').style.transform = 'scale(1)';
+		}, 10);
+	}
+
+	function closeGuideModal() {
+		unlockBodyScroll();
+		const modal = document.getElementById('guide-modal');
+		modal.style.opacity = '0';
+		document.getElementById('guide-modal-content').style.transform = 'scale(0.9)';
+		setTimeout(() => { modal.style.display = 'none'; }, 200);
+	}
+
+	function openAboutModal() {
+		lockBodyScroll();
+		const modal = document.getElementById('about-modal');
+		const verMatch = document.title.match(/\(([^)]+)\)/); // 🔧 <title>の括弧内(ver10.2.2など)を自動取得
+		document.getElementById('about-version').textContent = verMatch ? verMatch[1] : '';
+		modal.style.display = 'flex';
+		setTimeout(() => {
+			modal.style.opacity = '1';
+			document.getElementById('about-modal-content').style.transform = 'scale(1)';
+		}, 10);
+	}
+
+	function closeAboutModal() {
+		unlockBodyScroll();
+		const modal = document.getElementById('about-modal');
+		modal.style.opacity = '0';
+		document.getElementById('about-modal-content').style.transform = 'scale(0.9)';
+		setTimeout(() => { modal.style.display = 'none'; }, 200);
+	}
+
 	function confirmResetRanking() {
 		const modal = document.getElementById('ranking-reset-modal');
 		modal.style.display = 'flex';
-		requestAnimationFrame(() => {
+		setTimeout(() => {
 			modal.style.opacity = '1';
 			document.getElementById('ranking-reset-modal-content').style.transform = 'scale(1)';
-		});
+		}, 10);
 	}
 	function closeRankingResetModal() {
 		const modal = document.getElementById('ranking-reset-modal');
@@ -3130,6 +3443,7 @@ update() {
         
         totalSpentMoves = 0;
         obstacleDropCount = 0;
+        previousLevel = null; // 🎚️ 新規ゲーム開始時は演出を発火させない
         movesUntilNextObstacle = getCurrentObstaclePace();
 
         darkSpawnCount = 0;
@@ -3147,12 +3461,16 @@ update() {
         document.body.style.backgroundColor = '#CAF5FF';
         const gc = document.getElementById('game-container');
         if (gc) { gc.style.transition = 'none'; gc.style.backgroundColor = '#ffffff'; }
+        const skyGlow = document.getElementById('day-sky-glow');
+        if (skyGlow) { skyGlow.style.transition = 'none'; skyGlow.style.opacity = '1'; }
         document.querySelectorAll('.night-star-bg').forEach(el => el.remove()); // 🌙 リトライ時に夜空の星を確実に除去
         updateNightStarUI();
 
         document.getElementById('score').innerText = score;
         document.getElementById('moves').innerText = moves;
-        document.getElementById('overlay').style.display = 'none';
+        const overlayEl = document.getElementById('overlay');
+        overlayEl.style.opacity = '0';
+        setTimeout(() => { overlayEl.style.display = 'none'; }, 200);
         selected = null;
         
         const fill = document.getElementById('gauge-fill');
@@ -3296,7 +3614,7 @@ update() {
                         if (wave > 0) {
                             let alpha = Math.min(wave * 1.5, 0.9);
                             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                            ctx.font = "13px sans-serif";
+                            ctx.font = "12px sans-serif";
                             ctx.fillText("✦", x + ox, y + oy);
                         }
                     }
@@ -3317,9 +3635,9 @@ update() {
                     
                     ctx.shadowBlur = 0;
                     let count = dangerCounts[`${r},${c}`] !== undefined ? dangerCounts[`${r},${c}`] : CONFIG.DARK_PANEL_INIT_COUNT;
-					ctx.fillStyle = count <= 3 ? "#ff4757" : "white"; ctx.font = "bold 24px sans-serif";
-                    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-					ctx.fillText(count, x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2);
+					ctx.fillStyle = count <= 3 ? "#ff4757" : "white"; ctx.font = "600 30px 'Titillium Web', sans-serif";
+					ctx.textAlign = "center"; ctx.textBaseline = "middle";
+					ctx.fillText(count, x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2 + 2.0);
                     ctx.restore();
 				} else if (type >= CONFIG.PANEL_TYPE.BALL_MIN && type <= CONFIG.PANEL_TYPE.BALL_MAX) {
                     // ▼七色の玉／勾玉のグラデーション描画
@@ -3362,7 +3680,7 @@ update() {
                         if (wave > 0) {
                             let alpha = Math.min(wave * 1.5, 0.9);
                             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                            ctx.font = "13px sans-serif";
+                            ctx.font = "12px sans-serif";
                             ctx.fillText("✦", x + ox, y + oy);
                         }
                     }
@@ -3413,7 +3731,7 @@ update() {
 				} else if (type === CONFIG.PANEL_TYPE.SUNNY) {
 					ctx.save();
 					// 明るい黄色〜オレンジのグラデーション背景
-					let glow = 8 + Math.sin(selectionPulse * 1.8) * 4;
+					let glow = 8 + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * 4;
 					ctx.shadowBlur = glow;
 					ctx.shadowColor = "#ffe600";
 					let sunGrad = ctx.createRadialGradient(
@@ -3433,7 +3751,7 @@ update() {
 					ctx.restore();
 				} else if (type === CONFIG.PANEL_TYPE.RAINY) {
 					ctx.save();
-					let glow = 8 + Math.sin(selectionPulse * 1.8) * 4;
+					let glow = 8 + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * 4;
 					ctx.shadowBlur = glow;
 					ctx.shadowColor = "#74b9ff";
 					let rainGrad = ctx.createRadialGradient(
@@ -3477,7 +3795,7 @@ update() {
 					ctx.save();
 					let snowCount = dangerCounts[`${r},${c}`] !== undefined ? dangerCounts[`${r},${c}`] : CONFIG.SNOW_COUNT;
 					let isCold = snowCount <= 3;
-					let glow = 8 + Math.sin(selectionPulse * 1.8) * 4;
+					let glow = 8 + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * 4;
 					ctx.shadowBlur = glow;
 					ctx.shadowColor = isCold ? "rgba(140, 108, 255, 0.8)" : "#dff3ff";
 					let snowGrad = ctx.createRadialGradient(
@@ -3503,9 +3821,9 @@ update() {
 					ctx.shadowBlur = 0;
 					// カウント表示：7〜4は濃い青、3以下は濃い赤紫
 					ctx.fillStyle = isCold ? "#8b0a50" : "#0984e3";
-					ctx.font = "bold 24px sans-serif";
+					ctx.font = "600 30px 'Titillium Web', sans-serif";
 					ctx.textAlign = "center"; ctx.textBaseline = "middle";
-					ctx.fillText(snowCount, x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2);
+					ctx.fillText(snowCount, x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2 + 2.0);
 					ctx.restore();
                 } else {
                     ctx.fillStyle = (type === CONFIG.PANEL_TYPE.OBSTACLE) ? CONFIG.THEME_COLORS.OBSTACLE : CONFIG.COLORS[type];
@@ -3532,15 +3850,30 @@ update() {
                         if (img.complete && img.naturalWidth !== 0) {
                             ctx.drawImage(img, Math.floor(x + (CONFIG.CELL_SIZE-32)/2), Math.floor(y + (CONFIG.CELL_SIZE-32)/2), 32, 32);
                         } else {
-                            ctx.fillStyle = "rgba(0,0,0,0.22)"; ctx.font = "bold 26px sans-serif"; 
-                            ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(CONFIG.SYMBOLS[type], x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2);
+                            const useSimple = userSettings.iconStyle === 'simple';
+                            const typeIcon = useSimple ? simpleIconImages[type] : typeIconImages[type];
+                            if (typeIcon.complete && typeIcon.naturalWidth !== 0) {
+                                const iconSize = CONFIG.PANEL_ICON_SIZE[type];
+                                if (useSimple) { ctx.save(); ctx.globalAlpha = getSimpleIconOpacity(type); }
+                                ctx.drawImage(typeIcon, Math.round(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.round(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
+                                if (useSimple) { ctx.restore(); }
+                            } else {
+                                ctx.fillStyle = "rgba(0,0,0,0.22)"; ctx.font = "bold 26px sans-serif"; 
+                                ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(CONFIG.SYMBOLS[type], x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2);
+                            }
                         }
                     }
                 }
 				
                 if (selected && selected.r === r && selected.c === c) {
-                    const alpha = 0.5 + Math.sin(selectionPulse) * 0.3;
-                    ctx.strokeStyle = `rgba(44, 62, 80, ${alpha})`; ctx.lineWidth = 4;
+                    const alphaMid = (CONFIG.SELECTION_BORDER_ALPHA_MIN + CONFIG.SELECTION_BORDER_ALPHA_MAX) / 2;
+                    const alphaRange = (CONFIG.SELECTION_BORDER_ALPHA_MAX - CONFIG.SELECTION_BORDER_ALPHA_MIN) / 2;
+                    const alpha = alphaMid + Math.sin(selectionPulse) * alphaRange;
+                    const normalized = Math.pow(0.5 + 0.5 * Math.sin(selectionPulse), CONFIG.SELECTION_BORDER_LOOP_SHARPNESS);
+                    const darkRgb = (isNightMode ? CONFIG.SELECTION_BORDER_DARK_NIGHT : CONFIG.SELECTION_BORDER_DARK_DAY).split(',').map(Number);
+                    const lightRgb = (isNightMode ? CONFIG.SELECTION_BORDER_LIGHT_NIGHT : CONFIG.SELECTION_BORDER_LIGHT_DAY).split(',').map(Number);
+                    const litRgb = darkRgb.map((d, i) => Math.round(d + (lightRgb[i] - d) * normalized)).join(', ');
+                    ctx.strokeStyle = `rgba(${litRgb}, ${alpha})`; ctx.lineWidth = 4;
                     roundRect(x + 5, y + 5, CONFIG.CELL_SIZE - 10, CONFIG.CELL_SIZE - 10, 9); ctx.stroke();
                 }
 
@@ -3788,6 +4121,8 @@ update() {
         document.body.style.backgroundColor = '#241E58'; //夜モード背景色
         const gc = document.getElementById('game-container');
         if (gc) { gc.style.transition = 'background-color 2.5s ease'; gc.style.backgroundColor = '#3E3E78'; } //夜モード背景色（左枠内）
+        const skyGlow = document.getElementById('day-sky-glow');
+        if (skyGlow) { skyGlow.style.transition = 'opacity 4s ease'; skyGlow.style.opacity = '0'; } // 🌤️ 昼の薄青グラデーションをフェードアウト
 
         // 夜突入スコアを記録（星スポーンはDELAY_SCORE分後）
         nightModeEntryScore = score;
@@ -3900,6 +4235,8 @@ update() {
         document.body.style.backgroundColor = '#CAF5FF';
         const gc = document.getElementById('game-container');
         if (gc) { gc.style.transition = 'background-color 2.5s ease'; gc.style.backgroundColor = '#ffffff'; }
+        const skyGlow = document.getElementById('day-sky-glow');
+        if (skyGlow) { skyGlow.style.transition = 'opacity 1.5s ease'; skyGlow.style.opacity = '1'; } // 🌤️ 昼の薄青グラデーションをゆっくりフェードイン
 
         // 盤面に残っている星玉を通常パネルに変換
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
@@ -4468,8 +4805,20 @@ update() {
 
     function updateLevelUI() {
         let currentLevel = getCurrentObstacleLevel();
+        const leveledUp = previousLevel !== null && currentLevel > previousLevel;
         document.getElementById('status-level').innerText = `LEVEL ${currentLevel}`;
         document.getElementById('status-moves').innerText = Math.max(movesUntilNextObstacle, 0);
+        if (leveledUp) playLevelUpEffect();
+        previousLevel = currentLevel;
+    }
+
+    function playLevelUpEffect() {
+        const bar = document.getElementById('level-status-bar');
+        const label = document.getElementById('status-level');
+        bar.classList.add('level-up-flash');
+        label.classList.add('level-up-bounce');
+        setTimeout(() => bar.classList.remove('level-up-flash'), CONFIG.LEVEL_UP_FLASH_DURATION);
+        setTimeout(() => label.classList.remove('level-up-bounce'), CONFIG.LEVEL_UP_BOUNCE_DURATION);
     }
 
 	function getCurrentObstacleLevel() {
@@ -4941,8 +5290,8 @@ update() {
         let candidates = [];
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
             for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
-                // 盤面にある通常パネル（0〜6）を変換候補にする
-                if (board[r][c] >= 0 && board[r][c] < 7) {
+                // 盤面にある通常パネル（0〜6）を変換候補にする（凍結中のパネルは除外）
+                if (board[r][c] >= 0 && board[r][c] < 7 && frozenCells[`${r},${c}`] === undefined) {
                     candidates.push({r, c});
                 }
             }
@@ -5315,6 +5664,7 @@ update() {
     function openResetModal() {
 	    if (isGameOver) return;
         
+        lockBodyScroll();
         const modal = document.getElementById('reset-confirm-modal');
         const content = document.getElementById('reset-modal-content');
         modal.style.display = 'flex';
@@ -5325,6 +5675,7 @@ update() {
     }
 
     function closeResetModal() {
+        unlockBodyScroll();
         const modal = document.getElementById('reset-confirm-modal');
         const content = document.getElementById('reset-modal-content');
         modal.style.opacity = '0';
@@ -5396,10 +5747,7 @@ update() {
 			// SEVEN COLORS中：七色の玉の色を保持
 			for (let i = 0; i < 7; i++) {
 				if (slots[i]) {
-					slots[i].style.background = CONFIG.COLORS[i];if (gameContainer && !sevenColorsEndingTransition) {
-				gameContainer.style.transition = 'none'; // 🌈 夜モード用に残っていたtransitionをリセットし、瞬時に正しい背景色へ戻す
-				gameContainer.classList.remove('rainbow-bg');
-			}
+					slots[i].style.background = CONFIG.COLORS[i];
 					slots[i].style.boxShadow = `0 0 6px ${CONFIG.COLORS[i]}`;
 				}
 			}
@@ -5424,14 +5772,9 @@ update() {
 				movesEl.classList.remove('rainbow-moves');
 			}
 			if (gameContainer && !sevenColorsEndingTransition) {
-    console.log(`[SEVENEND] rainbow-bg除去直前 t=${Date.now()} 除去前の実際の背景色=${getComputedStyle(gameContainer).backgroundColor}`);
-    gameContainer.style.transition = 'none';
-    gameContainer.classList.remove('rainbow-bg');
-    console.log(`[SEVENEND] rainbow-bg除去直後 実際の背景色=${getComputedStyle(gameContainer).backgroundColor}`);
-    setTimeout(() => {
-        console.log(`[SEVENEND] 除去100ms後 実際の背景色=${getComputedStyle(gameContainer).backgroundColor}`);
-    }, 100);
-}
+				gameContainer.style.transition = 'none';
+				gameContainer.classList.remove('rainbow-bg');
+			}
 		}
 		// デバッグ進捗表示の更新
 		const colorNames = ['赤', '黄', '緑', '青', '紫', '橙', '藍'];
@@ -5474,20 +5817,7 @@ update() {
     } else {
         initGame();
     }
-			
-    // ⚙️ #top-button-row の右端を、#right-ui（スコア等が入ってる枠）の右端に揃える
-    function alignTopButtonRow() {
-        const rightUiTop = document.getElementById('right-ui-top');
-        const row = document.getElementById('top-button-row');
-        if (!rightUiTop || !row) return;
-        const rect = rightUiTop.getBoundingClientRect();
-        const gap = window.innerWidth - rect.right - 20; // ⚙️ OPTION オプションボタンの位置調整
-        row.style.paddingRight = Math.max(gap, 0) + 'px';
-    }
-    window.addEventListener('resize', alignTopButtonRow);
-    window.addEventListener('load', alignTopButtonRow);
-    setTimeout(alignTopButtonRow, 0); // 初回描画直後にも一度実行
-	
+
 </script>
 </body>
 </html>
