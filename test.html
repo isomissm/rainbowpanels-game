@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver10.4.2)</title>
+<title>ナナイロパネル／Rainbow Panels (ver10.4.3)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&display=swap" rel="stylesheet">
@@ -2853,12 +2853,25 @@ update() {
         return img;
     });
 
-    // 🔧 シンプルアイコン（白抜き＋半透明）用：元SVGのfill属性を全て指定色に置き換えて作る
+    // 🔧 シンプルアイコン（白抜き＋半透明 "風"）用：
+    // 元SVGのfill属性を「パネル背景色×透明度」で事前合成した単色に置き換えて作る
+    // → 描画時にglobalAlphaを使わずdrawImageのみで済むため、かわいい画像と同じ負荷になる
     // CONFIG.COLORSと同じ並び順（0:赤 1:黄 2:緑 3:青 4:紫 5:橙 6:藍）
-    function toSimpleIconSVG(svg, color, keepColors = []) {
+    function hexToRgb(hex) {
+        const h = hex.replace('#', '');
+        const n = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+        const num = parseInt(n, 16);
+        return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+    }
+    function blendColor(bgHex, fgHex, alpha) {
+        const bg = hexToRgb(bgHex), fg = hexToRgb(fgHex);
+        const mixed = bg.map((b, i) => Math.round(b * (1 - alpha) + fg[i] * alpha));
+        return 'rgb(' + mixed.join(',') + ')';
+    }
+    function toBakedSimpleIconSVG(svg, color, keepColors, opacity, bgColor) {
         return svg.replace(/fill="(#[0-9a-fA-F]{3,8})"/g, (match, original) => {
-            if (keepColors.includes(original.toLowerCase())) return match; // この色だけは置き換えず残す
-            return 'fill="' + color + '"';
+            const useColor = keepColors.includes(original.toLowerCase()) ? original : color;
+            return 'fill="' + blendColor(bgColor, useColor, opacity) + '"';
         });
     }
     const SIMPLE_ICON_COLOR = '#ffffff';        // 🔧 シンプルアイコンの基本色（白）
@@ -2878,8 +2891,10 @@ update() {
     const simpleIconImages = TYPE_ICON_SVGS.map((svg, i) => {
         const color = (i === 1) ? SIMPLE_ICON_COLOR_YELLOW : SIMPLE_ICON_COLOR;
         const keep = SIMPLE_ICON_KEEP_COLORS[i] || [];
+        const opacity = getSimpleIconOpacity(i);
+        const bgColor = CONFIG.COLORS[i];
         const img = new Image();
-        img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(toSimpleIconSVG(svg, color, keep));
+        img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(toBakedSimpleIconSVG(svg, color, keep, opacity, bgColor));
         img.onload = () => draw(); img.onerror = () => draw();
         return img;
     });
@@ -3854,9 +3869,8 @@ update() {
                             const typeIcon = useSimple ? simpleIconImages[type] : typeIconImages[type];
                             if (typeIcon.complete && typeIcon.naturalWidth !== 0) {
                                 const iconSize = CONFIG.PANEL_ICON_SIZE[type];
-                                if (useSimple) { ctx.save(); ctx.globalAlpha = getSimpleIconOpacity(type); }
+                                // 🔧 シンプルアイコンは色に透明度を焼き込み済みなのでglobalAlpha不要（かわいい画像と同じ負荷に）
                                 ctx.drawImage(typeIcon, Math.round(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.round(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
-                                if (useSimple) { ctx.restore(); }
                             } else {
                                 ctx.fillStyle = "rgba(0,0,0,0.22)"; ctx.font = "bold 26px sans-serif"; 
                                 ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(CONFIG.SYMBOLS[type], x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2);
