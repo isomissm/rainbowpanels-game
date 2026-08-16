@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver10.4.4)</title>
+<title>ナナイロパネル／Rainbow Panels (ver10.4.5)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&display=swap" rel="stylesheet">
@@ -2055,6 +2055,7 @@ const CONFIG = {
     let nightCycleDarkCount = 0;       // 🌙 現サイクルの闇玉発動数（夜終了でリセット）
     let nightModeEntryScore = 0;       // 🌙 夜突入時のスコア（星スポーン遅延用）
     let nightStarSpawned = false;      // 🌙 今サイクルで星スポーン済みか
+    let isDayNightFading = false;      // 🌗 昼夜背景色フェード中フラグ（フェード中に他処理がtransitionを上書きするのを防止）
     
     let lightPanelThreshold = CONFIG.THRESHOLD.LIGHT_START; 
     let darkPanelThreshold = CONFIG.THRESHOLD.DARK_START;
@@ -4133,12 +4134,14 @@ update() {
         nightStarCount = 0;
 
         // 背景を夜色にゆっくりフェード
+        isDayNightFading = true; // 🌗 フェード中は他処理によるtransition上書きを防止
         document.body.style.transition = 'background-color 2.5s ease';
         document.body.style.backgroundColor = '#241E58'; //夜モード背景色
         const gc = document.getElementById('game-container');
         if (gc) { gc.style.transition = 'background-color 2.5s ease'; gc.style.backgroundColor = '#3E3E78'; } //夜モード背景色（左枠内）
         const skyGlow = document.getElementById('day-sky-glow');
         if (skyGlow) { skyGlow.style.transition = 'opacity 4s ease'; skyGlow.style.opacity = '0'; } // 🌤️ 昼の薄青グラデーションをフェードアウト
+        setTimeout(() => { isDayNightFading = false; }, 2500); // 🌗 フェード完了後にフラグ解除
 
         // 夜突入スコアを記録（星スポーンはDELAY_SCORE分後）
         nightModeEntryScore = score;
@@ -4247,12 +4250,14 @@ update() {
         });
 
         // 背景を昼色にゆっくりフェード
+        isDayNightFading = true; // 🌗 フェード中は他処理によるtransition上書きを防止
         document.body.style.transition = 'background-color 2.5s ease';
         document.body.style.backgroundColor = '#CAF5FF';
         const gc = document.getElementById('game-container');
         if (gc) { gc.style.transition = 'background-color 2.5s ease'; gc.style.backgroundColor = '#ffffff'; }
         const skyGlow = document.getElementById('day-sky-glow');
         if (skyGlow) { skyGlow.style.transition = 'opacity 1.5s ease'; skyGlow.style.opacity = '1'; } // 🌤️ 昼の薄青グラデーションをゆっくりフェードイン
+        setTimeout(() => { isDayNightFading = false; }, 2500); // 🌗 フェード完了後にフラグ解除
 
         // 盤面に残っている星玉を通常パネルに変換
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
@@ -5788,7 +5793,7 @@ update() {
 				movesEl.classList.remove('rainbow-moves');
 			}
 			if (gameContainer && !sevenColorsEndingTransition) {
-				gameContainer.style.transition = 'none';
+				if (!isDayNightFading) gameContainer.style.transition = 'none'; // 🌗 昼夜フェード中はtransitionを上書きしない
 				gameContainer.classList.remove('rainbow-bg');
 			}
 		}
