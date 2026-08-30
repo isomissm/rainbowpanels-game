@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver10.4.5)</title>
+<title>ナナイロパネル／Rainbow Panels (ver10.5.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&display=swap" rel="stylesheet">
@@ -847,13 +847,13 @@ background: #c8e8ff;
 /* メディアクリエ */
 @media (max-width: 768px) {
 body {
-    padding: 16px 12px;
+    padding: 10px 12px;
     overflow-x: hidden;
 }
 #main-layout {
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -873,7 +873,7 @@ body {
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.04);
     border: 4px solid #fff;
-    padding: 6px 20px;
+    padding: 2px 20px;
     width: 100%;
     max-width: 385px;
     box-sizing: border-box;
@@ -897,10 +897,12 @@ body {
 .score-val {
     margin-bottom: 0;
     text-align: center;
+    line-height: 0.85;
 }
 .moves-val {
     margin-bottom: 0;
     text-align: center;
+    line-height: 0.85;
 }
 .score-group {
     display: flex;
@@ -926,16 +928,21 @@ canvas {
     height: auto !important;
 }
 .rb-slot {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
 }
 #rainbow-collection-ui {
-    padding: 6px 14px;
-    height: 48px; /* 星スロット(32px)＋上下padding分で固定 */
+    padding: 4px 14px;
+    height: 40px; /* 星スロット(26px)＋上下padding分で固定 */
     box-sizing: border-box;
+    margin-bottom: 6px !important; /* インライン指定(12px)をスマホ用に上書き */
+}
+.night-star-slot-item {
+    width: 26px;
+    height: 26px;
 }
 #level-status-bar {
-    padding: 10px 14px;
+    padding: 6px 14px;
     font-size: 15px;
 }
 .status-level-val {
@@ -960,6 +967,9 @@ canvas {
     box-sizing: border-box;
     gap: 0;
 }
+#right-ui-bottom .ui-section-title {
+    margin-bottom: 2px;
+}
 .gauge-bar-bg {
     width: 100%;
     max-width: 240px;
@@ -968,6 +978,7 @@ canvas {
 #skill-box {
     width: 100%;
     padding: 8px 20px;
+    gap: 8px;
 }
 .view-ranking-btn-pc {
     display: none;
