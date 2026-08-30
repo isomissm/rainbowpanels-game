@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver10.5.0)</title>
+<title>ナナイロパネル／Rainbow Panels (ver11.0.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&display=swap" rel="stylesheet">
@@ -124,6 +124,7 @@ canvas {
     cursor: pointer;
     border-radius: 12px;
     image-rendering: pixelated;
+    touch-action: none; /* 🖐️ フリック操作とブラウザのスクロール・ズームジェスチャーの競合を防ぐ */
 }
 /* 下側レベル表示UI */
 #level-status-bar {
@@ -1631,6 +1632,11 @@ const CONFIG = {
 		INITIAL_MOVES:      3,   // マッチ成立時に回復する手数
 
 		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🖐️ 操作設定
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		FLICK_THRESHOLD:    18,   // フリックと判定する移動距離のしきい値（px・仮値、実機調整予定）
+
+		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🎬 パネル移動アニメーション設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SWAP_ANIM_DURATION:          240,  // パネル入れ替えアニメの所要時間（ms）
@@ -2034,6 +2040,9 @@ const CONFIG = {
 	
     let board = [];
     let selected = null;
+    let flickStart = null;        // 🖐️ フリック開始位置・開始セル { r, c, x, y, pointerId }
+    let flickHandled = false;     // 🖐️ このジェスチャーが既にフリックとして処理済みか
+    let touchFeedbackCell = null; // 🖐️ 押した瞬間の見た目フィードバック用セル
     let swapAnim = null;   // 🎬 入れ替えアニメ状態 { r1, c1, r2, c2, startTime, duration }
     let fallAnims = {};    // 🎬 落下アニメ状態 { "r,c": { startTime, duration, dropDistance } }
     let landAnims = {};    // 🎬 着地バウンド演出 { "r,c": { startTime, duration } }
@@ -3893,7 +3902,7 @@ update() {
                     }
                 }
 				
-                if (selected && selected.r === r && selected.c === c) {
+                if ((selected && selected.r === r && selected.c === c) || (touchFeedbackCell && touchFeedbackCell.r === r && touchFeedbackCell.c === c)) {
                     const alphaMid = (CONFIG.SELECTION_BORDER_ALPHA_MIN + CONFIG.SELECTION_BORDER_ALPHA_MAX) / 2;
                     const alphaRange = (CONFIG.SELECTION_BORDER_ALPHA_MAX - CONFIG.SELECTION_BORDER_ALPHA_MIN) / 2;
                     const alpha = alphaMid + Math.sin(selectionPulse) * alphaRange;
@@ -4020,88 +4029,143 @@ update() {
         ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y); ctx.closePath();
     }
 
-    canvas.addEventListener('click', async (e) => {
-        if (isAnimating || isGameOver || isPaused || isStarEffectActive) return;document.getElementById('debug-time')
-        const rect = canvas.getBoundingClientRect();
-        const c = Math.floor((e.clientX - rect.left) / (rect.width / CONFIG.BOARD_SIZE));
-        const r = Math.floor((e.clientY - rect.top) / (rect.height / CONFIG.BOARD_SIZE));
+    async function performSwap(r1, c1, r2, c2) {
+    if (!gameStartTime) gameStartTime = Date.now();
+	isAnimating = true;
+	const swapR1 = r1, swapC1 = c1, swapR2 = r2, swapC2 = c2; // 🎬 アニメ用に座標を確定
+    const temp = board[r2][c2]; board[r2][c2] = board[r1][c1]; board[r1][c1] = temp;
+	lastMovedCell = [{r: r1, c: c1}, {r: r2, c: c2}];
+	
+	// ▼パネルを入れ替えた直後に光るエフェクトを発生させる
+	specialEffects.push(new SwapGlowEffect(c1, r1, c2, r2));
+	
+    selected = null;
+    
+	await animateSwap(swapR1, swapC1, swapR2, swapC2); // 🎬 2つのパネルが入れ替わるアニメーション（雷玉出現などの処理より先に完了させる）
+    
+	if (isLevelRainbow) {
+		levelRainbowCount--;
+		if (levelRainbowCount <= 0) {
+		isLevelRainbow = false;
+		sevenColorsEndingTransition = true;
+		playSevenColorsEndFlash();
+		const myFadeToken = ++sevenColorsEndToken; // 🌈 このフェード専用の識別番号を発行
+		setTimeout(() => {
+		if (myFadeToken !== sevenColorsEndToken) return;
+		sevenColorsEndingTransition = false;
+		updateRainbowUI();
+	}, 1400); // 🌈 フラッシュが完全に覆っている区間（1200〜1500ms）内で切り替える。ここで虹色アニメを止めておけば、残りのフェードアウト(1400〜2000ms)は完全に静止した本当の背景色を見せるだけになる
+	} else {
+			updateRainbowUI();
+		}
+	} else {
+		moves--; document.getElementById('moves').innerText = moves;
+	}
+			totalSpentMoves++;
+    movesUntilNextObstacle--;
+    
+    await processMatches();
+    
+    // 全消しパネルの出現チェック（マッチ処理後に雷玉を出現させる）
+    if (isLevelRainbow && allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
+        await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
+        allClearSpawnCount = null; // 使用済みにする
+    }
+    
+    if (!isGameOver) {
+        advanceDangerCounts();
+        advanceFrozenCells();
+        let exploded = checkDangerExplosions();
+        if (exploded) {
+            draw(); await new Promise(res => setTimeout(res, 250));
+            await processMatches(); 
+        }
+
+        await checkSnowFreezes();
+        
+        await checkDifficultyThresholds();
+        
+        updateLevelUI(); 
+        draw();
+    }
+}
+
+function finishInteraction() {
+		updateSkillUI();
+    isAnimating = false;
+    draw();
+    if (!isGameOver) autoSaveGame(); // 💾 1手ごとに中断データを更新
+}
+
+async function handleTap(r, c) {
+    if (!selected) selected = {r, c};
+    else {
+        if (selected.r === r && selected.c === c) selected = null;
+        else {
+            const dr = Math.abs(r - selected.r); const dc = Math.abs(c - selected.c);
+            if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
+				if ((board[r][c] >= CONFIG.PANEL_TYPE.OBSTACLE && board[r][c] !== CONFIG.PANEL_TYPE.ALMIGHTY) || (board[selected.r][selected.c] >= CONFIG.PANEL_TYPE.OBSTACLE && board[selected.r][selected.c] !== CONFIG.PANEL_TYPE.ALMIGHTY)) selected = {r, c};
+                else {
+                    await performSwap(selected.r, selected.c, r, c);
+                }
+            } else selected = {r, c};
+        }
+    }
+    finishInteraction();
+}
+
+canvas.addEventListener('pointerdown', (e) => {
+    if (isAnimating || isGameOver || isPaused || isStarEffectActive) return;document.getElementById('debug-time')
+    const rect = canvas.getBoundingClientRect();
+    const c = Math.floor((e.clientX - rect.left) / (rect.width / CONFIG.BOARD_SIZE));
+    const r = Math.floor((e.clientY - rect.top) / (rect.height / CONFIG.BOARD_SIZE));
 		if (shakingCells.has(`${r},${c}`)) return;
 		if (frozenCells[`${r},${c}`] !== undefined) return;
-        if (!selected) selected = {r, c};
-        else {
-            if (selected.r === r && selected.c === c) selected = null;
-            else {
-                const dr = Math.abs(r - selected.r); const dc = Math.abs(c - selected.c);
-                if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
-				if ((board[r][c] >= CONFIG.PANEL_TYPE.OBSTACLE && board[r][c] !== CONFIG.PANEL_TYPE.ALMIGHTY) || (board[selected.r][selected.c] >= CONFIG.PANEL_TYPE.OBSTACLE && board[selected.r][selected.c] !== CONFIG.PANEL_TYPE.ALMIGHTY)) selected = {r, c};
-                    else {
-                        if (!gameStartTime) gameStartTime = Date.now();
-						isAnimating = true;
-						const swapR1 = selected.r, swapC1 = selected.c, swapR2 = r, swapC2 = c; // 🎬 アニメ用に座標を確定
-                        const temp = board[r][c]; board[r][c] = board[selected.r][selected.c]; board[selected.r][selected.c] = temp;
-						lastMovedCell = [{r: selected.r, c: selected.c}, {r, c}];
-						
-						// ▼パネルを入れ替えた直後に光るエフェクトを発生させる
-						specialEffects.push(new SwapGlowEffect(selected.c, selected.r, c, r));
-						
-                        selected = null;
-                        
-					await animateSwap(swapR1, swapC1, swapR2, swapC2); // 🎬 2つのパネルが入れ替わるアニメーション（雷玉出現などの処理より先に完了させる）
-                        
-				if (isLevelRainbow) {
-					levelRainbowCount--;
-					if (levelRainbowCount <= 0) {
-					isLevelRainbow = false;
-					sevenColorsEndingTransition = true;
-					playSevenColorsEndFlash();
-					const myFadeToken = ++sevenColorsEndToken; // 🌈 このフェード専用の識別番号を発行
-					setTimeout(() => {
-					if (myFadeToken !== sevenColorsEndToken) return;
-					sevenColorsEndingTransition = false;
-					updateRainbowUI();
-				}, 1400); // 🌈 フラッシュが完全に覆っている区間（1200〜1500ms）内で切り替える。ここで虹色アニメを止めておけば、残りのフェードアウト(1400〜2000ms)は完全に静止した本当の背景色を見せるだけになる
-				} else {
-						updateRainbowUI();
-					}
-				} else {
-					moves--; document.getElementById('moves').innerText = moves;
-				}
-						totalSpentMoves++;
-                        movesUntilNextObstacle--;
-                        
-                        await processMatches();
-                        
-                        // 全消しパネルの出現チェック（マッチ処理後に雷玉を出現させる）
-                        if (isLevelRainbow && allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
-                            await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
-                            allClearSpawnCount = null; // 使用済みにする
-                        }
-                        
-                        if (!isGameOver) {
-                            advanceDangerCounts();
-                            advanceFrozenCells();
-                            let exploded = checkDangerExplosions();
-                            if (exploded) {
-                                draw(); await new Promise(res => setTimeout(res, 250));
-                                await processMatches(); 
-                            }
+    flickStart = {r, c, x: e.clientX, y: e.clientY, pointerId: e.pointerId};
+    flickHandled = false;
+    touchFeedbackCell = {r, c};
+    canvas.setPointerCapture(e.pointerId); // 🖐️ 指が盤面外に出てもこのポインターのイベントを追い続ける
+    draw();
+});
 
-                            await checkSnowFreezes();
-                            
-                            await checkDifficultyThresholds();
-                            
-                            updateLevelUI(); 
-                            draw();
-                        }
-                    }
-                } else selected = {r, c};
-            }
-        }
-		updateSkillUI();
-        isAnimating = false;
-        draw();
-        if (!isGameOver) autoSaveGame(); // 💾 1手ごとに中断データを更新
-    });
+canvas.addEventListener('pointermove', (e) => {
+    if (!flickStart || flickHandled || e.pointerId !== flickStart.pointerId) return;
+    const dx = e.clientX - flickStart.x;
+    const dy = e.clientY - flickStart.y;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < CONFIG.FLICK_THRESHOLD) return;
+    flickHandled = true;
+    touchFeedbackCell = null;
+    const dr = Math.abs(dx) >= Math.abs(dy) ? 0 : (dy > 0 ? 1 : -1);
+    const dc = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 1 : -1) : 0;
+    const startR = flickStart.r, startC = flickStart.c;
+    const targetR = startR + dr, targetC = startC + dc;
+    if (targetR < 0 || targetR >= CONFIG.BOARD_SIZE || targetC < 0 || targetC >= CONFIG.BOARD_SIZE) { draw(); return; }
+    if (shakingCells.has(`${targetR},${targetC}`) || frozenCells[`${targetR},${targetC}`] !== undefined) { draw(); return; }
+    if ((board[targetR][targetC] >= CONFIG.PANEL_TYPE.OBSTACLE && board[targetR][targetC] !== CONFIG.PANEL_TYPE.ALMIGHTY) || (board[startR][startC] >= CONFIG.PANEL_TYPE.OBSTACLE && board[startR][startC] !== CONFIG.PANEL_TYPE.ALMIGHTY)) { draw(); return; }
+    (async () => {
+        await performSwap(startR, startC, targetR, targetC);
+        finishInteraction();
+    })();
+});
+
+canvas.addEventListener('pointerup', (e) => {
+    if (!flickStart || e.pointerId !== flickStart.pointerId) return;
+    const {r, c} = flickStart;
+    const wasHandled = flickHandled;
+    flickStart = null;
+    touchFeedbackCell = null;
+    flickHandled = false;
+    if (wasHandled) { draw(); return; }
+    handleTap(r, c);
+});
+
+canvas.addEventListener('pointercancel', (e) => {
+    if (!flickStart || e.pointerId !== flickStart.pointerId) return;
+    flickStart = null;
+    touchFeedbackCell = null;
+    flickHandled = false;
+    draw();
+});
 
 	function unfreezeCell(r, c) {
         if (frozenCells[`${r},${c}`] === undefined) return;
