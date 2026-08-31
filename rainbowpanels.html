@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver10.5.0)</title>
+<title>ナナイロパネル／Rainbow Panels (ver11.0.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&display=swap" rel="stylesheet">
@@ -50,7 +50,7 @@ body {
     border-radius: 10px;
     margin-bottom: 25px;
     font-size: 12px;
-    display: none;  /* デバッグパネル表示flex・非表示none */
+    display:none;  /* デバッグパネル表示flex・非表示none */
     align-items: flex-start;
     gap: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -96,6 +96,7 @@ body {
 /* 左側エリア（盤面 ＋ 下部レベルUI） */
 #left-area {
     position: relative;
+    z-index: 5; /* 🔧 GAME OVERモーダルがRAINBOW GAUGE側の要素より確実に手前に来るよう明示 */
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -124,6 +125,7 @@ canvas {
     cursor: pointer;
     border-radius: 12px;
     image-rendering: pixelated;
+    touch-action: none; /* 🖐️ フリック操作とブラウザのスクロール・ズームジェスチャーの競合を防ぐ */
 }
 /* 下側レベル表示UI */
 #level-status-bar {
@@ -304,7 +306,9 @@ canvas {
     border-radius: 12px;         /* 角丸 */
     padding: 10px 14px;          /* 内側の余白 */
     margin: 10px auto;           /* 上下の隙間 */
-    display: inline-block;       /* 文字の幅に合わせる */
+    display: block;              /* 親の幅いっぱいに広げる */
+    width: 100%;
+    box-sizing: border-box;
     text-align: left;            /* 箇条書きを左寄せに */
 }
 /* 右側：統合UIパネル */
@@ -400,7 +404,7 @@ canvas {
     background: #e2e8f0;
     border-radius: 12px; /* レインボーゲージ枠の角丸調整 */
     overflow: hidden;
-    margin-bottom: 18px; /* 右枠の白枠内 レインボーゲージすぐ下の隙間の調整（マージン・行間）*/
+    margin-bottom: 25px; /* 右枠の白枠内 レインボーゲージすぐ下の隙間の調整（マージン・行間）*/
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
     border: 2.5px solid #fff;
     position: relative;
@@ -683,7 +687,7 @@ opacity: 0;
     top: 0;
     left: 0;
     width: 100%;
-    height: calc(100% + 15px + 49px); /* 盤面＋隙間＋レベルバーの高さ */
+    height: calc(100% + 100px); /* 盤面の高さ＋その下のUI一式を覆うための固定オフセット（実機調整用） */
     background: rgba(30, 41, 59, 0.96);
     display: none;
     flex-direction: column;
@@ -698,14 +702,13 @@ opacity: 0;
     opacity: 0;
     transition: opacity 0.2s ease;
 }
-/* 10位までスクロールなしで綺麗に収まる固定ランキングボックス */
 #ranking-box {
     background: rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     padding: 10px 15px;
     width: 85%;
     max-width: 270px;
-    height: 220px; /* 10行がピッタリ収まる高さ */
+    height: 300px; /* 10位までスクロールなしで綺麗に収まる固定ランキングボックス */
     box-sizing: border-box;
     text-align: left;
     font-size: 12px;
@@ -1280,7 +1283,7 @@ canvas {
           <button onclick="saveRankedScore()" style="padding:6px 14px; border-radius:12px; border:none; background: linear-gradient(90deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff4757); background-size: 200% 100%; animation: rainbowFlow 4s linear infinite; color:white; font-size:14px; font-weight:900; cursor:pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.2);">登録する</button>
         </div>
         <div style="font-size:11px; font-weight:900; margin-bottom:4px; color:#cbd5e1; text-align:left; width:85%; max-width:270px; letter-spacing: 0.05em;">🌈 TOP 10 RANKING</div>
-        <div id="ranking-box" style="width: 85%; max-width: 270px; height: auto; overflow: hidden; margin-bottom: 12px; display: flex; flex-direction: column; gap: 2px;"> </div>
+        <div id="ranking-box" style="width: 85%; max-width: 270px; overflow: hidden; margin-bottom: 12px; display: flex; flex-direction: column; gap: 2px;"> </div>
         <button id="retry-btn" onclick="initGame()" style="padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:12px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">もう一度プレイする</button>
         <button id="reset-ranking-btn" onclick="confirmResetRanking()" style="margin-top:12px; margin-bottom:10px; padding:6px 16px; border-radius:20px; border:1.5px solid rgba(255,255,255,0.3); cursor:pointer; font-weight:700; font-size:11px; background:transparent; color:#cbd5e1;">ランキングをリセットする</button>
         <button id="back-to-game-btn" onclick="closeRankingScreen()" style="display:none; padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:12px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">ゲームに戻る</button>
@@ -1375,7 +1378,7 @@ canvas {
 </div>
 <!-- 📖 あそびかたモーダル -->
 <div id="guide-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
-  <div style="background: white; padding: 28px 24px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 420px; width: 88%; max-height: 85vh; overflow-y: auto; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box;" id="guide-modal-content">
+<div style="background: white; padding: 28px 14px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 460px; width: 95%; max-height: 85vh; overflow-y: auto; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box;" id="guide-modal-content">
     <div style="position: sticky; top: -28px; left: -24px; margin: -28px 0 4px -24px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
       <button onclick="closeGuideModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
     </div>
@@ -1385,13 +1388,14 @@ canvas {
     <strong style="color: #FF6700;">💾 オートセーブ機能つき！<br>
     ブラウザを閉じても続きから遊べるよ</strong>
   </div>
-	<div style="line-height: 1.3; margin-top: 14px; font-size: 16px;">パネルをクリック／タップして<br>
-	隣のパネルと入れ替えて<br>
-	同じ色を縦横3つ揃えよう！</div>
+	<div style="line-height: 1.3; margin-top: 14px; font-size: 16px;">
+	隣同士のパネルを入れ替えて<br>
+	同じ色を縦横3つ揃えよう！<br>
+	クリック・タップ／フリックで動かせるよ</div>
 	<div style="line-height: 1.3; margin-top: 6px;">連鎖するとレインボーゲージが貯まって<br>
 	BURSTカウンター(🌈)が増えるよ</div>
   <hr class="desc-divider" style="margin: 10px auto;">
-  <span style="line-height: 1.3; display: inline-block;"><strong>色パネルを揃えた時に隣接していると<br>一緒に消えるパネル</strong></span><br>
+  <span style="line-height: 1.3; display: inline-block;"><strong>色パネルを揃えた時に<br>隣接していると<br>一緒に消えるパネル</strong></span><br>
   <span class="mini-dark-img"></span>闇玉・
   <span class="mini-rainbow-img"></span>虹玉・
   <span class="mini-allclear-img"><svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600"><polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/></svg></span>雷玉<br>
@@ -1400,7 +1404,7 @@ canvas {
   <span class="mini-snow-img"></span>雪玉<br>
   七色の玉・<span class="mini-star-img"></span>流れ星<br>
   <hr class="desc-divider">
-  <span style="line-height: 1.3; display: inline-block;"><strong>RAINBOW BURST!ボタンで<br>選んで直接消せるパネル</strong></span><br>
+  <span style="line-height: 1.3; display: inline-block;"><strong>直接選んで<br>RAINBOW BURST!ボタンで<br>消せるパネル</strong></span><br>
   <span class="mini-obstacle-img"><svg width="14" height="14" viewBox="0 0 85 85" fill="white"><path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/></svg></span>お邪魔パネル・
   <span class="mini-dark-img"></span>闇玉・
   <span class="mini-allclear-img"><svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600"><polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/></svg></span>雷玉<br>
@@ -1413,7 +1417,7 @@ canvas {
       <!-- 説明文白枠内の行間*/ -->
       <tr>
         <td class="guide-td-icon"><span class="mini-dark-img"></span><strong>闇玉</strong>：</td>
-        <td class="guide-td-text">カウントが0になると周囲を<span class="mini-obstacle-img">
+        <td class="guide-td-text">カウントが0になると周囲を<br><span class="mini-obstacle-img">
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
           </svg>
@@ -1434,7 +1438,7 @@ canvas {
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
           </svg>
-          </span>お邪魔パネルと<span class="mini-dark-img"></span>闇玉を一気に消せる！</td>
+          </span>お邪魔パネルと<br><span class="mini-dark-img"></span>闇玉を一気に消せる！</td>
       </tr>
       
       <tr>
@@ -1443,16 +1447,16 @@ canvas {
           <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
             <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
           </svg>
-          </span>お邪魔パネルが🟥赤パネルに変わる<br>凍っているパネルが解ける</td>
+          </span>お邪魔パネルが<br>🟥赤パネルに変わる<br>・凍っているパネルが解ける</td>
       </tr>
       <tr>
         <td class="guide-td-icon"><span class="mini-rainy-img"></span><strong>雨玉</strong>：</td>
-        <td class="guide-td-text">色パネルがランダムに🟦青パネルに変わる</td>
+        <td class="guide-td-text">色パネルがランダムに<br>🟦青パネルに変わる</td>
       </tr>
       <tr>
         <td class="guide-td-icon"><span class="mini-snow-img"></span><strong>雪玉</strong>：</td>
-        <td class="guide-td-text">カウントが0になると色パネルがランダムに凍ってしまう<br>
-		（凍ったパネルは移動できない・色パネル消去の隣接か手数経過で解ける）</td>
+        <td class="guide-td-text">カウントが0になると<br>色パネルがランダムに凍ってしまう<br>
+		・凍ったパネルは移動できない<br>・色パネル消去の隣接か手数経過で解ける</td>
       </tr>
     </table>
     <table style="border-collapse: collapse; line-height: 1.2; margin-top: 4px;">
@@ -1462,11 +1466,10 @@ canvas {
       </tr>
       <tr>
         <td class="guide-td-icon">🌈<strong>七色の玉</strong>：</td>
-        <td class="guide-td-text">色パネルをたくさん消すと同色の玉が出現！七色集めると…!?</td>
+        <td class="guide-td-text">色パネルをたくさん消すと<br>同色の玉が出現！七色集めると…!?</td>
       </tr>
     </table>
   </div>
-	<br>
   <div class="special-panel-box" style="margin-top: 8px;">
     <strong>《昼モード／夜モード》</strong><br>
     <span style="line-height: 1.3; display: inline-block;">
@@ -1629,6 +1632,11 @@ const CONFIG = {
 		BOARD_SIZE:         7,   // 盤面のマス数（縦横共通）
 		CELL_SIZE:         55,   // 1マスのサイズ（ピクセル）
 		INITIAL_MOVES:      3,   // マッチ成立時に回復する手数
+
+		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🖐️ 操作設定
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		FLICK_THRESHOLD:    18,   // フリックと判定する移動距離のしきい値（px・仮値、実機調整予定）
 
 		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🎬 パネル移動アニメーション設定
@@ -2034,6 +2042,9 @@ const CONFIG = {
 	
     let board = [];
     let selected = null;
+    let flickStart = null;        // 🖐️ フリック開始位置・開始セル { r, c, x, y, pointerId }
+    let flickHandled = false;     // 🖐️ このジェスチャーが既にフリックとして処理済みか
+    let touchFeedbackCell = null; // 🖐️ 押した瞬間の見た目フィードバック用セル
     let swapAnim = null;   // 🎬 入れ替えアニメ状態 { r1, c1, r2, c2, startTime, duration }
     let fallAnims = {};    // 🎬 落下アニメ状態 { "r,c": { startTime, duration, dropDistance } }
     let landAnims = {};    // 🎬 着地バウンド演出 { "r,c": { startTime, duration } }
@@ -3193,13 +3204,13 @@ update() {
         ranking.forEach((item, index) => {
             let rankNum = index + 1;
             let style = "";
-            
-            if (rankNum === 1) {
-                style = `color: ${CONFIG.THEME_COLORS.RANK_1st}; font-weight: 900; font-size: 14px;`;
+			
+			if (rankNum === 1) {
+                style = `color: ${CONFIG.THEME_COLORS.RANK_1st}; font-weight: 900; font-size: 14px; text-shadow: 0 0 2px rgba(255,229,59,0.6), 0 0 5px rgba(255,229,59,0.35);`;
             } else if (rankNum === 2) {
-                style = `color: ${CONFIG.THEME_COLORS.RANK_2nd}; font-weight: 900; font-size: 14px; text-shadow: 0 0 2px rgba(255,255,255,0.5);`;
+                style = `color: ${CONFIG.THEME_COLORS.RANK_2nd}; font-weight: 900; font-size: 14px; text-shadow: 0 0 2px rgba(178,190,195,0.6);`;
             } else if (rankNum === 3) {
-                style = `color: ${CONFIG.THEME_COLORS.RANK_3rd}; font-weight: 900; font-size: 14px;`;
+                style = `color: ${CONFIG.THEME_COLORS.RANK_3rd}; font-weight: 900; font-size: 14px; text-shadow: 0 0 2px rgba(225,112,85,0.6);`;
             } else {
                 style = "color: #ffffff; font-size: 12px;";
             }
@@ -3224,6 +3235,7 @@ update() {
             document.querySelector('#overlay h2').style.display = 'none';
             document.getElementById('final-score').style.display = 'none';
             document.getElementById('reset-btn').disabled = true;
+            document.getElementById('overlay').style.paddingTop = '36px'; // 🏆 h2非表示の分、TOP10見出し含めブロック全体を下に下げる
         }
         renderRankingList();
         const overlayEl = document.getElementById('overlay');
@@ -3243,6 +3255,7 @@ update() {
             document.getElementById('reset-ranking-btn').style.display = 'inline-block';
             document.querySelector('#overlay h2').style.display = 'block';
             document.getElementById('final-score').style.display = 'block';
+            document.getElementById('overlay').style.paddingTop = ''; // 🏆 ゲームオーバー画面用に戻す
         }, 200);
         document.getElementById('reset-btn').disabled = false;
     }
@@ -3893,7 +3906,7 @@ update() {
                     }
                 }
 				
-                if (selected && selected.r === r && selected.c === c) {
+                if ((selected && selected.r === r && selected.c === c) || (touchFeedbackCell && touchFeedbackCell.r === r && touchFeedbackCell.c === c)) {
                     const alphaMid = (CONFIG.SELECTION_BORDER_ALPHA_MIN + CONFIG.SELECTION_BORDER_ALPHA_MAX) / 2;
                     const alphaRange = (CONFIG.SELECTION_BORDER_ALPHA_MAX - CONFIG.SELECTION_BORDER_ALPHA_MIN) / 2;
                     const alpha = alphaMid + Math.sin(selectionPulse) * alphaRange;
@@ -4020,88 +4033,143 @@ update() {
         ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y); ctx.closePath();
     }
 
-    canvas.addEventListener('click', async (e) => {
-        if (isAnimating || isGameOver || isPaused || isStarEffectActive) return;document.getElementById('debug-time')
-        const rect = canvas.getBoundingClientRect();
-        const c = Math.floor((e.clientX - rect.left) / (rect.width / CONFIG.BOARD_SIZE));
-        const r = Math.floor((e.clientY - rect.top) / (rect.height / CONFIG.BOARD_SIZE));
+    async function performSwap(r1, c1, r2, c2) {
+    if (!gameStartTime) gameStartTime = Date.now();
+	isAnimating = true;
+	const swapR1 = r1, swapC1 = c1, swapR2 = r2, swapC2 = c2; // 🎬 アニメ用に座標を確定
+    const temp = board[r2][c2]; board[r2][c2] = board[r1][c1]; board[r1][c1] = temp;
+	lastMovedCell = [{r: r1, c: c1}, {r: r2, c: c2}];
+	
+	// ▼パネルを入れ替えた直後に光るエフェクトを発生させる
+	specialEffects.push(new SwapGlowEffect(c1, r1, c2, r2));
+	
+    selected = null;
+    
+	await animateSwap(swapR1, swapC1, swapR2, swapC2); // 🎬 2つのパネルが入れ替わるアニメーション（雷玉出現などの処理より先に完了させる）
+    
+	if (isLevelRainbow) {
+		levelRainbowCount--;
+		if (levelRainbowCount <= 0) {
+		isLevelRainbow = false;
+		sevenColorsEndingTransition = true;
+		playSevenColorsEndFlash();
+		const myFadeToken = ++sevenColorsEndToken; // 🌈 このフェード専用の識別番号を発行
+		setTimeout(() => {
+		if (myFadeToken !== sevenColorsEndToken) return;
+		sevenColorsEndingTransition = false;
+		updateRainbowUI();
+	}, 1400); // 🌈 フラッシュが完全に覆っている区間（1200〜1500ms）内で切り替える。ここで虹色アニメを止めておけば、残りのフェードアウト(1400〜2000ms)は完全に静止した本当の背景色を見せるだけになる
+	} else {
+			updateRainbowUI();
+		}
+	} else {
+		moves--; document.getElementById('moves').innerText = moves;
+	}
+			totalSpentMoves++;
+    movesUntilNextObstacle--;
+    
+    await processMatches();
+    
+    // 全消しパネルの出現チェック（マッチ処理後に雷玉を出現させる）
+    if (isLevelRainbow && allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
+        await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
+        allClearSpawnCount = null; // 使用済みにする
+    }
+    
+    if (!isGameOver) {
+        advanceDangerCounts();
+        advanceFrozenCells();
+        let exploded = checkDangerExplosions();
+        if (exploded) {
+            draw(); await new Promise(res => setTimeout(res, 250));
+            await processMatches(); 
+        }
+
+        await checkSnowFreezes();
+        
+        await checkDifficultyThresholds();
+        
+        updateLevelUI(); 
+        draw();
+    }
+}
+
+function finishInteraction() {
+		updateSkillUI();
+    isAnimating = false;
+    draw();
+    if (!isGameOver) autoSaveGame(); // 💾 1手ごとに中断データを更新
+}
+
+async function handleTap(r, c) {
+    if (!selected) selected = {r, c};
+    else {
+        if (selected.r === r && selected.c === c) selected = null;
+        else {
+            const dr = Math.abs(r - selected.r); const dc = Math.abs(c - selected.c);
+            if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
+				if ((board[r][c] >= CONFIG.PANEL_TYPE.OBSTACLE && board[r][c] !== CONFIG.PANEL_TYPE.ALMIGHTY) || (board[selected.r][selected.c] >= CONFIG.PANEL_TYPE.OBSTACLE && board[selected.r][selected.c] !== CONFIG.PANEL_TYPE.ALMIGHTY)) selected = {r, c};
+                else {
+                    await performSwap(selected.r, selected.c, r, c);
+                }
+            } else selected = {r, c};
+        }
+    }
+    finishInteraction();
+}
+
+canvas.addEventListener('pointerdown', (e) => {
+    if (isAnimating || isGameOver || isPaused || isStarEffectActive) return;document.getElementById('debug-time')
+    const rect = canvas.getBoundingClientRect();
+    const c = Math.floor((e.clientX - rect.left) / (rect.width / CONFIG.BOARD_SIZE));
+    const r = Math.floor((e.clientY - rect.top) / (rect.height / CONFIG.BOARD_SIZE));
 		if (shakingCells.has(`${r},${c}`)) return;
 		if (frozenCells[`${r},${c}`] !== undefined) return;
-        if (!selected) selected = {r, c};
-        else {
-            if (selected.r === r && selected.c === c) selected = null;
-            else {
-                const dr = Math.abs(r - selected.r); const dc = Math.abs(c - selected.c);
-                if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
-				if ((board[r][c] >= CONFIG.PANEL_TYPE.OBSTACLE && board[r][c] !== CONFIG.PANEL_TYPE.ALMIGHTY) || (board[selected.r][selected.c] >= CONFIG.PANEL_TYPE.OBSTACLE && board[selected.r][selected.c] !== CONFIG.PANEL_TYPE.ALMIGHTY)) selected = {r, c};
-                    else {
-                        if (!gameStartTime) gameStartTime = Date.now();
-						isAnimating = true;
-						const swapR1 = selected.r, swapC1 = selected.c, swapR2 = r, swapC2 = c; // 🎬 アニメ用に座標を確定
-                        const temp = board[r][c]; board[r][c] = board[selected.r][selected.c]; board[selected.r][selected.c] = temp;
-						lastMovedCell = [{r: selected.r, c: selected.c}, {r, c}];
-						
-						// ▼パネルを入れ替えた直後に光るエフェクトを発生させる
-						specialEffects.push(new SwapGlowEffect(selected.c, selected.r, c, r));
-						
-                        selected = null;
-                        
-					await animateSwap(swapR1, swapC1, swapR2, swapC2); // 🎬 2つのパネルが入れ替わるアニメーション（雷玉出現などの処理より先に完了させる）
-                        
-				if (isLevelRainbow) {
-					levelRainbowCount--;
-					if (levelRainbowCount <= 0) {
-					isLevelRainbow = false;
-					sevenColorsEndingTransition = true;
-					playSevenColorsEndFlash();
-					const myFadeToken = ++sevenColorsEndToken; // 🌈 このフェード専用の識別番号を発行
-					setTimeout(() => {
-					if (myFadeToken !== sevenColorsEndToken) return;
-					sevenColorsEndingTransition = false;
-					updateRainbowUI();
-				}, 1400); // 🌈 フラッシュが完全に覆っている区間（1200〜1500ms）内で切り替える。ここで虹色アニメを止めておけば、残りのフェードアウト(1400〜2000ms)は完全に静止した本当の背景色を見せるだけになる
-				} else {
-						updateRainbowUI();
-					}
-				} else {
-					moves--; document.getElementById('moves').innerText = moves;
-				}
-						totalSpentMoves++;
-                        movesUntilNextObstacle--;
-                        
-                        await processMatches();
-                        
-                        // 全消しパネルの出現チェック（マッチ処理後に雷玉を出現させる）
-                        if (isLevelRainbow && allClearSpawnCount !== null && levelRainbowCount === allClearSpawnCount) {
-                            await addSingleSpecialPanel(CONFIG.PANEL_TYPE.ALLCLEAR);
-                            allClearSpawnCount = null; // 使用済みにする
-                        }
-                        
-                        if (!isGameOver) {
-                            advanceDangerCounts();
-                            advanceFrozenCells();
-                            let exploded = checkDangerExplosions();
-                            if (exploded) {
-                                draw(); await new Promise(res => setTimeout(res, 250));
-                                await processMatches(); 
-                            }
+    flickStart = {r, c, x: e.clientX, y: e.clientY, pointerId: e.pointerId};
+    flickHandled = false;
+    touchFeedbackCell = {r, c};
+    canvas.setPointerCapture(e.pointerId); // 🖐️ 指が盤面外に出てもこのポインターのイベントを追い続ける
+    draw();
+});
 
-                            await checkSnowFreezes();
-                            
-                            await checkDifficultyThresholds();
-                            
-                            updateLevelUI(); 
-                            draw();
-                        }
-                    }
-                } else selected = {r, c};
-            }
-        }
-		updateSkillUI();
-        isAnimating = false;
-        draw();
-        if (!isGameOver) autoSaveGame(); // 💾 1手ごとに中断データを更新
-    });
+canvas.addEventListener('pointermove', (e) => {
+    if (!flickStart || flickHandled || e.pointerId !== flickStart.pointerId) return;
+    const dx = e.clientX - flickStart.x;
+    const dy = e.clientY - flickStart.y;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < CONFIG.FLICK_THRESHOLD) return;
+    flickHandled = true;
+    touchFeedbackCell = null;
+    const dr = Math.abs(dx) >= Math.abs(dy) ? 0 : (dy > 0 ? 1 : -1);
+    const dc = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 1 : -1) : 0;
+    const startR = flickStart.r, startC = flickStart.c;
+    const targetR = startR + dr, targetC = startC + dc;
+    if (targetR < 0 || targetR >= CONFIG.BOARD_SIZE || targetC < 0 || targetC >= CONFIG.BOARD_SIZE) { draw(); return; }
+    if (shakingCells.has(`${targetR},${targetC}`) || frozenCells[`${targetR},${targetC}`] !== undefined) { draw(); return; }
+    if ((board[targetR][targetC] >= CONFIG.PANEL_TYPE.OBSTACLE && board[targetR][targetC] !== CONFIG.PANEL_TYPE.ALMIGHTY) || (board[startR][startC] >= CONFIG.PANEL_TYPE.OBSTACLE && board[startR][startC] !== CONFIG.PANEL_TYPE.ALMIGHTY)) { draw(); return; }
+    (async () => {
+        await performSwap(startR, startC, targetR, targetC);
+        finishInteraction();
+    })();
+});
+
+canvas.addEventListener('pointerup', (e) => {
+    if (!flickStart || e.pointerId !== flickStart.pointerId) return;
+    const {r, c} = flickStart;
+    const wasHandled = flickHandled;
+    flickStart = null;
+    touchFeedbackCell = null;
+    flickHandled = false;
+    if (wasHandled) { draw(); return; }
+    handleTap(r, c);
+});
+
+canvas.addEventListener('pointercancel', (e) => {
+    if (!flickStart || e.pointerId !== flickStart.pointerId) return;
+    flickStart = null;
+    touchFeedbackCell = null;
+    flickHandled = false;
+    draw();
+});
 
 	function unfreezeCell(r, c) {
         if (frozenCells[`${r},${c}`] === undefined) return;
@@ -4805,12 +4873,11 @@ update() {
             p.className = 'charge-particle';
             document.body.appendChild(p);
 
-            let progress = 0;
-            const duration = 48; 
+            const duration = 800; // ⏱️ 実時間ベース（ms）。旧: フレーム数ベース(48フレーム)だと低フレームレート環境で実時間が伸びるバグがあった
+            const startTime = performance.now();
 
-            function frame() {
-                progress++;
-                const t = progress / duration;
+            function frame(now) {
+                const t = Math.min((now - startTime) / duration, 1);
 
                 const currentX = startX + (endX - startX) * t;
                 const linearY = startY + (endY - startY) * t;
@@ -4820,7 +4887,7 @@ update() {
                 p.style.left = currentX + 'px';
                 p.style.top = currentY + 'px';
 
-                if (progress < duration) {
+                if (t < 1) {
                     requestAnimationFrame(frame);
                 } else {
                     p.remove();
