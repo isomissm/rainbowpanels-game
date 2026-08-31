@@ -50,7 +50,7 @@ body {
     border-radius: 10px;
     margin-bottom: 25px;
     font-size: 12px;
-    display: none;  /* デバッグパネル表示flex・非表示none */
+    display: flex;  /* デバッグパネル表示flex・非表示none */
     align-items: flex-start;
     gap: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -96,6 +96,7 @@ body {
 /* 左側エリア（盤面 ＋ 下部レベルUI） */
 #left-area {
     position: relative;
+    z-index: 5; /* 🔧 GAME OVERモーダルがRAINBOW GAUGE側の要素より確実に手前に来るよう明示 */
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -684,7 +685,7 @@ opacity: 0;
     top: 0;
     left: 0;
     width: 100%;
-    height: calc(100% + 15px + 49px); /* 盤面＋隙間＋レベルバーの高さ */
+    height: calc(100% + 100px); /* 盤面の高さ＋その下のUI一式を覆うための固定オフセット（実機調整用） */
     background: rgba(30, 41, 59, 0.96);
     display: none;
     flex-direction: column;
@@ -699,14 +700,13 @@ opacity: 0;
     opacity: 0;
     transition: opacity 0.2s ease;
 }
-/* 10位までスクロールなしで綺麗に収まる固定ランキングボックス */
 #ranking-box {
     background: rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     padding: 10px 15px;
     width: 85%;
     max-width: 270px;
-    height: 220px; /* 10行がピッタリ収まる高さ */
+    height: 300px; /* 10位までスクロールなしで綺麗に収まる固定ランキングボックス */
     box-sizing: border-box;
     text-align: left;
     font-size: 12px;
@@ -1281,7 +1281,7 @@ canvas {
           <button onclick="saveRankedScore()" style="padding:6px 14px; border-radius:12px; border:none; background: linear-gradient(90deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff4757); background-size: 200% 100%; animation: rainbowFlow 4s linear infinite; color:white; font-size:14px; font-weight:900; cursor:pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.2);">登録する</button>
         </div>
         <div style="font-size:11px; font-weight:900; margin-bottom:4px; color:#cbd5e1; text-align:left; width:85%; max-width:270px; letter-spacing: 0.05em;">🌈 TOP 10 RANKING</div>
-        <div id="ranking-box" style="width: 85%; max-width: 270px; height: auto; overflow: hidden; margin-bottom: 12px; display: flex; flex-direction: column; gap: 2px;"> </div>
+        <div id="ranking-box" style="width: 85%; max-width: 270px; overflow: hidden; margin-bottom: 12px; display: flex; flex-direction: column; gap: 2px;"> </div>
         <button id="retry-btn" onclick="initGame()" style="padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:12px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">もう一度プレイする</button>
         <button id="reset-ranking-btn" onclick="confirmResetRanking()" style="margin-top:12px; margin-bottom:10px; padding:6px 16px; border-radius:20px; border:1.5px solid rgba(255,255,255,0.3); cursor:pointer; font-weight:700; font-size:11px; background:transparent; color:#cbd5e1;">ランキングをリセットする</button>
         <button id="back-to-game-btn" onclick="closeRankingScreen()" style="display:none; padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:12px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">ゲームに戻る</button>
@@ -3202,13 +3202,13 @@ update() {
         ranking.forEach((item, index) => {
             let rankNum = index + 1;
             let style = "";
-            
-            if (rankNum === 1) {
-                style = `color: ${CONFIG.THEME_COLORS.RANK_1st}; font-weight: 900; font-size: 14px;`;
+			
+			if (rankNum === 1) {
+                style = `color: ${CONFIG.THEME_COLORS.RANK_1st}; font-weight: 900; font-size: 14px; text-shadow: 0 0 2px rgba(255,229,59,0.6), 0 0 5px rgba(255,229,59,0.35);`;
             } else if (rankNum === 2) {
-                style = `color: ${CONFIG.THEME_COLORS.RANK_2nd}; font-weight: 900; font-size: 14px; text-shadow: 0 0 2px rgba(255,255,255,0.5);`;
+                style = `color: ${CONFIG.THEME_COLORS.RANK_2nd}; font-weight: 900; font-size: 14px; text-shadow: 0 0 2px rgba(178,190,195,0.6);`;
             } else if (rankNum === 3) {
-                style = `color: ${CONFIG.THEME_COLORS.RANK_3rd}; font-weight: 900; font-size: 14px;`;
+                style = `color: ${CONFIG.THEME_COLORS.RANK_3rd}; font-weight: 900; font-size: 14px; text-shadow: 0 0 2px rgba(225,112,85,0.6);`;
             } else {
                 style = "color: #ffffff; font-size: 12px;";
             }
@@ -3233,6 +3233,7 @@ update() {
             document.querySelector('#overlay h2').style.display = 'none';
             document.getElementById('final-score').style.display = 'none';
             document.getElementById('reset-btn').disabled = true;
+            document.getElementById('overlay').style.paddingTop = '36px'; // 🏆 h2非表示の分、TOP10見出し含めブロック全体を下に下げる
         }
         renderRankingList();
         const overlayEl = document.getElementById('overlay');
@@ -3252,6 +3253,7 @@ update() {
             document.getElementById('reset-ranking-btn').style.display = 'inline-block';
             document.querySelector('#overlay h2').style.display = 'block';
             document.getElementById('final-score').style.display = 'block';
+            document.getElementById('overlay').style.paddingTop = ''; // 🏆 ゲームオーバー画面用に戻す
         }, 200);
         document.getElementById('reset-btn').disabled = false;
     }
@@ -4869,12 +4871,11 @@ canvas.addEventListener('pointercancel', (e) => {
             p.className = 'charge-particle';
             document.body.appendChild(p);
 
-            let progress = 0;
-            const duration = 48; 
+            const duration = 800; // ⏱️ 実時間ベース（ms）。旧: フレーム数ベース(48フレーム)だと低フレームレート環境で実時間が伸びるバグがあった
+            const startTime = performance.now();
 
-            function frame() {
-                progress++;
-                const t = progress / duration;
+            function frame(now) {
+                const t = Math.min((now - startTime) / duration, 1);
 
                 const currentX = startX + (endX - startX) * t;
                 const linearY = startY + (endY - startY) * t;
@@ -4884,7 +4885,7 @@ canvas.addEventListener('pointercancel', (e) => {
                 p.style.left = currentX + 'px';
                 p.style.top = currentY + 'px';
 
-                if (progress < duration) {
+                if (t < 1) {
                     requestAnimationFrame(frame);
                 } else {
                     p.remove();
