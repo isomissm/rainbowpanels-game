@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver11.0.0)</title>
+<title>ナナイロパネル／Rainbow Panels (ver11.0.1)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&display=swap" rel="stylesheet">
@@ -50,7 +50,7 @@ body {
     border-radius: 10px;
     margin-bottom: 25px;
     font-size: 12px;
-    display:none;  /* デバッグパネル表示flex・非表示none */
+    display: none;  /* デバッグパネル表示flex・非表示none */
     align-items: flex-start;
     gap: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -1642,10 +1642,15 @@ const CONFIG = {
         // 🎬 パネル移動アニメーション設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SWAP_ANIM_DURATION:          240,  // パネル入れ替えアニメの所要時間（ms）
+	
 		FALL_ANIM_DURATION_PER_ROW:   74,  // パネル落下アニメ：1マス分落ちるのにかかる時間（ms）
 		FALL_ANIM_DURATION_MAX:      900,  // パネル落下アニメの最大所要時間（ms）※大きく落ちても間延びしないよう上限を設ける
 		LAND_ANIM_DURATION:          215,  // 着地バウンドの長さ（ms）
 		LAND_BOUNCE_HEIGHT:           10,  // バウンドの高さ（px）
+	
+		BALL_TO_SLOT_DURATION:      300,   // 虹玉を消した時に飛ぶ玉の速さ（ms・小さいほど速い／元550）
+		GAUGE_CHARGE_DURATION:      400,   // レインボーゲージが貯まった時に飛ぶ玉の速さ（ms・小さいほど速い／元800）
+	
 		ANIM_SPEED_PRESETS: { normal: 1.0, fast: 0.65 },  // オプション「はやい」の倍率（SWAP/FALL系のみ対象）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -4873,7 +4878,7 @@ canvas.addEventListener('pointercancel', (e) => {
             p.className = 'charge-particle';
             document.body.appendChild(p);
 
-            const duration = 800; // ⏱️ 実時間ベース（ms）。旧: フレーム数ベース(48フレーム)だと低フレームレート環境で実時間が伸びるバグがあった
+            const duration = CONFIG.GAUGE_CHARGE_DURATION; // ⏱️ 実時間ベース（ms）
             const startTime = performance.now();
 
             function frame(now) {
@@ -5655,7 +5660,7 @@ canvas.addEventListener('pointercancel', (e) => {
         star.innerHTML = `<svg viewBox="0 0 85 85" xmlns="http://www.w3.org/2000/svg"><path d="${STAR_PATH}" fill="#ffe600"/></svg>`;
         document.body.appendChild(star);
 
-        const duration = 550;
+        const duration = CONFIG.BALL_TO_SLOT_DURATION;
         const cp1x = fromX + (toX - fromX) * 0.3 + (Math.random() * 40 - 20);
         const cp1y = fromY - 60 - Math.random() * 40;
         const startTime = performance.now();
