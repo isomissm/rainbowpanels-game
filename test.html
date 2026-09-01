@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver11.0.0)</title>
+<title>ナナイロパネル／Rainbow Panels (ver11.0.1)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&display=swap" rel="stylesheet">
@@ -50,7 +50,7 @@ body {
     border-radius: 10px;
     margin-bottom: 25px;
     font-size: 12px;
-    display: none;  /* デバッグパネル表示flex・非表示none */
+    display: flex;  /* デバッグパネル表示flex・非表示none */
     align-items: flex-start;
     gap: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -1378,7 +1378,7 @@ canvas {
 </div>
 <!-- 📖 あそびかたモーダル -->
 <div id="guide-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
-  <div style="background: white; padding: 28px 14px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 460px; width: 95%; max-height: 85vh; overflow-y: auto; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box;" id="guide-modal-content">
+<div style="background: white; padding: 28px 14px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 460px; width: 95%; max-height: 85vh; overflow-y: auto; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box;" id="guide-modal-content">
     <div style="position: sticky; top: -28px; left: -24px; margin: -28px 0 4px -24px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
       <button onclick="closeGuideModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
     </div>
@@ -1395,7 +1395,7 @@ canvas {
 	<div style="line-height: 1.3; margin-top: 6px;">連鎖するとレインボーゲージが貯まって<br>
 	BURSTカウンター(🌈)が増えるよ</div>
   <hr class="desc-divider" style="margin: 10px auto;">
-  <span style="line-height: 1.3; display: inline-block;"><strong>色パネルを揃えた時に隣接していると<br>一緒に消えるパネル</strong></span><br>
+  <span style="line-height: 1.3; display: inline-block;"><strong>色パネルを揃えた時に<br>隣接していると<br>一緒に消えるパネル</strong></span><br>
   <span class="mini-dark-img"></span>闇玉・
   <span class="mini-rainbow-img"></span>虹玉・
   <span class="mini-allclear-img"><svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600"><polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/></svg></span>雷玉<br>
@@ -1404,7 +1404,7 @@ canvas {
   <span class="mini-snow-img"></span>雪玉<br>
   七色の玉・<span class="mini-star-img"></span>流れ星<br>
   <hr class="desc-divider">
-  <span style="line-height: 1.3; display: inline-block;"><strong>RAINBOW BURST!ボタンで<br>選んで直接消せるパネル</strong></span><br>
+  <span style="line-height: 1.3; display: inline-block;"><strong>直接選んで<br>RAINBOW BURST!ボタンで<br>消せるパネル</strong></span><br>
   <span class="mini-obstacle-img"><svg width="14" height="14" viewBox="0 0 85 85" fill="white"><path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/></svg></span>お邪魔パネル・
   <span class="mini-dark-img"></span>闇玉・
   <span class="mini-allclear-img"><svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600"><polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/></svg></span>雷玉<br>
@@ -1642,10 +1642,15 @@ const CONFIG = {
         // 🎬 パネル移動アニメーション設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SWAP_ANIM_DURATION:          240,  // パネル入れ替えアニメの所要時間（ms）
+	
 		FALL_ANIM_DURATION_PER_ROW:   74,  // パネル落下アニメ：1マス分落ちるのにかかる時間（ms）
 		FALL_ANIM_DURATION_MAX:      900,  // パネル落下アニメの最大所要時間（ms）※大きく落ちても間延びしないよう上限を設ける
 		LAND_ANIM_DURATION:          215,  // 着地バウンドの長さ（ms）
 		LAND_BOUNCE_HEIGHT:           10,  // バウンドの高さ（px）
+	
+		BALL_TO_SLOT_DURATION:      300,   // 虹玉を消した時に飛ぶ玉の速さ（ms・小さいほど速い／元550）
+		GAUGE_CHARGE_DURATION:      400,   // レインボーゲージが貯まった時に飛ぶ玉の速さ（ms・小さいほど速い／元800）
+	
 		ANIM_SPEED_PRESETS: { normal: 1.0, fast: 0.65 },  // オプション「はやい」の倍率（SWAP/FALL系のみ対象）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -4873,7 +4878,7 @@ canvas.addEventListener('pointercancel', (e) => {
             p.className = 'charge-particle';
             document.body.appendChild(p);
 
-            const duration = 800; // ⏱️ 実時間ベース（ms）。旧: フレーム数ベース(48フレーム)だと低フレームレート環境で実時間が伸びるバグがあった
+            const duration = CONFIG.GAUGE_CHARGE_DURATION; // ⏱️ 実時間ベース（ms）
             const startTime = performance.now();
 
             function frame(now) {
@@ -5655,7 +5660,7 @@ canvas.addEventListener('pointercancel', (e) => {
         star.innerHTML = `<svg viewBox="0 0 85 85" xmlns="http://www.w3.org/2000/svg"><path d="${STAR_PATH}" fill="#ffe600"/></svg>`;
         document.body.appendChild(star);
 
-        const duration = 550;
+        const duration = CONFIG.BALL_TO_SLOT_DURATION;
         const cp1x = fromX + (toX - fromX) * 0.3 + (Math.random() * 40 - 20);
         const cp1y = fromY - 60 - Math.random() * 40;
         const startTime = performance.now();
