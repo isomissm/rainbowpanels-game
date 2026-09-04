@@ -1703,7 +1703,7 @@ const CONFIG = {
 		DARK_PANEL_INIT_COUNT:  7,   // 通常闇玉の初期カウントダウン
 		DARK_PANEL_FAST_COUNT:  5,   // 高速闇玉の初期カウントダウン
 
-	// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ☔ 雨玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		RAINY_EFFECT_DURATION:  700,  // 薄青エフェクトの表示時間（ms）
@@ -1714,7 +1714,7 @@ const CONFIG = {
 		RAINY_COUNT_MIN:  7,  // 雨玉の効果の青パネル出現数（最低値）
 		RAINY_COUNT_MAX:  9,  // 雨玉の効果の青パネル出現数（最高値）
 
-	// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ❄️ 雪玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SNOW_COUNT:       5,  // 雪玉の初期カウント
@@ -1729,8 +1729,12 @@ const CONFIG = {
 		SNOWY_FLAKE_COUNT:      35,  // 雪モード中に降る雪片の生成数
 
 		ICE_SHARD_COUNT:        5,  // 氷パネルが割れた時に飛び散る破片の数
+		ICE_SPARKLE_FREQ:      0.4,  // 凍結パネルの✦キラキラの明滅周期。小さいほどゆっくり（間隔が空く）
+		ICE_SPARKLE_THRESHOLD: 0.82,  // 波形のうちどこから光らせるかの閾値。大きいほど光る瞬間が短く・レアになる
+		ICE_SPARKLE_COUNT:       3,  // 1回の明滅で同時に光らせる星の数
+		ICE_SPARKLE_SIZE_PEAK_TRIM: 0.03,  // サイズが最大になっている時間の短さ。大きいほど滞在時間が短い
 	
-	// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+	 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SPECIAL_BALL_GLOW_SPEED: 1.1,  // 晴玉・雨玉・雪玉の発光（明滅）周期の速さ。数値が大きいほど速い
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -3945,6 +3949,43 @@ update() {
                     ctx.globalCompositeOperation = 'screen';
                     ctx.fillStyle = iceShine;
                     roundRect(x + 3, y + 3, CONFIG.CELL_SIZE - 6, CONFIG.CELL_SIZE - 6, 12); ctx.fill();
+                    ctx.restore();
+
+                    // 4. ✦キラキラ（ランダムな位置で拡大縮小しながら明滅）
+                    ctx.save();
+                    for (let si = 0; si < CONFIG.ICE_SPARKLE_COUNT; si++) {
+                        let iceBaseSeed = r * 614879 + c * 271 + 53 + si * 7919; // セル位置＋星の番号から固定の種を作る（発生タイミングの位相用）
+                        const iceBaseRand = () => { iceBaseSeed = (iceBaseSeed * 9301 + 49297) % 233280; return iceBaseSeed / 233280; };
+                        let sOffset = iceBaseRand() * 6.28;
+                        let sPhase = selectionPulse * CONFIG.ICE_SPARKLE_FREQ + sOffset;
+                        let sWave = Math.sin(sPhase) - CONFIG.ICE_SPARKLE_THRESHOLD;
+                        if (sWave > 0) {
+                            // 周期（サイクル）ごとに種を変えて、光るたびに発生位置を変える
+                            let cycleIndex = Math.floor(sPhase / (Math.PI * 2));
+                            let posSeed = Math.abs((r * 614879 + c * 271 + 53 + si * 7919) + cycleIndex * 92821) % 233280;
+                            const posRand = () => { posSeed = (posSeed * 9301 + 49297) % 233280; return posSeed / 233280; };
+                            let sx = 10 + posRand() * 34;
+                            let sy = 10 + posRand() * 34;
+
+                            let sAlpha = Math.min(sWave * 8, 1);
+                            ctx.globalAlpha = sAlpha;
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                            // 細身の四芒星（✦）をパスで直接描画（フォント依存だと太くなるため）
+                            // サイズは明るさと同じ速度で拡大縮小しつつ、閾値を少し厳しくしてピーク滞在時間だけ短くする
+                            const sSizeFactor = Math.min(Math.max((sWave - CONFIG.ICE_SPARKLE_SIZE_PEAK_TRIM) * 8, 0), 1);
+                            const starSize = 20 * sSizeFactor;
+                            const starScale = starSize / 100;
+                            const starPts = [[0,-50],[7,-7],[50,0],[7,7],[0,50],[-7,7],[-50,0],[-7,-7]];
+                            ctx.beginPath();
+                            starPts.forEach(([px, py], i) => {
+                                const sxp = x + sx + px * starScale;
+                                const syp = y + sy + py * starScale;
+                                if (i === 0) ctx.moveTo(sxp, syp); else ctx.lineTo(sxp, syp);
+                            });
+                            ctx.closePath();
+                            ctx.fill();
+                        }
+                    }
                     ctx.restore();
                 }
             }
