@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver11.0.1)</title>
+<title>ナナイロパネル／Rainbow Panels (ver11.0.2)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&display=swap" rel="stylesheet">
@@ -1703,7 +1703,7 @@ const CONFIG = {
 		DARK_PANEL_INIT_COUNT:  7,   // 通常闇玉の初期カウントダウン
 		DARK_PANEL_FAST_COUNT:  5,   // 高速闇玉の初期カウントダウン
 
-		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+	// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ☔ 雨玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		RAINY_EFFECT_DURATION:  700,  // 薄青エフェクトの表示時間（ms）
@@ -1714,23 +1714,24 @@ const CONFIG = {
 		RAINY_COUNT_MIN:  7,  // 雨玉の効果の青パネル出現数（最低値）
 		RAINY_COUNT_MAX:  9,  // 雨玉の効果の青パネル出現数（最高値）
 
-		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+	// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ❄️ 雪玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SNOW_COUNT:       5,  // 雪玉の初期カウント
 		SNOW_FREEZE_MIN:  5,  // 凍結ターン数（最小）※自然解凍までのターン数
 		SNOW_FREEZE_MAX:  7,  // 凍結ターン数（最大）※自然解凍までのターン数
 	
-		SNOW_FREEZE_TARGET_MIN:  3,  // 一度に凍結させるパネル枚数（最小）
-		SNOW_FREEZE_TARGET_MAX:  5,  // 一度に凍結させるパネル枚数（最大）
+		SNOW_FREEZE_TARGET_MIN:  5,  // 一度に凍結させるパネル枚数（最小）
+		SNOW_FREEZE_TARGET_MAX:  6,  // 一度に凍結させるパネル枚数（最大）
 	
 		SNOWY_EFFECT_DURATION: 700,  // 白いオーバーレイの表示時間（ms）
 		SNOWY_FRAME_DURATION:  150,  // 雪エフェクトの表示時間（フレーム数）※雨より長め
-		SNOWY_FLAKE_COUNT:      10,  // 雪片の生成数
+		SNOWY_FLAKE_COUNT:      50,  // 雪モード中に降る雪片の生成数
 
+		ICE_SHARD_COUNT:        5,  // 氷パネルが割れた時に飛び散る破片の数
 	
-	    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		SPECIAL_BALL_GLOW_SPEED: 1.1,  // 晴玉・雨玉・雪玉の発光（明滅）周期の速さ。数値が大きいほど速い（元は1.8）
+	// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		SPECIAL_BALL_GLOW_SPEED: 1.1,  // 晴玉・雨玉・雪玉の発光（明滅）周期の速さ。数値が大きいほど速い
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌈 SEVEN COLORS設定
@@ -2243,7 +2244,7 @@ const CONFIG = {
 		constructor(x, y) {
 			this.x = x; this.y = y;
 			this.shards = [];
-			const count = 8 + Math.floor(Math.random() * 4);
+			const count = CONFIG.ICE_SHARD_COUNT;
 		for (let i = 0; i < count; i++) {
 				const angle = Math.random() * Math.PI * 2;
 				const speed = 0.8 + Math.random() * 1.5;
@@ -2251,9 +2252,9 @@ const CONFIG = {
 					x: this.x, y: this.y,
 					vx: Math.cos(angle) * speed,
 					vy: Math.sin(angle) * speed,
-					size: 4 + Math.random() * 6,
+					size: 6 + Math.random() * 8,
 					rotation: Math.random() * Math.PI * 2,
-					rotSpeed: (Math.random() - 0.5) * 0.25,
+					rotSpeed: (Math.random() - 0.5) * 0.5,
 					alpha: 1,
 				});
 			}
@@ -2285,7 +2286,7 @@ const CONFIG = {
 				ctx.globalAlpha = Math.max(0, s.alpha);
 				ctx.translate(s.x, s.y);
 				ctx.rotate(s.rotation);
-				ctx.fillStyle = 'rgba(93, 222, 244, 0.9)';
+				ctx.fillStyle = 'rgba(190, 240, 250, 0.9)';
 				ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
 				ctx.lineWidth = 1;
 				ctx.beginPath();
@@ -2448,7 +2449,7 @@ update() {
 					baseX: Math.random() * canvasWidth,
 					y: Math.random() * canvasHeight - canvasHeight * 0.5,
 					speed: 0.5 + Math.random() * 1.0,
-					radius: 1.5 + Math.random() * 2.5,
+					radius: 2.5 + Math.random() * 3.5, // 雪のパーティクルサイズ
 					alpha: 0.6 + Math.random() * 0.4,
 					swayAmp: 5 + Math.random() * 15,
 					swaySpeed: 0.02 + Math.random() * 0.03,
