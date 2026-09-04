@@ -4609,7 +4609,7 @@ canvas.addEventListener('pointercancel', (e) => {
 		isAnimating = true; // 凍結処理中は操作をロック
         // 1. 白いオーバーレイ＋雪エフェクト
         snowyOverlayAlpha = 0.5;
-        specialEffects.push(new SnowyEffect(canvas.width, canvas.height));
+        specialEffects.push(new SnowyEffect(canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1)));
         draw();
         await new Promise(res => setTimeout(res, CONFIG.SNOWY_EFFECT_DURATION));
 
