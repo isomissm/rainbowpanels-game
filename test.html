@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver11.0.2)</title>
+<title>ナナイロパネル／Rainbow Panels (ver11.1.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&display=swap" rel="stylesheet">
@@ -328,7 +328,7 @@ canvas {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    padding: 25px 10px 1px 10px;
+    padding: 16px 10px 1px 10px;
     box-sizing: border-box;
 }
 #right-ui-bottom {
@@ -403,7 +403,7 @@ canvas {
     background: #e2e8f0;
     border-radius: 12px; /* レインボーゲージ枠の角丸調整 */
     overflow: hidden;
-    margin-bottom: 25px; /* 右枠の白枠内 レインボーゲージすぐ下の隙間の調整（マージン・行間）*/
+    margin-bottom: 22px; /* 右枠の白枠内 レインボーゲージすぐ下の隙間の調整（マージン・行間）*/
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
     border: 2.5px solid #fff;
     position: relative;
@@ -434,7 +434,7 @@ background-position: -200% 0%;
     background: #f8fafc;
     border: none;
     border-radius: 20px;
-    padding: 16px 14px; /* 右枠の白枠 隙間の調整（マージン・行間） */
+    padding: 18px 14px; /* 右枠の白枠 隙間の調整（マージン・行間） */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -449,6 +449,9 @@ background-position: -200% 0%;
     display: flex;
     gap: 8px;
     justify-content: center;
+}
+.stock-container-spacer {
+    display: none; /* PCでは非表示。スマホ用@media側でだけ表示する */
 }
 .stock-star {
     width: 38px;  /* BURSTカウンターアイコン サイズの幅 */
@@ -634,7 +637,7 @@ opacity: 0;
     color: white;
     border: none;
     border-radius: 20px;
-    font-size: 15px;
+    font-size: 18px; /*RAINBOW BURST ボタンのフォントサイズ（PCブラウザ）*/
     font-weight: 900;
     font-family: var(--font-main-ui);
     line-height: 1.2;
@@ -892,6 +895,9 @@ body {
     color: #3D9DFF;
     margin: 20px auto -20px auto;
 }
+.gauge-title-overlay {
+    display: none; /* PCでは非表示。スマホ用@media側でだけ表示する */
+}
 #right-ui-top .ui-section-title {
     text-align: center;
     margin-bottom: 2px;
@@ -981,6 +987,38 @@ canvas {
     width: 100%;
     padding: 8px 20px;
     gap: 8px;
+    flex-direction: row; /* 🌈カウンター・ボタンを横並びに */
+}
+#stars-container-row {
+    flex-shrink: 0;
+    gap: 4px; /* 🌈カウンター同士の間隔を狭める */
+}
+#stars-container-row .stock-star {
+    width: 26px;  /* 🌈カウンターのサイズを縮小 */
+    height: 26px;
+}
+#skill-btn {
+    width: auto;
+    flex: 1; /* 🌈カウンターの残り幅いっぱいに広げる（中央配置は諦める） */
+    padding: 9px 10px;
+    font-size: 18px; /*RAINBOW BURST ボタンのフォントサイズ（スマホ）*/
+}
+.stock-container-spacer {
+    display: none; /* 中央配置をやめたので余白は使わない */
+}
+#gauge-title-top {
+    display: none; /* 上に出してたタイトルは非表示にして、バーに重ねる方だけ見せる */
+}
+.gauge-title-overlay {
+    display: flex;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    font-size: 13px; /* PCの16pxより小さめに */
+    z-index: 1;
+    pointer-events: none;
 }
 .view-ranking-btn-pc {
     display: none;
@@ -1310,12 +1348,13 @@ canvas {
       </div>
     </div>
     <div id="right-ui-bottom">
-      <div class="ui-section-title">RAINBOW GAUGE</div>
+      <div class="ui-section-title" id="gauge-title-top">RAINBOW GAUGE</div>
       <div class="gauge-bar-bg">
         <div id="gauge-fill" class="gauge-bar-fill"></div>
+        <div class="ui-section-title gauge-title-overlay">RAINBOW GAUGE</div>
       </div>
       <div class="skill-combined-box" id="skill-box">
-        <div class="stock-container" id="stars-container-row"> 
+        <div class="stock-container" id="stars-container-row">
           <!-- 共有グラデーション定義（非表示SVG） -->
           <svg width="0" height="0" style="position:absolute">
             <defs>
@@ -1348,6 +1387,9 @@ canvas {
         </div>
         <button id="skill-btn" onclick="triggerSkillWithEffects()" disabled>RAINBOW<br>
         BURST!</button>
+        <div class="stock-container-spacer" aria-hidden="true">
+          <div class="stock-star"></div><div class="stock-star"></div><div class="stock-star"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -4779,9 +4821,8 @@ canvas.addEventListener('pointercancel', (e) => {
     }
 
     function createShockwaveRingEffect() {
-        const skillBox = document.getElementById('skill-box');
         const btn = document.getElementById('skill-btn');
-        if (!skillBox || !btn) return;
+        if (!btn) return;
 
         const ring = document.createElement('div');
         ring.className = 'shockwave-ring';
@@ -4791,10 +4832,10 @@ canvas.addEventListener('pointercancel', (e) => {
         ring.style.borderColor = randomColor;
 
         ring.style.left = '50%';
-        ring.style.top = 'calc(' + btn.offsetTop + 'px + ' + (btn.offsetHeight / 2) + 'px)';
+        ring.style.top = '50%';
         ring.style.transform = 'translate(-50%, -50%)';
 
-        skillBox.appendChild(ring);
+        btn.appendChild(ring);
 		/* RAINBOW BURSTのエフェクト調整こっちも数値合わせる */
         setTimeout(() => ring.remove(), 1800); 
     }
