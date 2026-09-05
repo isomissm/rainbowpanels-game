@@ -2038,6 +2038,7 @@ const CONFIG = {
 
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d');
+    Object.defineProperty(ctx, 'shadowBlur', { get() { return 0; }, set() {} }); // 🔧 テスト用：shadowBlurを全箇所まとめて無効化（原因切り分け後に削除）
     
     const dpr = window.devicePixelRatio || 1;
     document.getElementById('dbg-dpr').textContent = `DPR: ${dpr}`;
