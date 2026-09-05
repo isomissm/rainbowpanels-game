@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rainbow Panels 修正版ランチャー</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#caf5ff;color:#243447;display:grid;place-items:center;min-height:100vh;margin:0;padding:24px;box-sizing:border-box}
+main{background:#fff;border-radius:18px;padding:22px;max-width:640px;box-shadow:0 10px 30px #0001}
+pre{white-space:pre-wrap;word-break:break-word;background:#f5f7fa;padding:12px;border-radius:10px}
+</style>
+</head>
+<body>
+<main>
+<h1>Rainbow Panels 修正版</h1>
+<p id="status">元ゲームを読み込み中…</p>
+<pre id="detail"></pre>
+</main>
+<script>
+(async()=>{
+  const status=document.getElementById('status');
+  const detail=document.getElementById('detail');
+  const url='https://raw.githubusercontent.com/isomissm/rainbowpanels-game/refs/heads/main/test.html';
+  try{
+    let src=await (await fetch(url,{cache:'no-store'})).text();
+    if(!src.includes('<!DOCTYPE html>')) throw new Error('元HTMLの取得に失敗');
+
+    // Fix 1: プリズム描画の restore() に対応する save() が欠けているため追加
+    const prismNeedle="} else if (type === CONFIG.PANEL_TYPE.ALMIGHTY) {\n\t\t\t\t\tif (!almightyGradCache) {";
+    const prismReplacement="} else if (type === CONFIG.PANEL_TYPE.ALMIGHTY) {\n\t\t\t\t\tctx.save(); // FIX: balance ctx.restore() and prevent transform leakage\n\t\t\t\t\tif (!almightyGradCache) {";
+    let prismFixed=false;
+    if(src.includes(prismNeedle)){
+      src=src.replace(prismNeedle,prismReplacement);
+      prismFixed=true;
+    } else {
+      // 空白差異に耐えるフォールバック
+      const re=/(else if \(type === CONFIG\.PANEL_TYPE\.ALMIGHTY\) \{\s*)(if \(!almightyGradCache\) \{)/;
+      if(re.test(src)){
+        src=src.replace(re,'$1ctx.save(); // FIX: balance ctx.restore() and prevent transform leakage\n                    $2');
+        prismFixed=true;
+      }
+    }
+
+    // Fix 2: 万一どこかでCanvas変換が漏れても、次フレーム冒頭でDPR込みの基準変換へ復帰
+    const drawNeedle='    pruneFinishedAnimations();\n    ctx.clearRect(0, 0, canvas.width, canvas.height);';
+    const drawReplacement='    pruneFinishedAnimations();\n    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // FIX: recover from leaked transforms while preserving DPR\n    ctx.globalAlpha = 1;\n    ctx.shadowBlur = 0;\n    ctx.clearRect(0, 0, canvas.width, canvas.height);';
+    let guardFixed=false;
+    if(src.includes(drawNeedle)){
+      src=src.replace(drawNeedle,drawReplacement);
+      guardFixed=true;
+    }
+
+    if(!prismFixed) throw new Error('プリズム描画箇所を検出できなかったため安全のため停止');
+
+    // document.write 後も相対URLが元サイト基準になるようにする
+    src=src.replace(/<head>/i,'<head>\n<base href="https://isomissm.github.io/rainbowpanels-game/">');
+    src=src.replace(/<title>(.*?)<\/title>/i,'<title>$1 - flicker fix</title>');
+
+    status.textContent='修正を適用して起動中…';
+    detail.textContent=`プリズム save/restore 修正: ${prismFixed?'OK':'NG'}\n描画フレーム安全ガード: ${guardFixed?'OK':'未適用'}`;
+
+    document.open();
+    document.write(src);
+    document.close();
+  }catch(e){
+    status.textContent='起動できなかった';
+    detail.textContent=String(e && e.stack || e);
+  }
+})();
+</script>
+</body>
+</html>
