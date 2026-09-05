@@ -4066,12 +4066,17 @@ update() {
 		}
 	}
 
-    setInterval(() => {
+    let lastPulseTime = performance.now();
+    function mainLoop(now) {
+        const dt = now - lastPulseTime;
+        lastPulseTime = now;
         if (!isGameOver && !isPaused) {
-            selectionPulse += 0.08; 
+            selectionPulse += dt * 0.005; // 旧: 16msごとに+0.08固定 → 経過時間ベースに変更（旧と同じ平均速度）
             draw();
         }
-    }, 16);
+        requestAnimationFrame(mainLoop);
+    }
+    requestAnimationFrame(mainLoop);
 
     function roundRect(x, y, w, h, r) {
         ctx.beginPath(); ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
