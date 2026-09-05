@@ -2038,7 +2038,6 @@ const CONFIG = {
 
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d');
-    Object.defineProperty(ctx, 'shadowBlur', { get() { return 0; }, set() {} }); // 🔧 テスト用：shadowBlurを全箇所まとめて無効化（原因切り分け後に削除）
     
     const dpr = window.devicePixelRatio || 1;
     document.getElementById('dbg-dpr').textContent = `DPR: ${dpr}`;
@@ -2953,6 +2952,18 @@ update() {
 	const BALL_SHAPE_HEIGHT = 69.32;
 	let BALL_SHAPE = new Path2D(BALL_SHAPES.circle); // 🔧 現在選択中のシェイプ（オプションで切り替え可）
 
+	// 🎨 特殊パネルのグラデーションキャッシュ（毎フレーム生成すると重いので初回だけ作って使い回す）
+	let rainbowGradCache = null;
+	let darkGradCache = null;
+	const ballGradCache = {}; // 色番号ごとにキャッシュ
+	let almightyGradCache = null;
+	let allClearGradCache = null;
+	let sunnyGradCache = null;
+	let rainyGradCache = null;
+	let starGradCache = null;
+	const snowGradCache = {}; // isCold(true/false)ごとにキャッシュ
+	let iceShineGradCache = null;
+
 	// 🔧 玉のシェイプを切り替える（オプション画面から呼ばれる）
 	function applyBallShape(key) {
 		if (!BALL_SHAPES[key]) key = 'circle';
@@ -3641,16 +3652,19 @@ update() {
                 
                 if (type === CONFIG.PANEL_TYPE.RAINBOW) {
                     ctx.save();
-                    let grad = ctx.createRadialGradient(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, 1, x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4);
-					/* 虹玉のグラデーション 色順の設定 */
-					grad.addColorStop(0, '#c175ff');   
-					grad.addColorStop(0.3, '#1e90ff'); 
-					grad.addColorStop(0.45, '#2ed573');  
-					grad.addColorStop(0.65, '#ffe53b');  
-					grad.addColorStop(0.9, '#FF6A39');  
-					grad.addColorStop(1.0, '#c82333'); 
-                    ctx.fillStyle = grad;
-                    ctx.beginPath(); ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2); ctx.fill();
+                    ctx.translate(x, y);
+                    if (!rainbowGradCache) {
+                        rainbowGradCache = ctx.createRadialGradient(CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, 1, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4);
+                        /* 虹玉のグラデーション 色順の設定 */
+                        rainbowGradCache.addColorStop(0, '#c175ff');   
+                        rainbowGradCache.addColorStop(0.3, '#1e90ff'); 
+                        rainbowGradCache.addColorStop(0.45, '#2ed573');  
+                        rainbowGradCache.addColorStop(0.65, '#ffe53b');  
+                        rainbowGradCache.addColorStop(0.9, '#FF6A39');  
+                        rainbowGradCache.addColorStop(1.0, '#c82333'); 
+                    }
+                    ctx.fillStyle = rainbowGradCache;
+                    ctx.beginPath(); ctx.arc(CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2); ctx.fill();
                     
 					// ▼虹玉のキラキラエフェクト出現位置と周期をランダム化
                     let rbSeed = r * 928371 + c * 137 + 17; // セル位置から固定の種を作る
@@ -3667,29 +3681,32 @@ update() {
                             let alpha = Math.min(wave * 1.5, 0.9);
                             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
                             ctx.font = "12px sans-serif";
-                            ctx.fillText("✦", x + ox, y + oy);
+                            ctx.fillText("✦", ox, oy);
                         }
                     }
                     ctx.restore();
-				} else if (type === CONFIG.PANEL_TYPE.DARK) {
+                } else if (type === CONFIG.PANEL_TYPE.DARK) {
                     ctx.save();
                     let glow = 12 + Math.cos(selectionPulse * 2.0) * 5; 
                     ctx.shadowBlur = glow;
                     ctx.shadowColor = "rgba(116, 21, 117, 0.8)"; 
                     
-                    let grad = ctx.createRadialGradient(x + CONFIG.CELL_SIZE/2 - 2, y + CONFIG.CELL_SIZE/2 - 2, 1, x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4);
-                    grad.addColorStop(0, '#6d1c64');    
-                    grad.addColorStop(0.3, '#32062e');   
-                    grad.addColorStop(0.7, '#0f000e');   
-                    grad.addColorStop(1.0, '#1c141b');   
-                    ctx.fillStyle = grad;
-                    ctx.beginPath(); ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2); ctx.fill();
+                    if (!darkGradCache) {
+                        darkGradCache = ctx.createRadialGradient(CONFIG.CELL_SIZE/2 - 2, CONFIG.CELL_SIZE/2 - 2, 1, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4);
+                        darkGradCache.addColorStop(0, '#6d1c64');    
+                        darkGradCache.addColorStop(0.3, '#32062e');   
+                        darkGradCache.addColorStop(0.7, '#0f000e');   
+                        darkGradCache.addColorStop(1.0, '#1c141b');   
+                    }
+                    ctx.translate(x, y);
+                    ctx.fillStyle = darkGradCache;
+                    ctx.beginPath(); ctx.arc(CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2); ctx.fill();
                     
                     ctx.shadowBlur = 0;
                     let count = dangerCounts[`${r},${c}`] !== undefined ? dangerCounts[`${r},${c}`] : CONFIG.DARK_PANEL_INIT_COUNT;
 					ctx.fillStyle = count <= 3 ? "#ff4757" : "white"; ctx.font = "600 30px 'Titillium Web', sans-serif";
 					ctx.textAlign = "center"; ctx.textBaseline = "middle";
-					ctx.fillText(count, x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2 + 2.0);
+					ctx.fillText(count, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 + 2.0);
                     ctx.restore();
 				} else if (type >= CONFIG.PANEL_TYPE.BALL_MIN && type <= CONFIG.PANEL_TYPE.BALL_MAX) {
                     // ▼七色の玉／勾玉のグラデーション描画
@@ -3704,17 +3721,18 @@ update() {
                     ctx.scale(ballScale, ballScale);
                     ctx.translate(-BALL_SHAPE_CENTER.x, -BALL_SHAPE_CENTER.y);
 
-                    let grad = ctx.createRadialGradient(
-						BALL_SHAPE_CENTER.x - 8, BALL_SHAPE_CENTER.y - 20, 2,   // 白い点の位置（x座標, y座標, 半径）
-						BALL_SHAPE_CENTER.x, BALL_SHAPE_CENTER.y, 50             // 全体の色が広がる範囲（位置は固定）
-					);
-
-					grad.addColorStop(0, "#ffffff");              // 白い点（やや左上にオフセット）
-                    grad.addColorStop(0.25, CONFIG.COLORS[cIdx]);  // 白→本来の色への変化を広めに取る ※白い点のサイズ変更はここの数値
-                    grad.addColorStop(0.75, CONFIG.COLORS[cIdx]); // 本来の色を保つ範囲
-                    grad.addColorStop(1.0, "#666666");            // フチの影
-
-					ctx.fillStyle = grad;
+                    if (!ballGradCache[cIdx]) {
+                        let grad = ctx.createRadialGradient(
+                            BALL_SHAPE_CENTER.x - 8, BALL_SHAPE_CENTER.y - 20, 2,   // 白い点の位置（x座標, y座標, 半径）
+                            BALL_SHAPE_CENTER.x, BALL_SHAPE_CENTER.y, 50             // 全体の色が広がる範囲（位置は固定）
+                        );
+                        grad.addColorStop(0, "#ffffff");              // 白い点（やや左上にオフセット）
+                        grad.addColorStop(0.25, CONFIG.COLORS[cIdx]);  // 白→本来の色への変化を広めに取る ※白い点のサイズ変更はここの数値
+                        grad.addColorStop(0.75, CONFIG.COLORS[cIdx]); // 本来の色を保つ範囲
+                        grad.addColorStop(1.0, "#666666");            // フチの影
+                        ballGradCache[cIdx] = grad;
+                    }
+					ctx.fillStyle = ballGradCache[cIdx];
                     ctx.fill(BALL_SHAPE);
                     ctx.restore();
 
@@ -3738,14 +3756,17 @@ update() {
                     }
 						
 				} else if (type === CONFIG.PANEL_TYPE.ALMIGHTY) {
-					let grad = ctx.createLinearGradient(x, y, x + CONFIG.CELL_SIZE, y + CONFIG.CELL_SIZE);
-					grad.addColorStop(0.0,  '#ff4757');
-					grad.addColorStop(0.4, '#ffe53b');
-					grad.addColorStop(0.6, '#2ed573');
-					grad.addColorStop(0.8, '#1e90ff');
-					grad.addColorStop(1.0,  '#c175ff');
-					ctx.fillStyle = grad;
-					roundRect(x + 3, y + 3, CONFIG.CELL_SIZE - 6, CONFIG.CELL_SIZE - 6, 12);
+					if (!almightyGradCache) {
+						almightyGradCache = ctx.createLinearGradient(0, 0, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+						almightyGradCache.addColorStop(0.0,  '#ff4757');
+						almightyGradCache.addColorStop(0.4, '#ffe53b');
+						almightyGradCache.addColorStop(0.6, '#2ed573');
+						almightyGradCache.addColorStop(0.8, '#1e90ff');
+						almightyGradCache.addColorStop(1.0,  '#c175ff');
+					}
+					ctx.translate(x, y);
+					ctx.fillStyle = almightyGradCache;
+					roundRect(3, 3, CONFIG.CELL_SIZE - 6, CONFIG.CELL_SIZE - 6, 12);
 					ctx.fill();
 					ctx.restore();
 				} else if (type === CONFIG.PANEL_TYPE.ALLCLEAR) {
@@ -3754,20 +3775,23 @@ update() {
 					ctx.shadowBlur = glow;
 					ctx.shadowColor = "#ffe600";
 					// 暗い青紫の玉
-					let acGrad = ctx.createRadialGradient(
-						x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, 0,
-						x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4
-					);
-					acGrad.addColorStop(0,   "#5c52d4");
-					acGrad.addColorStop(0.7, "#3a2fb5");
-					acGrad.addColorStop(1.0, "#1a1560");
-					ctx.fillStyle = acGrad;
+					if (!allClearGradCache) {
+						allClearGradCache = ctx.createRadialGradient(
+							CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, 0,
+							CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4
+						);
+						allClearGradCache.addColorStop(0,   "#5c52d4");
+						allClearGradCache.addColorStop(0.7, "#3a2fb5");
+						allClearGradCache.addColorStop(1.0, "#1a1560");
+					}
+					ctx.translate(x, y);
+					ctx.fillStyle = allClearGradCache;
 					ctx.beginPath();
-					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
+					ctx.arc(CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
 					// 稲妻描画
-					let cx2 = x + CONFIG.CELL_SIZE/2;
-					let cy2 = y + CONFIG.CELL_SIZE/2;
+					let cx2 = CONFIG.CELL_SIZE/2;
+					let cy2 = CONFIG.CELL_SIZE/2;
 					let s = CONFIG.CELL_SIZE / 55;
 					ctx.fillStyle = "#ffe600";
 					ctx.beginPath();
@@ -3786,40 +3810,46 @@ update() {
 					let glow = 8 + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * 4;
 					ctx.shadowBlur = glow;
 					ctx.shadowColor = "#ffe600";
-					let sunGrad = ctx.createRadialGradient(
-						x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, 0,
-						x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4
-					);
-					sunGrad.addColorStop(0,   "#fff9c4");
-					sunGrad.addColorStop(0.5, "#ffe53b");
-					sunGrad.addColorStop(1.0, "#ff9300");
-					ctx.fillStyle = sunGrad;
+					if (!sunnyGradCache) {
+						sunnyGradCache = ctx.createRadialGradient(
+							CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, 0,
+							CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4
+						);
+						sunnyGradCache.addColorStop(0,   "#fff9c4");
+						sunnyGradCache.addColorStop(0.5, "#ffe53b");
+						sunnyGradCache.addColorStop(1.0, "#ff9300");
+					}
+					ctx.translate(x, y);
+					ctx.fillStyle = sunnyGradCache;
 					ctx.beginPath();
-					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
+					ctx.arc(CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
 					ctx.shadowBlur = 0;
 					const iconSize = 36;
-					ctx.drawImage(sunnyImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
+					ctx.drawImage(sunnyImage, Math.floor((CONFIG.CELL_SIZE - iconSize) / 2), Math.floor((CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
 					ctx.restore();
 				} else if (type === CONFIG.PANEL_TYPE.RAINY) {
 					ctx.save();
 					let glow = 8 + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * 4;
 					ctx.shadowBlur = glow;
 					ctx.shadowColor = "#74b9ff";
-					let rainGrad = ctx.createRadialGradient(
-						x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, 0,
-						x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4
-					);
-					rainGrad.addColorStop(0,   "#dff3ff");
-					rainGrad.addColorStop(0.5, "#74b9ff");
-					rainGrad.addColorStop(1.0, "#0984e3");
-					ctx.fillStyle = rainGrad;
+					if (!rainyGradCache) {
+						rainyGradCache = ctx.createRadialGradient(
+							CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, 0,
+							CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4
+						);
+						rainyGradCache.addColorStop(0,   "#dff3ff");
+						rainyGradCache.addColorStop(0.5, "#74b9ff");
+						rainyGradCache.addColorStop(1.0, "#0984e3");
+					}
+					ctx.translate(x, y);
+					ctx.fillStyle = rainyGradCache;
 					ctx.beginPath();
-					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
+					ctx.arc(CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
 					ctx.shadowBlur = 0;
 					const iconSize = 36;
-					ctx.drawImage(rainyImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
+					ctx.drawImage(rainyImage, Math.floor((CONFIG.CELL_SIZE - iconSize) / 2), Math.floor((CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
 					ctx.restore();
                 } else if (type === CONFIG.PANEL_TYPE.STAR) {
 					// ⭐ 星パネル（●なし、星形のみ）
@@ -3835,11 +3865,13 @@ update() {
 					ctx.shadowBlur = (15 + Math.sin(selectionPulse * 1.5) * 3) / scale;
 					ctx.shadowColor = "#ffe600";
 					// グラデーション塗り
-					const starGrad = ctx.createRadialGradient(42, 42, 0, 42, 42, 42);
-					starGrad.addColorStop(0,   "#fffde7");
-					starGrad.addColorStop(0.5, "#ffe53b");
-					starGrad.addColorStop(1.0, "#e6a800");
-					ctx.fillStyle = starGrad;
+					if (!starGradCache) {
+						starGradCache = ctx.createRadialGradient(42, 42, 0, 42, 42, 42);
+						starGradCache.addColorStop(0,   "#fffde7");
+						starGradCache.addColorStop(0.5, "#ffe53b");
+						starGradCache.addColorStop(1.0, "#e6a800");
+					}
+					ctx.fillStyle = starGradCache;
 					ctx.fill(STAR_ICON_PATH);
 					ctx.restore();
 				} else if (type === CONFIG.PANEL_TYPE.SNOW) {
@@ -3850,25 +3882,29 @@ update() {
 					let glow = 8 + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * 4;
 					ctx.shadowBlur = glow;
 					ctx.shadowColor = isCold ? "rgba(140, 108, 255, 0.8)" : "#dff3ff";
-					let snowGrad = ctx.createRadialGradient(
-						x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, 0,
-						x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4
-					);
-					if (isCold) {
-						// カウント3以下：元の雪玉カラーを濃くした明るい青紫グラデーション
-						snowGrad.addColorStop(0,   '#ffffff');
-						snowGrad.addColorStop(0.3, '#cdb8ff');
-						snowGrad.addColorStop(0.7, '#8c6cff');
-						snowGrad.addColorStop(1.0, '#5e3ff0');
-					} else {
-						// 通常時：白〜青白グラデーション
-						snowGrad.addColorStop(0,   "#ffffff");
-						snowGrad.addColorStop(0.5, "#eaf6ff");
-						snowGrad.addColorStop(1.0, "#a4d4ff");
+					if (!snowGradCache[isCold]) {
+						let snowGrad = ctx.createRadialGradient(
+							CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, 0,
+							CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4
+						);
+						if (isCold) {
+							// カウント3以下：元の雪玉カラーを濃くした明るい青紫グラデーション
+							snowGrad.addColorStop(0,   '#ffffff');
+							snowGrad.addColorStop(0.3, '#cdb8ff');
+							snowGrad.addColorStop(0.7, '#8c6cff');
+							snowGrad.addColorStop(1.0, '#5e3ff0');
+						} else {
+							// 通常時：白〜青白グラデーション
+							snowGrad.addColorStop(0,   "#ffffff");
+							snowGrad.addColorStop(0.5, "#eaf6ff");
+							snowGrad.addColorStop(1.0, "#a4d4ff");
+						}
+						snowGradCache[isCold] = snowGrad;
 					}
-					ctx.fillStyle = snowGrad;
+					ctx.translate(x, y);
+					ctx.fillStyle = snowGradCache[isCold];
 					ctx.beginPath();
-					ctx.arc(x + CONFIG.CELL_SIZE/2, y + CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
+					ctx.arc(CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2);
 					ctx.fill();
 					ctx.shadowBlur = 0;
 					// カウント表示：7〜4は濃い青、3以下は濃い赤紫
