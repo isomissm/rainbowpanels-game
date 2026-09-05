@@ -3798,6 +3798,7 @@ update() {
                     }
 						
 				} else if (type === CONFIG.PANEL_TYPE.ALMIGHTY) {
+					ctx.save();
 					if (!almightyGradCache) {
 						almightyGradCache = ctx.createLinearGradient(0, 0, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
 						almightyGradCache.addColorStop(0.0,  '#ff4757');
