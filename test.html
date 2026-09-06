@@ -719,7 +719,7 @@ opacity: 0;
     padding: 10px 15px;
     width: 85%;
     max-width: 270px;
-    height: 355px; /* 10位までスクロールなしで綺麗に収まる固定ランキングボックス（フォント拡大に伴い調整） */
+    height: 260px; /* 黒枠内のランキング枠高さ固定（10位まで収まる高さに調整する） */
     box-sizing: border-box;
     text-align: left;
     font-size: 12px;
@@ -1321,7 +1321,7 @@ canvas {
       </div>
       <canvas id="stage"></canvas>
       <div id="allclear-overlay"></div>
-      <div id="overlay" style="padding-top: 0px;">
+      <div id="overlay" style="padding-top: 10px;"> <!-- GAMEOVERテキストの上の隙間調整-->
         <h2 style="font-size:22px; margin: 0; line-height: 1; letter-spacing: 0.05em; color: #ff7675;">GAME OVER</h2>
         <div id="final-score" style="font-size:24px; font-weight: 900; margin-bottom: 2px; color: #fff;"></div>
         <div id="name-input-box" style="margin-top: 2px; margin-bottom: 8px; display: none; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 12px;"> <span style="font-size:14px; font-weight:bold; color:#ffe53b; display:block; margin-bottom:3px;">🎉 ランクイン！ 名前を入力してね</span>
