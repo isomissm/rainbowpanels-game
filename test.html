@@ -1202,7 +1202,7 @@ canvas {
 <!-- デバッグパネル内部のレイアウト -->
 <div id="debug-panel">
   <div id="debug-left" style="display:flex; flex-direction:column; gap:10px;">
-    <div class="debug-row"> <span>玉追加:</span>
+    <div class="debug-row">
       <div class="debug-btns">
         <button onclick="spawnRainbowBall(0)" style="color:#ff7675;">赤</button>
         <button onclick="spawnRainbowBall(1)" style="color:#ffe53b; text-shadow:0 0 1px #000;">黄</button>
@@ -1224,9 +1224,11 @@ canvas {
         <button onclick="applyDebugScore()" style="padding: 4px 8px; font-size: 12px; cursor: pointer; border-radius: 4px; border: none; background: #34495e; color: white;">反映</button>
       </div>
       <div class="debug-btns">
-        <button onclick="setDebugScore(CONFIG.THRESHOLD.LIGHT_START - 100)">虹玉直前</button>
-        <button onclick="setDebugScore(CONFIG.THRESHOLD.DARK_START - 100)">闇玉直前</button>
-        <button onclick="setDebugScore(CONFIG.THRESHOLD.ALMIGHTY_START - 100)">プリズム直前</button>
+        <button onclick="setDebugScore(CONFIG.THRESHOLD.LIGHT_START - 100)">虹玉前</button>
+        <button onclick="setDebugScore(CONFIG.THRESHOLD.DARK_START - 100)">闇玉前</button>
+        <button onclick="setDebugScore(CONFIG.THRESHOLD.ALMIGHTY_START - 100)">プリズム前</button>
+      </div>
+      <div class="debug-btns">
         <button onclick="addSingleSpecialPanel(CONFIG.PANEL_TYPE.SUNNY)" style="color:#ff9300;">晴玉</button>
         <button onclick="addSingleSpecialPanel(CONFIG.PANEL_TYPE.RAINY)" style="color:#74b9ff;">雨玉</button>
         <button onclick="addSingleSpecialPanel(CONFIG.PANEL_TYPE.SNOW)" style="color:#0984e3;">雪玉</button>
@@ -1240,27 +1242,27 @@ canvas {
     </div>
     <div class="debug-row"> <span>LEVEL:</span>
       <div class="debug-btns">
-        <button onclick="setDebugLevel(1)">LV 1</button>
-        <button onclick="setDebugLevel(2)">LV 2</button>
-        <button onclick="setDebugLevel(3)">LV 3</button>
-        <button onclick="setDebugLevel(4)">LV 4</button>
-        <button onclick="setDebugLevel(5)">LV 5</button>
-        <button onclick="setDebugLevel(6)">LV 6</button>
-        <button onclick="setDebugLevel(7)">LV 7</button>
-        <button onclick="setDebugLevel(8)">LV 8</button>
-        <button onclick="setDebugLevel(9)">LV 9</button>
-        <button onclick="setDebugLevel(10)">LV 10</button>
+        <button onclick="setDebugLevel(1)">L 1</button>
+        <button onclick="setDebugLevel(2)">L 2</button>
+        <button onclick="setDebugLevel(3)">L 3</button>
+        <button onclick="setDebugLevel(4)">L 4</button>
+        <button onclick="setDebugLevel(5)">L 5</button><br>
+        <button onclick="setDebugLevel(6)">L 6</button>
+        <button onclick="setDebugLevel(7)">L 7</button>
+        <button onclick="setDebugLevel(8)">L 8</button>
+        <button onclick="setDebugLevel(9)">L 9</button>
+        <button onclick="setDebugLevel(10)">L 10</button>
       </div>
     </div>
-    <div class="debug-row"> <span>OBSTACLE (■):</span>
+    <div class="debug-row"> <span>雲パネル:</span>
       <div class="debug-btns">
         <button onclick="deployObstacleDirectly()">今すぐ1個配置</button>
         <button onclick="clearObstacles()" style="background:#c0392b;">全消去</button>
       </div>
     </div>
-    <div class="debug-row"> <span>SKILL:</span>
+    <div class="debug-row"> <span>BURSTボタン:</span>
       <div class="debug-btns">
-        <button onclick="addDebugSkillStock()">BURSTカウント+1</button>
+        <button onclick="addDebugSkillStock()">カウンター+1</button>
       </div>
     </div>
   </div>
