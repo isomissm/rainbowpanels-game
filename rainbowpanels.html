@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver11.2.0)</title>
+<title>ナナイロパネル／Rainbow Panels (ver11.3.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
@@ -1729,7 +1729,17 @@ const CONFIG = {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 📈 レベル・お邪魔パネル出現設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // threshold: お邪魔パネルの累計ドロップ数がこの値を超えるとレベルアップ
+
+	    // お邪魔パネル（🌥️雲パネル）のエフェクト時間など調整
+		OBSTACLE_SHAKE_DURATION: 400,  // 🌥️ 雲パネル出現時の震え演出の表示時間（ms）※SHAKE_LIFEと連動して調整
+		OBSTACLE_APPEAR_PAUSE:    40,  // 🌥️ 震え終了後、次の操作を受け付けるまでの追加の間（ms）
+		OBSTACLE_SHAKE_LIFE:      70,  // 🌥️ 震えエフェクトの表示フレーム数（大きいほど長く震える）
+		OBSTACLE_SHAKE_JITTER_INTERVAL:  2,  // 🌥️ 何フレームおきに震え位置を更新するか（大きいほどゆっくり揺れる）
+		OBSTACLE_SHAKE_FADE_FRAMES:     12,  // 🌥️ 終盤に震えを止めてフェードアウトさせるフレーム数
+		OBSTACLE_SHAKE_AMPLITUDE:        7,  // 🌥️ 震えの横方向の振れ幅（px）。大きいほど揺れが目立つ
+		OBSTACLE_APPEAR_PAUSE_REDUCED_MOTION: 400,  // 🌥️ モーション減少ON時（震え演出なし）に、雲パネル出現後の操作不可時間として使う値
+	
+	    // threshold: お邪魔パネルの累計ドロップ数がこの値を超えるとレベルアップ
         // pace:      お邪魔パネルが出現するまでの手数間隔
 		LEVELS: [
 			{ threshold:  0, pace: 14 }, // レベル1
@@ -2603,9 +2613,10 @@ update() {
             this.alpha = 1; 
             
             if (type === "shake") {
-                this.life = 35; 
-                this.maxLife = 35;
+                this.life = CONFIG.OBSTACLE_SHAKE_LIFE; 
+                this.maxLife = CONFIG.OBSTACLE_SHAKE_LIFE;
                 this.offsetX = 0;
+                this.jitterTimer = 0; // 🌥️ 震え位置の更新間隔を制御するカウンター
             } else {
                 this.size = 12 + Math.random() * 8;
                 this.angle = Math.random() * Math.PI * 2;
@@ -2616,11 +2627,15 @@ update() {
         update() {
             if (this.type === "shake") {
                 this.life--;
-                if (this.life > 10) {
-                    this.offsetX = (Math.random() * 5 - 2.5);
+                if (this.life > CONFIG.OBSTACLE_SHAKE_FADE_FRAMES) {
+                    this.jitterTimer++;
+                    if (this.jitterTimer >= CONFIG.OBSTACLE_SHAKE_JITTER_INTERVAL) { // 🌥️ 毎フレームではなく間隔を置いて位置を更新することでゆっくり揺れる
+                        this.jitterTimer = 0;
+                        this.offsetX = (Math.random() * CONFIG.OBSTACLE_SHAKE_AMPLITUDE - CONFIG.OBSTACLE_SHAKE_AMPLITUDE / 2);
+                    }
                 } else {
                     this.offsetX = 0;
-                    this.alpha = this.life / 10;
+                    this.alpha = this.life / CONFIG.OBSTACLE_SHAKE_FADE_FRAMES;
                 }
             } else {
                 this.x += Math.cos(this.angle) * this.speed;
@@ -5341,7 +5356,7 @@ canvas.addEventListener('pointercancel', (e) => {
 
     async function checkDifficultyThresholds() {
         if (movesUntilNextObstacle <= 0) {
-            addObstacle();
+            await addObstacle();
             obstacleDropCount++; 
             movesUntilNextObstacle = getCurrentObstaclePace();
         }
@@ -5484,7 +5499,7 @@ canvas.addEventListener('pointercancel', (e) => {
         cleanUpDangerCountsData();
     }
 
-    function addObstacle() {
+    async function addObstacle() {
         let r, c; let tries = 0;
         while (tries < 50) {
             r = Math.floor(Math.random() * CONFIG.BOARD_SIZE); c = Math.floor(Math.random() * CONFIG.BOARD_SIZE);
@@ -5499,7 +5514,10 @@ canvas.addEventListener('pointercancel', (e) => {
 						if (!isGameOver) { 
 							draw(); 
 						}
-					}, 500);
+					}, CONFIG.OBSTACLE_SHAKE_DURATION);
+					await new Promise(res => setTimeout(res, CONFIG.OBSTACLE_SHAKE_DURATION + CONFIG.OBSTACLE_APPEAR_PAUSE)); // 🌥️ 震えが収まってから少し間を置いて操作可能にする
+				} else {
+					await new Promise(res => setTimeout(res, CONFIG.OBSTACLE_APPEAR_PAUSE_REDUCED_MOTION)); // 🌥️ モーション減少ON時は震えがない分、専用の待機時間で気づく間を確保する
 				}
             break; 
             } tries++;
