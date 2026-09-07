@@ -1730,14 +1730,14 @@ const CONFIG = {
         // 📈 レベル・お邪魔パネル出現設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-	    // お邪魔パネルのエフェクト時間など調整
-		OBSTACLE_SHAKE_DURATION: 700,  // 🌥️ 雲パネル出現時の震え演出の表示時間（ms）※SHAKE_LIFEと連動して調整
-		OBSTACLE_APPEAR_PAUSE:    50,  // 🌥️ 震え終了後、次の操作を受け付けるまでの追加の間（ms）
-		OBSTACLE_SHAKE_LIFE:      74,  // 🌥️ 震えエフェクトの表示フレーム数（大きいほど長く震える）
+	    // お邪魔パネル（🌥️雲パネル）のエフェクト時間など調整
+		OBSTACLE_SHAKE_DURATION: 400,  // 🌥️ 雲パネル出現時の震え演出の表示時間（ms）※SHAKE_LIFEと連動して調整
+		OBSTACLE_APPEAR_PAUSE:    32,  // 🌥️ 震え終了後、次の操作を受け付けるまでの追加の間（ms）
+		OBSTACLE_SHAKE_LIFE:      70,  // 🌥️ 震えエフェクトの表示フレーム数（大きいほど長く震える）
 		OBSTACLE_SHAKE_JITTER_INTERVAL:  2,  // 🌥️ 何フレームおきに震え位置を更新するか（大きいほどゆっくり揺れる）
-		OBSTACLE_SHAKE_FADE_FRAMES:     14,  // 🌥️ 終盤に震えを止めてフェードアウトさせるフレーム数
+		OBSTACLE_SHAKE_FADE_FRAMES:     12,  // 🌥️ 終盤に震えを止めてフェードアウトさせるフレーム数
 		OBSTACLE_SHAKE_AMPLITUDE:        7,  // 🌥️ 震えの横方向の振れ幅（px）。大きいほど揺れが目立つ
-		OBSTACLE_APPEAR_PAUSE_REDUCED_MOTION: 700,  // 🌥️ モーション減少ON時（震え演出なし）に、雲パネル出現後の操作不可時間として使う値
+		OBSTACLE_APPEAR_PAUSE_REDUCED_MOTION: 400,  // 🌥️ モーション減少ON時（震え演出なし）に、雲パネル出現後の操作不可時間として使う値
 	
 	    // threshold: お邪魔パネルの累計ドロップ数がこの値を超えるとレベルアップ
         // pace:      お邪魔パネルが出現するまでの手数間隔
