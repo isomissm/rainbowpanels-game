@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver11.3.0)</title>
+<title>ナナイロパネル／Rainbow Panels (ver12.0.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
@@ -1722,8 +1722,8 @@ const CONFIG = {
         // 🏆 スコア・コンボ設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SCORE: {
-			BASE:        { 3: 30, 4: 70, 5: 120, 6: 200 }, // 同時消し数ごとの基本スコア（6以上は180）
-			COMBO_BONUS: { 1: 30, 2: 40, 3:  60, 4:  90, 5: 150 }, // コンボ数ごとの加算ボーナス（5以上は150）
+			BASE:        { 3: 40, 4: 80, 5: 140, 6: 230 }, // 同時消し数ごとの基本スコア（7以上は250）
+			COMBO_BONUS: { 1: 30, 2: 50, 3:  70, 4: 100, 5: 170 }, // コンボ数ごとの加算ボーナス（6以上は190）
 		},
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2209,9 +2209,9 @@ const CONFIG = {
             this.alpha = 1.0;
             this.decay = 0.02 + Math.random() * 0.02;
         }
-        update() {
-            this.x += this.vx; this.y += this.vy;
-            this.alpha -= this.decay;
+        update(frameFactor = 1) {
+            this.x += this.vx * frameFactor; this.y += this.vy * frameFactor;
+            this.alpha -= this.decay * frameFactor;
         }
         draw() {
             ctx.save(); ctx.globalAlpha = this.alpha;
@@ -2234,9 +2234,9 @@ const CONFIG = {
 		this.decay = 0.018 + Math.random() * 0.012;
 		this.rotation = Math.random() * Math.PI * 2;
 	}
-	update() {
-		this.x += this.vx; this.y += this.vy;
-		this.alpha -= this.decay;
+	update(frameFactor = 1) {
+		this.x += this.vx * frameFactor; this.y += this.vy * frameFactor;
+		this.alpha -= this.decay * frameFactor;
 	}
 		draw() {
         if (this.alpha <= 0) return;
@@ -2283,17 +2283,18 @@ const CONFIG = {
 			}
 			/* グラデーションはサイズ変化に合わせてdraw()で毎フレーム生成 */
 		}
-		update() {
+		update(frameFactor = 1) {
 			this.blobs.forEach(b => {
-				b.x += b.vx;
-				b.y += b.vy;
-				b.vx *= 0.94;
-				b.vy *= 0.94;
+				b.x += b.vx * frameFactor;
+				b.y += b.vy * frameFactor;
+				const friction = Math.pow(0.94, frameFactor); // 🎞️ 減速率は乗算なのでフレーム数分だけ累乗する
+				b.vx *= friction;
+				b.vy *= friction;
 				/* サイズをmaxSizeまで膨張させてからフェード */
 				if (b.size < b.maxSize) {
-					b.size = Math.min(b.size * 1.18, b.maxSize); //闇玉もわもわエフェクトの膨張速度
+					b.size = Math.min(b.size * Math.pow(1.18, frameFactor), b.maxSize); //闇玉もわもわエフェクトの膨張速度
 				}
-				b.alpha -= b.decay;
+				b.alpha -= b.decay * frameFactor;
 			});
 		}
 		draw() {
@@ -2339,14 +2340,14 @@ const CONFIG = {
 			}
 			this.flashAlpha = 0.8;
 		}
-		update() {
-			this.flashAlpha = Math.max(0, this.flashAlpha - 0.12);
+		update(frameFactor = 1) {
+			this.flashAlpha = Math.max(0, this.flashAlpha - 0.12 * frameFactor);
 			this.shards.forEach(s => {
-				s.x += s.vx;
-				s.y += s.vy;
-				s.vy += 0.08; // 重力で落下
-				s.rotation += s.rotSpeed;
-				s.alpha -= 0.022;
+				s.x += s.vx * frameFactor;
+				s.y += s.vy * frameFactor;
+				s.vy += 0.08 * frameFactor; // 重力で落下
+				s.rotation += s.rotSpeed * frameFactor;
+				s.alpha -= 0.022 * frameFactor;
 			});
 		}
 		draw() {
@@ -2392,10 +2393,10 @@ const CONFIG = {
 				{ r: 0, alpha: 0.4, speed: 0.7 },
 			];
 		}
-		update() {
+		update(frameFactor = 1) {
 			this.rings.forEach(ring => {
-				ring.r += ring.speed;
-				ring.alpha -= 0.022;
+				ring.r += ring.speed * frameFactor;
+				ring.alpha -= 0.022 * frameFactor;
 			});
 		}
 		draw() {
@@ -2426,10 +2427,10 @@ const CONFIG = {
 				{ r: 0, alpha: 0.4, speed: 0.7 },
 			];
 		}
-		update() {
+		update(frameFactor = 1) {
 			this.rings.forEach(ring => {
-				ring.r += ring.speed;
-				ring.alpha -= 0.022;
+				ring.r += ring.speed * frameFactor;
+				ring.alpha -= 0.022 * frameFactor;
 			});
 		}
 		draw() {
@@ -2468,11 +2469,11 @@ const CONFIG = {
 			}
 			this.age = 0;
 		}
-update() {
-    this.age++;
+update(frameFactor = 1) {
+    this.age += frameFactor;
     this.drops.forEach(d => {
-        d.y += d.speed;
-        d.x -= d.speed * 0.05;  // 雨 左に微小移動（線の傾きと合わせる）
+        d.y += d.speed * frameFactor;
+        d.x -= d.speed * 0.05 * frameFactor;  // 雨 左に微小移動（線の傾きと合わせる）
         if (d.y > this.height + 20) {
             d.y = -20;
             d.x = Math.random() * this.width;  // x位置もリセット
@@ -2537,10 +2538,10 @@ update() {
 			}
 			this.age = 0;
 		}
-		update() {
-			this.age++;
+		update(frameFactor = 1) {
+			this.age += frameFactor;
 			this.flakes.forEach(f => {
-				f.y += f.speed;
+				f.y += f.speed * frameFactor;
 				f.x = f.baseX + Math.sin(this.age * f.swaySpeed + f.phase) * f.swayAmp;
 				if (f.y > this.height + 10) {
 					f.y = -10;
@@ -2570,9 +2571,9 @@ update() {
 			this.c2 = c2; this.r2 = r2;
 			this.alpha = 1.0;
 		}
-		update() {
+		update(frameFactor = 1) {
 			// ① 光が出現している時間を長くする（残像感を出す）
-			this.alpha -= 0.03; // 数値を小さくする（例: 0.02）と、ゆっくり消えるようになり目立ちます
+			this.alpha -= 0.03 * frameFactor; // 数値を小さくする（例: 0.02）と、ゆっくり消えるようになり目立ちます
 		}
 		draw() {
 			if (this.alpha <= 0) return;
@@ -2624,11 +2625,11 @@ update() {
                 this.decay = 0.015 + Math.random() * 0.015;
             }
         }
-        update() {
+        update(frameFactor = 1) {
             if (this.type === "shake") {
-                this.life--;
+                this.life -= frameFactor;
                 if (this.life > CONFIG.OBSTACLE_SHAKE_FADE_FRAMES) {
-                    this.jitterTimer++;
+                    this.jitterTimer += frameFactor;
                     if (this.jitterTimer >= CONFIG.OBSTACLE_SHAKE_JITTER_INTERVAL) { // 🌥️ 毎フレームではなく間隔を置いて位置を更新することでゆっくり揺れる
                         this.jitterTimer = 0;
                         this.offsetX = (Math.random() * CONFIG.OBSTACLE_SHAKE_AMPLITUDE - CONFIG.OBSTACLE_SHAKE_AMPLITUDE / 2);
@@ -2638,9 +2639,9 @@ update() {
                     this.alpha = this.life / CONFIG.OBSTACLE_SHAKE_FADE_FRAMES;
                 }
             } else {
-                this.x += Math.cos(this.angle) * this.speed;
-                this.y += Math.sin(this.angle) * this.speed;
-                this.alpha -= this.decay;
+                this.x += Math.cos(this.angle) * this.speed * frameFactor;
+                this.y += Math.sin(this.angle) * this.speed * frameFactor;
+                this.alpha -= this.decay * frameFactor;
             }
         }
         draw() {
@@ -2690,10 +2691,13 @@ update() {
                 }
             }
         }
-        update() {
-            this.life -= this.decay;
+        update(frameFactor = 1) {
+            this.life -= this.decay * frameFactor;
             if (this.type === CONFIG.PANEL_TYPE.DARK) {
-                this.suckers.forEach(s => { s.ox *= s.speedFactor; s.oy *= s.speedFactor; });
+                this.suckers.forEach(s => {
+                    const f = Math.pow(s.speedFactor, frameFactor); // 🎞️ 減速率は乗算なのでフレーム数分だけ累乗する
+                    s.ox *= f; s.oy *= f;
+                });
             }
         }
 		
@@ -2754,10 +2758,10 @@ update() {
             this.decay = 0.008;
             this.done = false;
         }
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            this.life -= this.decay;
+        update(frameFactor = 1) {
+            this.x += this.vx * frameFactor;
+            this.y += this.vy * frameFactor;
+            this.life -= this.decay * frameFactor;
             if (this.life <= 0) this.done = true;
         }
         draw() {
@@ -2810,9 +2814,9 @@ update() {
 		this.life = 80;    // 表示時間
 		this.maxLife = 80; // ↑この数値に合わせて変更
 	  }
-	  update() {
-		this.life--;
-		this.y -= 0.6;     // 得点が上に昇るスピード
+	  update(frameFactor = 1) {
+		this.life -= frameFactor;
+		this.y -= 0.6 * frameFactor;     // 得点が上に昇るスピード
 		if (this.life < 20) this.alpha = this.life / 20; // 得点が消える間際のフワッとした余韻
 	  }
 			draw() {
@@ -3273,6 +3277,16 @@ update() {
         }
     }
 
+    // 🎉 前回ハイスコア登録時に入力した名前を読み込む
+    function loadLastPlayerName() {
+        try {
+            return localStorage.getItem('rainbow_puzzle_last_name') || "Player";
+        } catch (e) {
+            console.warn('プレイヤー名の読み込みに失敗しました。デフォルト値を使用します。', e);
+            return "Player";
+        }
+    }
+
     function updateBestScoreDisplay() {
         let ranking = loadRanking();
         let best = ranking[0] ? ranking[0].score : 0;
@@ -3288,7 +3302,7 @@ update() {
         let isRankIn = score > ranking[9].score;
         if (isRankIn && score > 0) {
             document.getElementById('name-input-box').style.display = 'block';
-            document.getElementById('player-name-field').value = "Player";
+            document.getElementById('player-name-field').value = loadLastPlayerName(); // 🎉 前回入力した名前を復元
         } else {
             document.getElementById('name-input-box').style.display = 'none';
         }
@@ -3549,6 +3563,9 @@ update() {
         
         try { localStorage.setItem('rainbow_puzzle_ranking', JSON.stringify(ranking)); }
         catch (e) { console.warn('ランキングの保存に失敗しました。', e); }
+        
+        try { localStorage.setItem('rainbow_puzzle_last_name', name); } // 🎉 次回の名前入力欄に残すため保存
+        catch (e) { console.warn('プレイヤー名の保存に失敗しました。', e); }
         
         document.getElementById('name-input-box').style.display = 'none';
         renderRankingList();
@@ -4163,24 +4180,17 @@ update() {
 			ctx.restore();
 		});
 		
-        for (let i = specialEffects.length - 1; i >= 0; i--) {
-            specialEffects[i].update();
-            if (specialEffects[i].isFinished || specialEffects[i].life <= 0 || specialEffects[i].done) {
-                specialEffects.splice(i, 1);
-            } else {
-                specialEffects[i].draw();
-            }
+        // 🎞️ update済みの現在の状態を描画するだけ（進行・削除はupdateEffects()側で行う）
+        for (let i = 0; i < specialEffects.length; i++) {
+            specialEffects[i].draw();
         }
 
-        for (let i = particles.length - 1; i >= 0; i--) {
-            particles[i].update(); if (particles[i].alpha <= 0) particles.splice(i, 1);
-            else particles[i].draw();
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].draw();
         }
 
-        for (let i = textEffects.length - 1; i >= 0; i--) {
-            textEffects[i].update();
-            if (textEffects[i].life <= 0) textEffects.splice(i, 1);
-            else textEffects[i].draw();
+        for (let i = 0; i < textEffects.length; i++) {
+            textEffects[i].draw();
         }
 		if (gameStartTime && !isGameOver && !isPaused) {
 			document.getElementById('debug-time').textContent = `TIME: ${formatTime(Date.now() - gameStartTime)}`;
@@ -4189,12 +4199,32 @@ update() {
 		}
 	}
 
+    // 🎞️ 各種エフェクトの進行・削除をまとめて行う（描画(draw)とは分離し、実際に経過した時間分だけ進める）
+    function updateEffects(frameFactor) {
+        for (let i = specialEffects.length - 1; i >= 0; i--) {
+            specialEffects[i].update(frameFactor);
+            if (specialEffects[i].isFinished || specialEffects[i].life <= 0 || specialEffects[i].done) {
+                specialEffects.splice(i, 1);
+            }
+        }
+        for (let i = particles.length - 1; i >= 0; i--) {
+            particles[i].update(frameFactor);
+            if (particles[i].alpha <= 0) particles.splice(i, 1);
+        }
+        for (let i = textEffects.length - 1; i >= 0; i--) {
+            textEffects[i].update(frameFactor);
+            if (textEffects[i].life <= 0) textEffects.splice(i, 1);
+        }
+    }
+
     let lastPulseTime = performance.now();
     function mainLoop(now) {
         const dt = now - lastPulseTime;
         lastPulseTime = now;
         if (!isGameOver && !isPaused) {
+            const frameFactor = Math.min(dt / (1000 / 60), 3); // 🎞️ 60fps基準の経過フレーム数。モニターのリフレッシュレートが変わっても速度が一定になるようにする（タブ復帰時に飛ばないよう3でキャップ）
             selectionPulse += dt * 0.005; // 旧: 16msごとに+0.08固定 → 経過時間ベースに変更（旧と同じ平均速度）
+            updateEffects(frameFactor);
             draw();
         }
         requestAnimationFrame(mainLoop);
@@ -4570,8 +4600,8 @@ canvas.addEventListener('pointercancel', (e) => {
             const STAR_PATH = "M44.27,8.41l10.25,20.52,22.68,3.41c1.51.23,2.12,2.09,1.03,3.16l-16.34,16.09,3.77,22.62c.25,1.51-1.33,2.66-2.69,1.95l-20.35-10.57-20.35,10.57c-1.36.71-2.94-.44-2.69-1.95l3.77-22.62L6.99,35.5c-1.09-1.07-.49-2.93,1.03-3.16l22.68-3.41,10.25-20.52c.68-1.37,2.64-1.37,3.32,0Z";
             this.starPath = new Path2D(STAR_PATH);
         }
-        update() {
-            this.life -= this.decay;
+        update(frameFactor = 1) {
+            this.life -= this.decay * frameFactor;
             if (this.life <= 0) this.done = true;
         }
         draw() {
@@ -5210,11 +5240,11 @@ canvas.addEventListener('pointercancel', (e) => {
             
             let matchCount = uniqueCells.length;
             
-            // CONFIGから個数に応じたベーススコアを取得（定義がないほど大量の場合は最大値の180）
-            let baseScore = CONFIG.SCORE.BASE[matchCount] || 180;
+            // CONFIGから個数に応じたベーススコアを取得（定義がないほど大量の場合は最大値の250）
+            let baseScore = CONFIG.SCORE.BASE[matchCount] || 250;
             
-            // CONFIGからコンボ数に応じたボーナスを取得
-            let comboBonus = CONFIG.SCORE.COMBO_BONUS[comboCount] || 100;
+            // CONFIGからコンボ数に応じたボーナスを取得（定義がないほど大連鎖の場合は最大値の190）
+            let comboBonus = CONFIG.SCORE.COMBO_BONUS[comboCount] || 190;
             
             let currentEarnedScore = baseScore + comboBonus;
             score += currentEarnedScore; 
@@ -5665,12 +5695,12 @@ canvas.addEventListener('pointercancel', (e) => {
 	}
 
 	async function triggerRainy(col, row) {
-		// 対象候補（通常パネルのみ）を収集
+		// 対象候補（通常パネルのみ、既に青いパネルは除外）
 		let candidates = [];
 		for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
 			for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
 				const t = board[r][c];
-				if (t >= 0 && t < CONFIG.PANEL_TYPE.OBSTACLE) {
+				if (t >= 0 && t < CONFIG.PANEL_TYPE.OBSTACLE && t !== 3) { // 3: 青（既に青いパネルは変換候補から除外）
 					candidates.push({r, c});
 				}
 			}
