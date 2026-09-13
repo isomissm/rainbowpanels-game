@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver12.0.0)</title>
+<title>ナナイロパネル／Rainbow Panels (ver12.1.0) </title> 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
@@ -11,6 +11,13 @@
 :root {
 --font-main-ui: 'Nunito', sans-serif; /* メインUIフォント：ここを変更するとUI全体に反映 */
 --font-jp: 'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif; /* 日本語UIフォント：ここを変更すると和文表示全体に反映 */
+
+/* 🔊 起動時モーダル（音設定／ゲームをはじめる／中断再開）共通サイズ⚙️コンフィグ：ここを変えると3つとも一括で変わる */
+--start-modal-width: 420px;      /* 白枠モーダルの横幅の上限 */
+--start-modal-height: 220px;     /* 白枠モーダルの縦幅（タイトルロゴモーダル以外） */
+--start-gate-modal-height: 340px; /* タイトルロゴモーダルのみの縦幅（ロゴ〜ボタンの余白を広げるため） */
+--start-modal-btn-width: 180px;  /* ボタン1つぶんの横幅 */
+--start-modal-btn-height: 56px;  /* ボタンの縦幅 */
 }
 html {
     scrollbar-width: none; /* 🔧 Firefox：スクロールバー非表示（スクロール自体は可能） */
@@ -1554,7 +1561,7 @@ canvas {
 </div>
 <!-- ランキングをリセットするダイアログ -->
 <div id="ranking-reset-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
-  <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="ranking-reset-modal-content">
+  <div style="background: white; padding: 20px 15px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="ranking-reset-modal-content">
     <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">ランキングをリセットする？</h3>
     <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: normal; line-height: 1.5;">これまでのスコア記録を消して全部0に戻します。<br>
       本当に消していいですか？</p>
@@ -1568,7 +1575,7 @@ canvas {
 </div>
 <!-- ゲームリセットのダイアログ -->
 <div id="reset-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
-  <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="reset-modal-content">
+  <div style="background: white; padding: 20px 15px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="reset-modal-content">
     <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">最初からやりなおす？</h3>
    <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: normal; line-height: 1.5;">現在のスコアやパネルの配置などが<br>
       全てリセットされます</p>
@@ -1582,14 +1589,36 @@ canvas {
 </div>
 <!-- 💾 中断データ再開確認モーダル -->
 <div id="resume-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
-  <div style="background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="resume-modal-content">
+  <div style="background: white; padding: 20px 15px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: var(--start-modal-width); width: 85%; height: var(--start-modal-height); box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="resume-modal-content">
     <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">前回の続きがあるよ</h3>
     <p id="resume-modal-detail" style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: normal; line-height: 1.5;">中断したところから再開する？</p>
     <div style="display: flex; gap: 12px; justify-content: center;">
-      <button onclick="startNewGameFromModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #ff7675; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">最初から<br>
+      <button onclick="startNewGameFromModal()" style="width: var(--start-modal-btn-width); height: var(--start-modal-btn-height); box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 12px; line-height: 1.3; border: none; border-radius: 15px; background: #ff7675; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">最初から<br>
       始める</button>
-      <button onclick="resumeGameFromModal()" style="flex: 1; padding: 12px; border: none; border-radius: 15px; background: #3D9DFF; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(61,157,255,0.3);">続きから<br>
+      <button onclick="resumeGameFromModal()" style="width: var(--start-modal-btn-width); height: var(--start-modal-btn-height); box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 12px; line-height: 1.3; border: none; border-radius: 15px; background: #3D9DFF; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(61,157,255,0.3);">続きから<br>
       再開する</button>
+    </div>
+  </div>
+</div>
+<!-- 🔊 音設定モーダル(初回のみ表示) -->
+<div id="sound-pref-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1001; opacity: 0; transition: opacity 0.2s ease;">
+  <div style="background: white; padding: 20px 15px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: var(--start-modal-width); width: 85%; height: var(--start-modal-height); box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="sound-pref-modal-content">
+     <h3 style="margin: 0 0 25px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">BGM・効果音の設定<br><span style="font-size: 14px; color: #64748b; font-weight: 700;">（後からOPTIONで変更できます）</span></h3>
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <button onclick="chooseSoundPref(false)" style="width: var(--start-modal-btn-width); height: var(--start-modal-btn-height); flex-shrink: 0; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 12px; line-height: 1.3; border: none; border-radius: 15px; background: #433994; color: #E9E7F7; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(36,30,88,0.3);">🔇 音なし</button>
+      <button onclick="chooseSoundPref(true)" style="width: var(--start-modal-btn-width); height: var(--start-modal-btn-height); box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 12px; line-height: 1.3; border: none; border-radius: 15px; background: #3D9DFF; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(61,157,255,0.3);">🔊 音あり</button>
+    </div>
+  </div>
+</div>
+<!-- ▶ ゲームをはじめるゲートモーダル(音設定済み・中断データなしの時だけ表示) -->
+<div id="start-gate-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1001; opacity: 0; transition: opacity 0.2s ease;">
+  <div style="background: white; padding: 20px 15px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: var(--start-modal-width); width: 85%; height: var(--start-gate-modal-height); box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="start-gate-modal-content">
+    <h3 style="margin: 0 0 6px 0; color: #2c3e50; font-size: 20px; font-weight: 900; font-family: var(--font-jp);">🌈 ナナイロパネル</h3>
+    <p style="margin: 0 0 12px 0; color: #64748b; font-size: 13px; font-weight: 700; font-family: var(--font-main-ui);">Rainbow Panels</p>
+    <p style="margin: 0 0 26px 0; color: #64748b; font-size: 13px;">© 2026 by isomi_ssm</p>
+     <div id="start-gate-panel-row" style="display: flex; gap: 6px; justify-content: center; margin: 0 0 48px 0;"></div>
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <button onclick="startGameFromGate()" style="width: var(--start-modal-btn-width); height: var(--start-modal-btn-height); box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 12px; line-height: 1.3; border: none; border-radius: 15px; background: #3D9DFF; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(61,157,255,0.3);">ゲームをはじめる</button>
     </div>
   </div>
 </div>
@@ -1597,6 +1626,9 @@ canvas {
 <div id="options-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); max-width: 380px; width: 88%; max-height: 85vh; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" id="options-modal-content">
   <div style="overflow-y: auto; flex: 1; min-height: 0; padding: 28px 24px; box-sizing: border-box; text-align: center;">
+    <div style="position: sticky; top: -28px; left: -24px; margin: -28px 0 4px -24px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
+      <button onclick="closeOptionsModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
+    </div>
     <h3 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 18px; font-weight: 900; font-family: var(--font-jp);">⚙️ OPTION</h3>
 
     <div style="text-align: left; margin-bottom: 20px;">
@@ -1619,10 +1651,20 @@ canvas {
     </div>
 
     <div id="opt-sound-section" style="text-align: left; margin-bottom: 20px;">
-      <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">BGM音量 <span id="opt-bgm-volume-label" style="color: #3D9DFF;">80%</span></div>
-      <input type="range" id="opt-bgm-volume" min="0" max="100" step="5" oninput="onVolumeChange('bgm', this.value)" style="width: 100%; cursor: pointer;">
-      <div style="font-size: 14px; font-weight: 900; color: #475569; margin: 12px 0 8px 0;">SE音量 <span id="opt-se-volume-label" style="color: #3D9DFF;">80%</span></div>
-      <input type="range" id="opt-se-volume" min="0" max="100" step="5" oninput="onVolumeChange('se', this.value)" style="width: 100%; cursor: pointer;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+        <div style="font-size: 14px; font-weight: 900; color: #475569;">BGM音量 <span id="opt-bgm-volume-label" style="color: #3D9DFF; font-size: 18px;">80%</span></div>
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 900; color: #475569; cursor: pointer;">
+          <input type="checkbox" id="opt-bgm-mute" onchange="toggleSoundMute('bgm')" style="width: 18px; height: 18px; cursor: pointer;"> 消音
+        </label>
+      </div>
+      <input type="range" id="opt-bgm-volume" min="0" max="100" step="5" oninput="onVolumeChange('bgm', this.value)" style="width: 100%; cursor: pointer; accent-color: #3D9DFF;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin: 12px 0 8px 0;">
+        <div style="font-size: 14px; font-weight: 900; color: #475569;">SE音量 <span id="opt-se-volume-label" style="color: #3D9DFF; font-size: 18px;">80%</span></div>
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 900; color: #475569; cursor: pointer;">
+          <input type="checkbox" id="opt-se-mute" onchange="toggleSoundMute('se')" style="width: 18px; height: 18px; cursor: pointer;"> 消音
+        </label>
+      </div>
+      <input type="range" id="opt-se-volume" min="0" max="100" step="5" oninput="onVolumeChange('se', this.value)" style="width: 100%; cursor: pointer; accent-color: #3D9DFF;">
     </div>
 
     <div style="text-align: left; margin-bottom: 8px;">
@@ -1679,7 +1721,7 @@ canvas {
 	 * 
 	 ************************************************************/
 
-/* コンフィグ */
+/* ⚙️コンフィグ */
 const CONFIG = {
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1689,12 +1731,12 @@ const CONFIG = {
 		CELL_SIZE:         55,   // 1マスのサイズ（ピクセル）
 		INITIAL_MOVES:      3,   // マッチ成立時に回復する手数
 
-		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🖐️ 操作設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		FLICK_THRESHOLD:    18,   // フリックと判定する移動距離のしきい値（px・仮値、実機調整予定）
 
-		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🎬 パネル移動アニメーション設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SWAP_ANIM_DURATION:          240,  // パネル入れ替えアニメの所要時間（ms）
@@ -1705,6 +1747,7 @@ const CONFIG = {
 		LAND_BOUNCE_HEIGHT:           10,  // バウンドの高さ（px）
 	
 		BALL_TO_SLOT_DURATION:      300,   // 虹玉を消した時に飛ぶ玉の速さ（ms・小さいほど速い／元550）
+		STAR_TO_SLOT_DURATION:      500,   // 🌙 星パネルを消した時に飛ぶ星の速さ（ms・小さいほど速い）
 		GAUGE_CHARGE_DURATION:      400,   // レインボーゲージが貯まった時に飛ぶ玉の速さ（ms・小さいほど速い／元800）
 		GAUGE_CHARGE_START_OFFSET_X: -16,  // ゲージ満タン時に飛ぶ玉の出現X位置補正（px・マイナスで左へ、PC/スマホ共通）
 		GAUGE_CHARGE_START_OFFSET_Y: -6,   // ゲージ満タン時に飛ぶ玉の出現Y位置補正（px・マイナスで上へ、PC/スマホ共通）
@@ -1718,7 +1761,7 @@ const CONFIG = {
 		ORANGE_UNLOCK_SCORE: 5500,     // 橙パネルが追加されるスコア
 		INDIGO_UNLOCK_SCORE: 7500,     // 藍パネルが追加されるスコア
 	
-	     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🏆 スコア・コンボ設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SCORE: {
@@ -1827,7 +1870,7 @@ const CONFIG = {
 		NIGHT_STAR_NEEDED:          3, // 昼に戻るために必要な星の数
 		NIGHT_COLOR_BOOST:          5, // 夜中の青・藍・紫の出現率ボーナス（0=均等 数値を増やすほど青・藍・紫が出やすくなる）
 	
-		// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌙 パネル選択設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SELECTION_BORDER_DARK_DAY:   "10, 12, 15",    // 選択パネル枠線・暗い側の色（昼）※ほぼ黒
@@ -1923,7 +1966,24 @@ const CONFIG = {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🔊 オプション画面 表示切替設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		SHOW_SOUND_OPTIONS: false,  // trueにするとBGM/SE音量スライダーをオプション画面に表示（音源実装時にtrueへ）
+		SHOW_SOUND_OPTIONS: false,  // 🔧 falseにするとBGM/SE音量スライダーをオプション画面を非表示（true/false）
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🎵 BGM設定
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		BGM_ENABLED: false,  // 🔧 falseにするとBGM機能自体を無効化（true/false）
+		BGM_TRACKS: {
+			day:     'assets/bgm/day.wav',
+			night:   'assets/bgm/night.wav',
+			rainbow: 'assets/bgm/rainbow.wav',
+		},
+		BGM_DAYNIGHT_CROSSFADE_MS: 3500,  // 昼⇔夜のクロスフェード時間（ms）
+		BGM_RAINBOW_FADE_OUT_MS:    1600,  // 昼/夜→ナナイロに入る時のフェード時間（ms）※音が動き出してからの所要時間
+		BGM_RAINBOW_FADE_IN_MS:     2000,  // ナナイロ→昼/夜に戻る時のフェード時間（ms）※音が動き出してからの所要時間
+		BGM_RAINBOW_ENTER_DELAY_MS:   0,  // ナナイロ開始判定〜実際に音が動き出すまでの遅延（ms）
+		BGM_RAINBOW_EXIT_DELAY_MS: 800,  // ナナイロ終了判定〜実際に音が動き出すまでの遅延（ms）
+		BGM_STARTUP_FADE_IN_MS:     800,  // 起動モーダルを閉じた直後、BGMを鳴らし始める際のフェードイン時間（ms）
+		BGM_VOLUME_CURVE_EXPONENT:    2,  // 音量スライダー(0-100)を実ゲインへ変換する際の聴感補正カーブ
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🔧 システム内部用（基本的に変更不要）
@@ -1954,12 +2014,15 @@ const CONFIG = {
     const SETTINGS_STORAGE_KEY = 'nanairoPanelUserSettings';
 
 	const DEFAULT_SETTINGS = {
-        animSpeed:    'normal', // 'none'（アニメなし） | 'normal'（ふつう） | 'fast'（はやい）
-        bgmVolume:    80,       // 0-100（音源実装後に接続予定。現状は値の保持のみ）
-        seVolume:     80,       // 0-100（同上）
-        reduceMotion: false,    // trueで、お邪魔パネル出現時の震え等「追加の演出」を抑える（パネル移動アニメの速度とは別軸）
-        ballShape:    'circle', // 'circle' | 'magatama' | 'hexagon'
-        iconStyle:    'cute'    // 'cute'（カラフルアイコン） | 'simple'（白抜き半透明アイコン）
+        animSpeed:     'normal', // 'none'（アニメなし） | 'normal'（ふつう） | 'fast'（はやい）
+        bgmVolume:     80,       // 0-100
+        seVolume:      80,       // 0-100
+        bgmMuted:      false,    // trueで音量値はそのまま、実際の音だけ0にする
+        seMuted:       false,    // 同上（SE）
+        bgmChoiceMade: false,    // 起動時の音設定モーダルで一度でも選択済みか
+        reduceMotion:  false,    // trueで、お邪魔パネル出現時の震え等「追加の演出」を抑える（パネル移動アニメの速度とは別軸）
+        ballShape:     'circle', // 'circle' | 'magatama' | 'hexagon'
+        iconStyle:     'cute'    // 'cute'（カラフルアイコン） | 'simple'（白抜き半透明アイコン）
     };
 	
     // CONFIGのベース値（速度プリセットを切り替えるたびに、ここから再計算する）
@@ -2002,7 +2065,8 @@ const CONFIG = {
             CONFIG.FALL_ANIM_DURATION_MAX = Math.round(BASE_FALL_ANIM_DURATION_MAX * speedMul);
         }
         applyBallShape(userSettings.ballShape);
-        // BGM/SE音量：音源実装後にここへ接続予定（現状は値の保持のみ）
+        BGM.setVolume(userSettings.bgmMuted ? 0 : userSettings.bgmVolume);
+        // SE音量：効果音実装後にここへ接続予定
         // reduceMotion：お邪魔パネルの震えなど「追加の演出」の抑制に使用（addObstacle()等で直接参照）
     }
 
@@ -2106,6 +2170,7 @@ const CONFIG = {
         updateRainbowUI();
         updateNightStarUI();
         draw();
+        BGM.startForCurrentState();
     }
 
     // ────────────────────────────────────────────────────
@@ -2741,6 +2806,11 @@ update(frameFactor = 1) {
 		/*プリズムパネルのエフェクトここまで*/
     }
 
+    // 色を線形補間するヘルパー（発光表現用）
+    function lerpColor(from, to, t) {
+        return from.map((v, i) => Math.round(v + (to[i] - v) * t));
+    }
+
     // 🌙 流れ星エフェクト（夜モード突入時）
     class ShootingStarEffect {
         constructor() {
@@ -2750,17 +2820,17 @@ update(frameFactor = 1) {
             this.x = canvasW * (0.55 + Math.random() * 0.4); /* 流れ星のスタートの位置座標 */
             this.y = canvasH * (Math.random() * 0.2);
             this.len = 140 + Math.random() * 60;
-            this.speed = 5 + Math.random() * 3;
-			this.angle = Math.PI * 0.75; // 左下方向
-            this.vx = Math.cos(this.angle) * this.speed;
-            this.vy = Math.sin(this.angle) * this.speed;
+            this.speed = 9 + Math.random() * 3; /* 流れ星の初速（速めに開始） */
+            this.angle = Math.PI * 0.75; // 左下方向
+            this.speedDecay = 0.987; /* 1フレームごとの速度の減衰率（1に近いほど減速が緩やか＝最後まで進む） */
             this.life = 1.0;
             this.decay = 0.008;
             this.done = false;
         }
         update(frameFactor = 1) {
-            this.x += this.vx * frameFactor;
-            this.y += this.vy * frameFactor;
+            this.speed *= Math.pow(this.speedDecay, frameFactor); // 🎞️ フレーム数分だけ累乗して減速
+            this.x += Math.cos(this.angle) * this.speed * frameFactor;
+            this.y += Math.sin(this.angle) * this.speed * frameFactor;
             this.life -= this.decay * frameFactor;
             if (this.life <= 0) this.done = true;
         }
@@ -2768,22 +2838,27 @@ update(frameFactor = 1) {
             if (this.done) return;
             ctx.save();
             ctx.globalAlpha = this.life;
+            /* 発光の強さ：初動は白に近く強く、終盤は元の色に戻り弱まる */
+            const glowFactor = Math.pow(this.life, 2.5);
+            const trailHead = lerpColor([255, 220, 100], [255, 255, 255], glowFactor);
             const grad = ctx.createLinearGradient(
                 this.x, this.y,
                 this.x - Math.cos(this.angle) * this.len,
                 this.y - Math.sin(this.angle) * this.len
             );
-            grad.addColorStop(0,   "rgba(255, 255, 200, 1.0)");
+            grad.addColorStop(0,   `rgba(${trailHead[0]}, ${trailHead[1]}, ${trailHead[2]}, 1.0)`);
             grad.addColorStop(0.4, "rgba(255, 220, 100, 0.6)");
             grad.addColorStop(1.0, "rgba(255, 200,  50, 0.0)");
             ctx.strokeStyle = grad;
             ctx.lineWidth = 10; /* 流れ星の線の幅 */
+            ctx.shadowBlur = 6 * glowFactor; /* ぼかし範囲を狭めに（発光は主に色で表現） */
+            ctx.shadowColor = "#fff9c4";
             ctx.beginPath();
             ctx.moveTo(this.x, this.y);
             ctx.lineTo(this.x - Math.cos(this.angle) * this.len, this.y - Math.sin(this.angle) * this.len);
             ctx.stroke();
-            // 先端の輝き（星形）
-            ctx.shadowBlur = 20;
+            // 先端の輝き（星形）：色そのものを白く近づけて発光を表現
+            ctx.shadowBlur = 8 * glowFactor;
             ctx.shadowColor = "#ffe600";
             {
                 const svgSize = 85;
@@ -2794,7 +2869,8 @@ update(frameFactor = 1) {
                 ctx.scale(scale, scale);
                 ctx.translate(-svgSize / 2, -svgSize / 2);
                 const starPath = new Path2D("M44.27,8.41l10.25,20.52,22.68,3.41c1.51.23,2.12,2.09,1.03,3.16l-16.34,16.09,3.77,22.62c.25,1.51-1.33,2.66-2.69,1.95l-20.35-10.57-20.35,10.57c-1.36.71-2.94-.44-2.69-1.95l3.77-22.62L6.99,35.5c-1.09-1.07-.49-2.93,1.03-3.16l22.68-3.41,10.25-20.52c.68-1.37,2.64-1.37,3.32,0Z");
-                ctx.fillStyle = "#fffde7";
+                const starColor = lerpColor([255, 229, 0], [255, 255, 255], glowFactor);
+                ctx.fillStyle = `rgb(${starColor[0]}, ${starColor[1]}, ${starColor[2]})`;
                 ctx.fill(starPath);
                 ctx.restore();
             }
@@ -3408,12 +3484,16 @@ update(frameFactor = 1) {
 		if (reduceMotionCheckbox) reduceMotionCheckbox.checked = userSettings.reduceMotion;
 		const bgmSlider = document.getElementById('opt-bgm-volume');
 		const seSlider = document.getElementById('opt-se-volume');
-		if (bgmSlider) bgmSlider.value = userSettings.bgmVolume;
-		if (seSlider) seSlider.value = userSettings.seVolume;
+		if (bgmSlider) { bgmSlider.value = userSettings.bgmVolume; bgmSlider.disabled = userSettings.bgmMuted; }
+		if (seSlider) { seSlider.value = userSettings.seVolume; seSlider.disabled = userSettings.seMuted; }
 		const bgmLabel = document.getElementById('opt-bgm-volume-label');
 		const seLabel = document.getElementById('opt-se-volume-label');
 		if (bgmLabel) bgmLabel.textContent = userSettings.bgmVolume + '%';
 		if (seLabel) seLabel.textContent = userSettings.seVolume + '%';
+		const bgmMuteCheckbox = document.getElementById('opt-bgm-mute');
+		const seMuteCheckbox = document.getElementById('opt-se-mute');
+		if (bgmMuteCheckbox) bgmMuteCheckbox.checked = userSettings.bgmMuted;
+		if (seMuteCheckbox) seMuteCheckbox.checked = userSettings.seMuted;
 
 		const soundSection = document.getElementById('opt-sound-section');
 		if (soundSection) soundSection.style.display = CONFIG.SHOW_SOUND_OPTIONS ? '' : 'none';
@@ -3449,16 +3529,31 @@ update(frameFactor = 1) {
 
 	function onVolumeChange(type, value) {
 		value = Number(value);
-		if (type === 'bgm') userSettings.bgmVolume = value;
+		if (type === 'bgm') { userSettings.bgmVolume = value; BGM.setVolume(userSettings.bgmMuted ? 0 : value); }
 		else userSettings.seVolume = value;
 		const label = document.getElementById(type === 'bgm' ? 'opt-bgm-volume-label' : 'opt-se-volume-label');
 		if (label) label.textContent = value + '%';
 		saveUserSettings();
-		// 🔊 音源実装後、ここで実際のBGM/SE音量に反映する予定
+		// 🔊 SE音量は効果音実装後にここへ接続予定
+	}
+
+	function toggleSoundMute(type) {
+		const checkbox = document.getElementById(type === 'bgm' ? 'opt-bgm-mute' : 'opt-se-mute');
+		const muted = checkbox.checked;
+		if (type === 'bgm') {
+			userSettings.bgmMuted = muted;
+			BGM.setVolume(muted ? 0 : userSettings.bgmVolume);
+		} else {
+			userSettings.seMuted = muted;
+			// 🔊 SE消音は効果音実装後にここへ接続予定
+		}
+		saveUserSettings();
+		updateOptionsUI(); // スライダーのdisabled状態を反映
 	}
 
 	function resetUserSettingsToDefault() {
-		userSettings = { ...DEFAULT_SETTINGS };
+		const bgmChoiceMade = userSettings.bgmChoiceMade; // 🔊 初期設定に戻しても起動時モーダルは再表示させない
+		userSettings = { ...DEFAULT_SETTINGS, bgmChoiceMade };
 		saveUserSettings();
 		applyUserSettings();
 		updateOptionsUI();
@@ -3966,7 +4061,7 @@ update(frameFactor = 1) {
 					ctx.translate(ox, oy);
 					ctx.scale(scale, scale);
 					// グロー
-					ctx.shadowBlur = (15 + Math.sin(selectionPulse * 1.5) * 3) / scale;
+					ctx.shadowBlur = (9 + Math.sin(selectionPulse * 1.5) * 4) / scale; //星パネルの光ぼかしと明滅の振れ幅
 					ctx.shadowColor = "#ffe600";
 					// グラデーション塗り
 					if (!starGradCache) {
@@ -4264,6 +4359,10 @@ update(frameFactor = 1) {
 		sevenColorsEndingTransition = false;
 		updateRainbowUI();
 	}, 1400); // 🌈 フラッシュが完全に覆っている区間（1200〜1500ms）内で切り替える。ここで虹色アニメを止めておけば、残りのフェードアウト(1400〜2000ms)は完全に静止した本当の背景色を見せるだけになる
+		setTimeout(() => {
+		if (myFadeToken !== sevenColorsEndToken) return;
+		BGM.exitRainbow();
+	}, CONFIG.BGM_RAINBOW_EXIT_DELAY_MS); // 🎵 見た目とは独立したタイミングで音を切り替える
 	} else {
 			updateRainbowUI();
 		}
@@ -4416,6 +4515,7 @@ canvas.addEventListener('pointercancel', (e) => {
         isNightMode = true;
         nightTriggered = true;
         nightStarCount = 0;
+        BGM.crossfadeToNight();
 
         // 背景を夜色にゆっくりフェード
         isDayNightFading = true; // 🌗 フェード中は他処理によるtransition上書きを防止
@@ -4519,6 +4619,7 @@ canvas.addEventListener('pointercancel', (e) => {
         nightModeEntryScore = 0;      // 🌙 夜突入スコアリセット
         nightStarSpawned = false;     // 🌙 星スポーン済みフラグリセット
         isReplenishingStars = false;  // 🌙 補充フラグをリセット
+        BGM.crossfadeToDay();
 
         // 🌙 夜中に蓄積したスコア分の閾値を昼復帰時に現在スコアへ追いつかせる
         while (rainyThreshold <= score) rainyThreshold += CONFIG.THRESHOLD.RAINY_INTERVAL;
@@ -4610,14 +4711,19 @@ canvas.addEventListener('pointercancel', (e) => {
             ctx.save();
             ctx.globalAlpha = this.life;
             /* 白い閃光（序盤に強く） */
-            const flashAlpha = Math.max(0, 1 - t * 3);
+            const flashAlpha = Math.max(0, 1 - t * 3); // 星パネル背面の白丸が残る時間（最後の数値を小さくすると時間が伸びる）
             if (flashAlpha > 0) {
                 ctx.globalAlpha = flashAlpha;
-                ctx.fillStyle = '#ffffff';
+                const flashRadius = CONFIG.CELL_SIZE * 0.5 * (1 - t * 0.5);
+                const flashGrad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, flashRadius);
+                flashGrad.addColorStop(0, 'rgba(255,255,255,1)');
+                flashGrad.addColorStop(0.6, 'rgba(255,255,255,0.6)');
+                flashGrad.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.fillStyle = flashGrad;
                 ctx.shadowBlur = 12;
                 ctx.shadowColor = '#ffffff';
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, CONFIG.CELL_SIZE * 0.5 * (1 - t * 0.5), 0, Math.PI * 2);
+                ctx.arc(this.x, this.y, flashRadius, 0, Math.PI * 2);
                 ctx.fill();
             }
             /* 星型フレア（黄色、広がりながらフェード） */
@@ -5632,6 +5738,7 @@ canvas.addEventListener('pointercancel', (e) => {
 			allClearSpawnCount = CONFIG.ALLCLEAR_SPAWN_COUNT_MIN + Math.floor(Math.random() * CONFIG.ALLCLEAR_SPAWN_COUNT_RANGE);
 
 			createRainbowShockwaveEffect();
+			setTimeout(() => BGM.enterRainbow(), CONFIG.BGM_RAINBOW_ENTER_DELAY_MS); // 🎵 見た目とは独立したタイミングで音を切り替える
 
 			updateRainbowUI();
 		}
@@ -5862,7 +5969,7 @@ canvas.addEventListener('pointercancel', (e) => {
         star.innerHTML = `<svg viewBox="0 0 85 85" xmlns="http://www.w3.org/2000/svg"><path d="${STAR_PATH}" fill="#ffe600"/></svg>`;
         document.body.appendChild(star);
 
-        const duration = CONFIG.BALL_TO_SLOT_DURATION;
+        const duration = CONFIG.STAR_TO_SLOT_DURATION;
         const cp1x = fromX + (toX - fromX) * 0.3 + (Math.random() * 40 - 20);
         const cp1y = fromY - 60 - Math.random() * 40;
         const startTime = performance.now();
@@ -6020,6 +6127,7 @@ canvas.addEventListener('pointercancel', (e) => {
 
     function resumeGameFromModal() {
         closeResumeModal();
+        BGM.unlock();
         const saved = loadAutoSave();
         if (saved) applySaveState(saved);
         else initGame(); // 万一読み込みに失敗した場合は新規開始にフォールバック
@@ -6027,7 +6135,93 @@ canvas.addEventListener('pointercancel', (e) => {
 
     function startNewGameFromModal() {
         closeResumeModal();
+        BGM.unlock();
         clearAutoSave();
+        initGame();
+    }
+
+    // 🔊 音設定確定後の分岐（中断データの有無で次のモーダルを出し分ける）
+    function proceedAfterSoundPref() {
+        const pendingAutoSave = loadAutoSave();
+        if (pendingAutoSave) {
+            openResumeModal(pendingAutoSave);
+        } else {
+            openStartGateModal();
+        }
+    }
+
+    function openSoundPrefModal() {
+        const modal = document.getElementById('sound-pref-modal');
+        const content = document.getElementById('sound-pref-modal-content');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            content.style.transform = 'scale(1)';
+        }, 10);
+    }
+
+    function closeSoundPrefModal() {
+        const modal = document.getElementById('sound-pref-modal');
+        const content = document.getElementById('sound-pref-modal-content');
+        modal.style.opacity = '0';
+        content.style.transform = 'scale(0.9)';
+        setTimeout(() => { modal.style.display = 'none'; }, 200);
+    }
+
+    function chooseSoundPref(enabled) {
+        userSettings.bgmVolume = enabled ? DEFAULT_SETTINGS.bgmVolume : 0;
+        userSettings.seVolume  = enabled ? DEFAULT_SETTINGS.seVolume  : 0;
+        userSettings.bgmChoiceMade = true;
+        saveUserSettings();
+        BGM.unlock();
+        BGM.setVolume(userSettings.bgmVolume);
+        closeSoundPrefModal();
+        proceedAfterSoundPref();
+    }
+
+    // 🎨 ゲームをはじめるモーダル用：ゲーム本編と同じ角丸パネル・アイコンを流用してミニパネルを7つ並べる（かわいいスタイル固定）
+    function renderStartGatePanelRow() {
+        const container = document.getElementById('start-gate-panel-row');
+        if (!container || container.childElementCount > 0) return; // 二重生成を防止
+        const size = 34; // 🔧 ミニパネルの一辺(px)。ゲーム本編のパネルより小さめ
+        const scale = size / CONFIG.CELL_SIZE; // 本編パネルとの比率換算
+        const radius = Math.round(12 * scale); // 本編と同じ角丸比率（本編は角丸12px）
+        const rainbowOrder = [0, 5, 1, 2, 3, 6, 4]; // 🌈 表示順を虹の並び（赤橙黄緑青藍紫）に変換
+        rainbowOrder.forEach(i => {
+            const color = CONFIG.COLORS[i];
+            const iconSize = Math.round(CONFIG.PANEL_ICON_SIZE[i] * scale);
+            const panel = document.createElement('div');
+            panel.style.cssText = `width:${size}px; height:${size}px; border-radius:${radius}px; background:${color}; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 4px rgba(0,0,0,0.15); flex-shrink:0;`;
+            const img = document.createElement('img');
+            img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(TYPE_ICON_SVGS[i]);
+            img.style.cssText = `width:${iconSize}px; height:${iconSize}px;`;
+            panel.appendChild(img);
+            container.appendChild(panel);
+        });
+    }
+			
+    function openStartGateModal() {
+        renderStartGatePanelRow();
+        const modal = document.getElementById('start-gate-modal');
+        const content = document.getElementById('start-gate-modal-content');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            content.style.transform = 'scale(1)';
+        }, 10);
+    }
+
+    function closeStartGateModal() {
+        const modal = document.getElementById('start-gate-modal');
+        const content = document.getElementById('start-gate-modal-content');
+        modal.style.opacity = '0';
+        content.style.transform = 'scale(0.9)';
+        setTimeout(() => { modal.style.display = 'none'; }, 200);
+    }
+
+    function startGameFromGate() {
+        BGM.unlock();
+        closeStartGateModal();
         initGame();
     }
 
@@ -6105,23 +6299,197 @@ canvas.addEventListener('pointercancel', (e) => {
         if (elRate)   elRate.textContent   = `発動率 ${rate !== null ? rate + '%' : '--'}`;
         if (elCycle)  elCycle.textContent  = `夜スコア補正 ${nightCycleDarkCount}`;	}
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🎵 BGM再生システム（Web Audio API）
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const BGM = (() => {
+        let audioCtx = null;
+        let masterGain = null;   // 全体音量（userSettings.bgmVolumeを反映）
+        let fieldGain = null;    // 昼/夜バスの親ゲイン（ナナイロ中は0にして丸ごと隠す）
+        let dayGain = null, nightGain = null, rainbowGain = null;
+        let daySource = null, nightSource = null, rainbowSource = null;
+        let dayBuffer = null, nightBuffer = null, rainbowBuffer = null;
+        let isUnlocked = false;
+        let buffersLoaded = false;
+        let loadingPromise = null;
+
+        function volumeToGain(percent) {
+            const v = Math.max(0, Math.min(100, percent)) / 100;
+            return Math.pow(v, CONFIG.BGM_VOLUME_CURVE_EXPONENT);
+        }
+
+        function ensureContext() {
+            if (!CONFIG.BGM_ENABLED || audioCtx) return audioCtx;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = volumeToGain(userSettings.bgmVolume);
+            masterGain.connect(audioCtx.destination);
+
+            fieldGain = audioCtx.createGain(); // 昼/夜の親バス
+            fieldGain.gain.value = 0;
+            fieldGain.connect(masterGain);
+
+            dayGain = audioCtx.createGain();
+            nightGain = audioCtx.createGain();
+            rainbowGain = audioCtx.createGain();
+            dayGain.gain.value = 0;
+            nightGain.gain.value = 0;
+            rainbowGain.gain.value = 0;
+            dayGain.connect(fieldGain);
+            nightGain.connect(fieldGain);
+            rainbowGain.connect(masterGain);
+
+            return audioCtx;
+        }
+
+        async function loadBuffer(url) {
+            const res = await fetch(url);
+            const arrayBuffer = await res.arrayBuffer();
+            return await audioCtx.decodeAudioData(arrayBuffer);
+        }
+
+        function loadBuffers() {
+            if (buffersLoaded) return Promise.resolve();
+            if (loadingPromise) return loadingPromise;
+            loadingPromise = Promise.all([
+                loadBuffer(CONFIG.BGM_TRACKS.day),
+                loadBuffer(CONFIG.BGM_TRACKS.night),
+                loadBuffer(CONFIG.BGM_TRACKS.rainbow),
+            ]).then(([d, n, r]) => {
+                dayBuffer = d; nightBuffer = n; rainbowBuffer = r;
+                buffersLoaded = true;
+            }).catch(e => console.warn('BGM読み込みに失敗しました。', e));
+            return loadingPromise;
+        }
+
+        function stopSource(src) {
+            if (!src) return;
+            try { src.stop(); } catch (e) {}
+            try { src.disconnect(); } catch (e) {}
+        }
+
+        function rampGain(node, target, ms) {
+            const now = audioCtx.currentTime;
+            node.gain.cancelScheduledValues(now);
+            node.gain.setValueAtTime(node.gain.value, now);
+            node.gain.linearRampToValueAtTime(target, now + ms / 1000);
+        }
+
+        // 昼/夜を完全に同じタイミングでスタートし、以降ずっと裏で回し続ける
+        function startFieldSources() {
+            stopSource(daySource);
+            stopSource(nightSource);
+            const now = audioCtx.currentTime;
+            daySource = audioCtx.createBufferSource();
+            daySource.buffer = dayBuffer;
+            daySource.loop = true;
+            daySource.connect(dayGain);
+            daySource.start(now);
+
+            nightSource = audioCtx.createBufferSource();
+            nightSource.buffer = nightBuffer;
+            nightSource.loop = true;
+            nightSource.connect(nightGain);
+            nightSource.start(now);
+        }
+
+        function startRainbowSource() {
+            stopSource(rainbowSource);
+            rainbowSource = audioCtx.createBufferSource();
+            rainbowSource.buffer = rainbowBuffer;
+            rainbowSource.loop = true;
+            rainbowSource.connect(rainbowGain);
+            rainbowSource.start(audioCtx.currentTime);
+        }
+
+        // 🔓 ユーザー操作のハンドラ内で同期的に呼ぶ想定（AudioContext解禁のみ。何度呼んでも安全）
+        function unlock() {
+            if (!CONFIG.BGM_ENABLED) return;
+            const ctx = ensureContext();
+            if (!ctx) return;
+            isUnlocked = true;
+            if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+        }
+
+        // 現在のisNightMode／isLevelRainbowに応じてBGMを鳴らし始める（initGame/applySaveState末尾から呼ぶ）
+        async function startForCurrentState() {
+            if (!CONFIG.BGM_ENABLED || !isUnlocked) return;
+            await loadBuffers();
+            if (!buffersLoaded) return; // 読み込み失敗時は無音のまま諦める
+            startFieldSources();
+            dayGain.gain.value = isNightMode ? 0 : 1;
+            nightGain.gain.value = isNightMode ? 1 : 0;
+            if (isLevelRainbow) {
+                startRainbowSource();
+                fieldGain.gain.value = 0;
+                rainbowGain.gain.value = 1;
+            } else {
+                rainbowGain.gain.value = 0;
+                fieldGain.gain.value = 0;
+                rampGain(fieldGain, 1, CONFIG.BGM_STARTUP_FADE_IN_MS);
+            }
+        }
+
+        function crossfadeToNight() {
+            if (!CONFIG.BGM_ENABLED || !isUnlocked || !buffersLoaded) return;
+            rampGain(dayGain, 0, CONFIG.BGM_DAYNIGHT_CROSSFADE_MS);
+            rampGain(nightGain, 1, CONFIG.BGM_DAYNIGHT_CROSSFADE_MS);
+        }
+
+        function crossfadeToDay() {
+            if (!CONFIG.BGM_ENABLED || !isUnlocked || !buffersLoaded) return;
+            rampGain(nightGain, 0, CONFIG.BGM_DAYNIGHT_CROSSFADE_MS);
+            rampGain(dayGain, 1, CONFIG.BGM_DAYNIGHT_CROSSFADE_MS);
+        }
+
+        // 昼/夜→ナナイロ（普通のフェード。裏の昼/夜ループは止めずfieldGainごと隠すだけ）
+        function enterRainbow() {
+            if (!CONFIG.BGM_ENABLED || !isUnlocked || !buffersLoaded) return;
+            rampGain(fieldGain, 0, CONFIG.BGM_RAINBOW_FADE_OUT_MS);
+            startRainbowSource();
+            rampGain(rainbowGain, 1, CONFIG.BGM_RAINBOW_FADE_OUT_MS);
+        }
+
+        // ナナイロ→昼/夜（この時点のisNightModeに沿ったdayGain/nightGainバランスがそのまま復帰する）
+        function exitRainbow() {
+            if (!CONFIG.BGM_ENABLED || !isUnlocked || !buffersLoaded) return;
+            rampGain(rainbowGain, 0, CONFIG.BGM_RAINBOW_FADE_IN_MS);
+            rampGain(fieldGain, 1, CONFIG.BGM_RAINBOW_FADE_IN_MS);
+            const src = rainbowSource;
+            setTimeout(() => stopSource(src), CONFIG.BGM_RAINBOW_FADE_IN_MS + 50);
+        }
+
+        function setVolume(percent) {
+            if (!masterGain) return;
+            rampGain(masterGain, volumeToGain(percent), 150);
+        }
+
+        return {
+            unlock, startForCurrentState,
+            crossfadeToNight, crossfadeToDay,
+            enterRainbow, exitRainbow,
+            setVolume,
+        };
+    })();			
+
     // ゲーム開始時と、玉を回収した時に自動でUIが新しくなるようにします
     const originalInitGame = initGame;
     initGame = function() {
         originalInitGame();
         updateRainbowUI();
+        BGM.startForCurrentState();
     };
 
     // ⚙️ 保存済みのプレイヤー設定を読み込んでから反映する
     loadUserSettings();
     applyUserSettings();
 
-    // 💾 中断データがあれば再開確認モーダルを表示し、なければ通常どおり新規開始
-    const pendingAutoSave = loadAutoSave();
-    if (pendingAutoSave) {
-        openResumeModal(pendingAutoSave);
+    // 🔊 音設定が未確定なら最優先で確認し、確定済みなら中断データの有無で分岐する（BGM無効時はモーダル自体をスキップ）
+    if (CONFIG.BGM_ENABLED && !userSettings.bgmChoiceMade) {
+        openSoundPrefModal();
     } else {
-        initGame();
+        proceedAfterSoundPref();
     }
 
 </script>
