@@ -1748,8 +1748,9 @@ const CONFIG = {
 
 		STAR_TO_SLOT_DURATION:      700,   // 🌙 星パネルを消した時に飛ぶ星の速さ（ms・小さいほど速い）
 	
-		BALL_TO_SLOT_DURATION:      600,   // 七色の玉を消した時に飛ぶ玉の速さ（ms・小さいほど速い）
-		GAUGE_CHARGE_DURATION_FROM_PANEL: 500,  // 虹玉パネルを消した時に飛ぶ玉の速さ（ms・小さいほど速い）
+		BALL_TO_SLOT_DURATION:      500,   // 七色の玉を消した時に飛ぶ玉の速さ（ms・小さいほど速い）
+		BALL_TO_SLOT_DELAY_MS:      200,   // 七色の玉を消してから、玉が飛び始めるまでの間（ms）
+		GAUGE_CHARGE_DURATION_FROM_PANEL: 450,  // 虹玉パネルを消した時に飛ぶ玉の速さ（ms・小さいほど速い）
 		GAUGE_CHARGE_DURATION_FROM_COMBO: 400,  // レインボーゲージが貯まった時に飛ぶ玉の速さ（ms・小さいほど速い）
 		GAUGE_CHARGE_START_OFFSET_X: -16,  // ゲージ満タン時に飛ぶ玉の出現X位置補正（px・マイナスで左へ、PC/スマホ共通）
 		GAUGE_CHARGE_START_OFFSET_Y: -6,   // ゲージ満タン時に飛ぶ玉の出現Y位置補正（px・マイナスで上へ、PC/スマホ共通）
@@ -5478,7 +5479,10 @@ canvas.addEventListener('pointercancel', (e) => {
 					const canvasRect = canvas.getBoundingClientRect();
 					const ballFromX = canvasRect.left + (s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.width / logicalSize);
                     const ballFromY = canvasRect.top  + (s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.height / logicalSize);
-					collectRainbowBall(board[s.r][s.c] - 102, ballFromX, ballFromY);
+					const ballColorIndex = board[s.r][s.c] - 102;
+					setTimeout(() => {
+						if (!isGameOver) collectRainbowBall(ballColorIndex, ballFromX, ballFromY);
+					}, CONFIG.BALL_TO_SLOT_DELAY_MS);
 				} else if (board[s.r][s.c] === CONFIG.PANEL_TYPE.ALLCLEAR) {
 					board[s.r][s.c] = -1;
 					await triggerAllClear(s.c, s.r);
