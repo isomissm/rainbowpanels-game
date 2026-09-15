@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver12.1.0) </title> 
+<title>ナナイロパネル／Rainbow Panels (ver12.2.0) </title> 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
@@ -1432,15 +1432,15 @@ canvas {
     <div id="panel-image-rows"></div>
 
     <button id="panel-image-remove-all-btn" onclick="removeAllCustomPanelImages()">全ての画像を削除する</button>
-    <button onclick="closePanelImageModal()" style="display:block; width:220px; margin:10px auto 0 auto; border:none; border-radius:14px; background:#cbd5e1; color:#475569; font-size:12px; font-weight:900; padding:10px 0; cursor:pointer;">閉じる</button>
+    <button onclick="closePanelImageModal()" style="display:block; width:220px; margin:10px auto 0 auto; border:none; border-radius:14px; background:#dbeeff; color:#2b7fd1; font-size:12px; font-weight:900; padding:10px 0; cursor:pointer;">閉じる</button>
   </div>
 </div>
 <!-- 📖 あそびかたモーダル -->
 <div id="guide-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
 <div style="background: white; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); max-width: 460px; width: 95%; max-height: 85vh; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" id="guide-modal-content">
 <div style="overflow-y: auto; flex: 1; min-height: 0; padding: 28px 14px; box-sizing: border-box; text-align: center;">
-    <div style="position: sticky; top: -28px; left: -24px; margin: -28px 0 4px -24px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
-      <button onclick="closeGuideModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
+    <div style="position: sticky; top: -28px; left: -18px; margin: -28px 0 4px -18px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
+      <button onclick="closeGuideModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
     </div>
    <h3 style="margin: 0 0 16px 0; color: #2c3e50; font-size: 18px; font-weight: 900; font-family: var(--font-jp);">📖 あそびかた</h3>
 <div class="description">
@@ -1539,7 +1539,7 @@ canvas {
     </span>
   </div>
 </div>
-    <button onclick="closeGuideModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer; margin-top: 20px;">閉じる</button>
+    <button onclick="closeGuideModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 14px; cursor: pointer; margin-top: 20px;">閉じる</button>
   </div>
 </div>
 </div>
@@ -1556,7 +1556,7 @@ canvas {
     <!-- Xのリンクボタンここまで -->
     <!-- フォント表記追加 -->
     <p style="margin: 0 0 20px 0; color: #94a3b8; font-size: 11px;">Font: (Google Fonts) <br>Nunito / Noto Sans Japanese</p>
-    <button onclick="closeAboutModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer;">閉じる</button>
+    <button onclick="closeAboutModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 14px; cursor: pointer;">閉じる</button>
   </div>
 </div>
 <!-- ランキングをリセットするダイアログ -->
@@ -1626,8 +1626,8 @@ canvas {
 <div id="options-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); max-width: 380px; width: 88%; max-height: 85vh; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" id="options-modal-content">
   <div style="overflow-y: auto; flex: 1; min-height: 0; padding: 28px 24px; box-sizing: border-box; text-align: center;">
-    <div style="position: sticky; top: -28px; left: -24px; margin: -28px 0 4px -24px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
-      <button onclick="closeOptionsModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
+    <div style="position: sticky; top: -28px; left: -28px; margin: -28px 0 4px -28px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
+      <button onclick="closeOptionsModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
     </div>
     <h3 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 18px; font-weight: 900; font-family: var(--font-jp);">⚙️ OPTION</h3>
 
@@ -1701,7 +1701,7 @@ canvas {
     <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 32px 0;">
     <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
       <button onclick="resetUserSettingsToDefault()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #ff7675; color: #FFFFFF; font-weight: 700; font-size: 14px; cursor: pointer;">初期設定に戻す</button>
-      <button onclick="closeOptionsModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #cbd5e1; color: #475569; font-weight: 900; font-size: 14px; cursor: pointer;">閉じる</button>
+      <button onclick="closeOptionsModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 14px; cursor: pointer;">閉じる</button>
     </div>
 
   </div>
@@ -1745,10 +1745,12 @@ const CONFIG = {
 		FALL_ANIM_DURATION_MAX:      900,  // パネル落下アニメの最大所要時間（ms）※大きく落ちても間延びしないよう上限を設ける
 		LAND_ANIM_DURATION:          215,  // 着地バウンドの長さ（ms）
 		LAND_BOUNCE_HEIGHT:           10,  // バウンドの高さ（px）
+
+		STAR_TO_SLOT_DURATION:      700,   // 🌙 星パネルを消した時に飛ぶ星の速さ（ms・小さいほど速い）
 	
-		BALL_TO_SLOT_DURATION:      300,   // 虹玉を消した時に飛ぶ玉の速さ（ms・小さいほど速い／元550）
-		STAR_TO_SLOT_DURATION:      500,   // 🌙 星パネルを消した時に飛ぶ星の速さ（ms・小さいほど速い）
-		GAUGE_CHARGE_DURATION:      400,   // レインボーゲージが貯まった時に飛ぶ玉の速さ（ms・小さいほど速い／元800）
+		BALL_TO_SLOT_DURATION:      600,   // 七色の玉を消した時に飛ぶ玉の速さ（ms・小さいほど速い）
+		GAUGE_CHARGE_DURATION_FROM_PANEL: 600,  // 虹玉パネルを消した時に飛ぶ玉の速さ（ms・小さいほど速い）
+		GAUGE_CHARGE_DURATION_FROM_COMBO: 400,  // レインボーゲージが貯まった時に飛ぶ玉の速さ（ms・小さいほど速い）
 		GAUGE_CHARGE_START_OFFSET_X: -16,  // ゲージ満タン時に飛ぶ玉の出現X位置補正（px・マイナスで左へ、PC/スマホ共通）
 		GAUGE_CHARGE_START_OFFSET_Y: -6,   // ゲージ満タン時に飛ぶ玉の出現Y位置補正（px・マイナスで上へ、PC/スマホ共通）
 	
@@ -1836,7 +1838,7 @@ const CONFIG = {
 		SNOW_FREEZE_TARGET_MAX:  6,  // 一度に凍結させるパネル枚数（最大）
 	
 		SNOWY_EFFECT_DURATION: 700,  // 白いオーバーレイの表示時間（ms）
-		SNOWY_FRAME_DURATION:  120,  // 雪エフェクトの表示時間（フレーム数）※雨より長め
+		SNOWY_FRAME_DURATION:  120,  // 雪エフェクトの表示時間（フレーム数）
 		SNOWY_FLAKE_COUNT:      35,  // 雪モード中に降る雪片の生成数
 
 		ICE_SHARD_COUNT:        5,  // 氷パネルが割れた時に飛び散る破片の数
@@ -1844,6 +1846,17 @@ const CONFIG = {
 		ICE_SPARKLE_THRESHOLD: 0.82,  // 波形のうちどこから光らせるかの閾値。大きいほど光る瞬間が短く・レアになる
 		ICE_SPARKLE_COUNT:       3,  // 1回の明滅で同時に光らせる星の数
 		ICE_SPARKLE_SIZE_PEAK_TRIM: 0.03,  // サイズが最大になっている時間の短さ。大きいほど滞在時間が短い
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  虹玉・七色の玉エフェクト設定
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		BALL_SPARKLE_INTERVAL_MIN: 0.5,  // 虹玉・七色玉キラキラの発生間隔（最短、selectionPulse単位）
+		BALL_SPARKLE_INTERVAL_MAX: 4.0,  // 虹玉・七色玉キラキラの発生間隔（最長、selectionPulse単位）
+		BALL_SPARKLE_DURATION:     3.5,  // 1回のキラキラが表示されている長さ（selectionPulse単位）
+		BALL_SPARKLE_SIZE_MIN:      16,  // キラキラのサイズ（最小）
+		BALL_SPARKLE_SIZE_MAX:      24,  // キラキラのサイズ（最大）
+		BALL_SPARKLE_ALPHA_MIN:    0.6,  // キラキラの透明度（最小、最大到達値）
+		BALL_SPARKLE_ALPHA_MAX:    0.9,  // キラキラの透明度（最大、最大到達値）
 	
 	 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SPECIAL_BALL_GLOW_SPEED: 1.1,  // 晴玉・雨玉・雪玉の発光（明滅）周期の速さ。数値が大きいほど速い
@@ -2198,6 +2211,31 @@ const CONFIG = {
     let swapAnim = null;   // 🎬 入れ替えアニメ状態 { r1, c1, r2, c2, startTime, duration }
     let fallAnims = {};    // 🎬 落下アニメ状態 { "r,c": { startTime, duration, dropDistance } }
     let landAnims = {};    // 🎬 着地バウンド演出 { "r,c": { startTime, duration } }
+    let sparkleState = {}; // ✶ 虹玉・七色玉キラキラの発生管理 { "r,c": { nextTime, active: {startTime, ox, oy, size, peakAlpha} | null } }
+
+    // ✶ セルごとに1つずつキラキラを発生させ、間隔・サイズ・透明度をランダム化して返す（表示中でなければnull）
+    function updateBallSparkle(key, now) {
+        let state = sparkleState[key];
+        if (!state) state = sparkleState[key] = { nextTime: now, active: null };
+        if (!state.active && now >= state.nextTime) {
+            state.active = {
+                startTime: now,
+                ox: 8 + Math.random() * 38,
+                oy: 8 + Math.random() * 38,
+                size: CONFIG.BALL_SPARKLE_SIZE_MIN + Math.random() * (CONFIG.BALL_SPARKLE_SIZE_MAX - CONFIG.BALL_SPARKLE_SIZE_MIN),
+                peakAlpha: CONFIG.BALL_SPARKLE_ALPHA_MIN + Math.random() * (CONFIG.BALL_SPARKLE_ALPHA_MAX - CONFIG.BALL_SPARKLE_ALPHA_MIN),
+            };
+        }
+        if (!state.active) return null;
+        const progress = (now - state.active.startTime) / CONFIG.BALL_SPARKLE_DURATION;
+        if (progress >= 1) {
+            state.active = null;
+            state.nextTime = now + CONFIG.BALL_SPARKLE_INTERVAL_MIN + Math.random() * (CONFIG.BALL_SPARKLE_INTERVAL_MAX - CONFIG.BALL_SPARKLE_INTERVAL_MIN);
+            return null;
+        }
+        const fade = Math.sin(progress * Math.PI); // 表示中に0→1→0で滑らかに増減
+        return { ox: state.active.ox, oy: state.active.oy, size: state.active.size, alpha: state.active.peakAlpha * fade };
+    }
     let score = 0;
     let moves = CONFIG.INITIAL_MOVES;
     let isAnimating = false;
@@ -2670,8 +2708,9 @@ update(frameFactor = 1) {
 		get isFinished() { return this.alpha <= 0; }
 	}
 	
-    const OBSTACLE_CLOUD_PATH = new Path2D("M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"); // 🐛 お邪魔パネルの雲模様（毎フレーム再生成しないようキャッシュ）
+	const OBSTACLE_CLOUD_PATH = new Path2D("M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"); // お邪魔パネルの雲模様（毎フレーム再生成しないようキャッシュ）
 	const STAR_ICON_PATH = new Path2D("M44.27,8.41l10.25,20.52,22.68,3.41c1.51.23,2.12,2.09,1.03,3.16l-16.34,16.09,3.77,22.62c.25,1.51-1.33,2.66-2.69,1.95l-20.35-10.57-20.35,10.57c-1.36.71-2.94-.44-2.69-1.95l3.77-22.62L6.99,35.5c-1.09-1.07-.49-2.93,1.03-3.16l22.68-3.41,10.25-20.52c.68-1.37,2.64-1.37,3.32,0Z"); // ⭐ 盤面上の星玉パネル用（毎フレーム再生成しないようキャッシュ）
+	const SPARKLE_STAR_PATH = new Path2D("M50,2 L55,41.3 L91.6,26 L60,50 L91.6,74 L55,58.7 L50,98 L45,58.7 L8.4,74 L40,50 L8.4,26 L45,41.3 Z"); // ✶ 虹玉・七色玉のキラキラ用（線が長めの6方向スパークル）
 
     class Particle {
         constructor(x, y, color, type = "star") {
@@ -2685,9 +2724,13 @@ update(frameFactor = 1) {
                 this.jitterTimer = 0; // 🌥️ 震え位置の更新間隔を制御するカウンター
             } else {
                 this.size = 12 + Math.random() * 8;
-                this.angle = Math.random() * Math.PI * 2;
-                this.speed = 0.8 + Math.random() * 1.4;
-                this.decay = 0.015 + Math.random() * 0.015;
+                const angle = Math.random() * Math.PI * 2;
+                const burstSpeed = 4.5; /* 星が弾け飛ぶ瞬間の速さ（広がる勢い） */
+                this.vx = Math.cos(angle) * burstSpeed; /* 横方向の速さ */
+                this.vy = Math.sin(angle) * burstSpeed; /* 縦方向の速さ */
+                this.friction = 0.90; /* 弾けた勢いの減衰（1に近いほど遠くまで広がってから止まる） */
+                this.settled = false; /* 飛び散りきったか（※変更不要） */
+                this.decay = 0.05; /* 星が消える速さ */
             }
         }
         update(frameFactor = 1) {
@@ -2704,9 +2747,16 @@ update(frameFactor = 1) {
                     this.alpha = this.life / CONFIG.OBSTACLE_SHAKE_FADE_FRAMES;
                 }
             } else {
-                this.x += Math.cos(this.angle) * this.speed * frameFactor;
-                this.y += Math.sin(this.angle) * this.speed * frameFactor;
-                this.alpha -= this.decay * frameFactor;
+                this.vx *= Math.pow(this.friction, frameFactor); // 弾けた直後の勢いをだんだん落ち着かせる
+                this.vy *= Math.pow(this.friction, frameFactor);
+                this.x += this.vx * frameFactor;
+                this.y += this.vy * frameFactor;
+                if (!this.settled && Math.abs(this.vx) + Math.abs(this.vy) < 0.3) {
+                    this.settled = true; // 飛び散りきって止まった
+                }
+                if (this.settled) {
+                    this.alpha -= this.decay * frameFactor; // 飛び散りきってからお掃除するように消える
+                }
             }
         }
         draw() {
@@ -3863,23 +3913,17 @@ update(frameFactor = 1) {
                     ctx.fillStyle = rainbowGradCache;
                     ctx.beginPath(); ctx.arc(CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2); ctx.fill();
                     
-					// ▼虹玉のキラキラエフェクト出現位置と周期をランダム化
-                    let rbSeed = r * 928371 + c * 137 + 17; // セル位置から固定の種を作る
-                    const rbRand = () => { rbSeed = (rbSeed * 9301 + 49297) % 233280; return rbSeed / 233280; }; // 簡易疑似乱数
-
-                    for (let i = 0; i < 6; i++) {
-                        let ox = 8 + rbRand() * 38;
-                        let oy = 8 + rbRand() * 38;
-                        let freq = 0.35 + rbRand() * 0.4;
-                        let offset = rbRand() * 6.28;
-
-                        let wave = Math.sin(selectionPulse * freq + offset) - 0.35;
-                        if (wave > 0) {
-                            let alpha = Math.min(wave * 1.5, 0.9);
-                            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                            ctx.font = "12px sans-serif";
-                            ctx.fillText("✦", ox, oy);
-                        }
+                    // ▼虹玉のキラキラエフェクト（1つずつ、間隔・サイズ・透明度をランダムに発生させる）
+                    const rbSparkle = updateBallSparkle(`${r},${c}`, selectionPulse);
+                    if (rbSparkle) {
+                        const rbSparkleScale = rbSparkle.size / 100;
+                        ctx.save();
+                        ctx.translate(rbSparkle.ox, rbSparkle.oy);
+                        ctx.scale(rbSparkleScale, rbSparkleScale);
+                        ctx.translate(-50, -50);
+                        ctx.fillStyle = `rgba(255, 255, 255, ${rbSparkle.alpha})`;
+                        ctx.fill(SPARKLE_STAR_PATH);
+                        ctx.restore();
                     }
                     ctx.restore();
                 } else if (type === CONFIG.PANEL_TYPE.DARK) {
@@ -3934,25 +3978,18 @@ update(frameFactor = 1) {
 
                     ctx.restore(); // 🔧 玉描画用の座標変換をここで元に戻す（これが無いと以降の描画がズレ続けるバグがあった）
 
-                    // ▼七色の玉のキラキラエフェクト出現位置と周期をランダム化
-                    let seed = r * 928371 + c * 137 + 17; // セル位置から固定の種を作る
-                    const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }; // 簡易疑似乱数（同じseedなら毎回同じ値）
-
-                    for (let i = 0; i < 6; i++) {
-                        let ox = 8 + rand() * 38;   // 玉の範囲内でランダムな位置
-                        let oy = 8 + rand() * 38;
-                        let freq = 0.35 + rand() * 0.4;  // 光る速さもランダム
-                        let offset = rand() * 6.28;      // 光るタイミングもランダム
-
-                        let wave = Math.sin(selectionPulse * freq + offset) - 0.35;
-                        if (wave > 0) {
-                            let alpha = Math.min(wave * 1.5, 0.9);
-                            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                            ctx.font = "12px sans-serif";
-                            ctx.fillText("✦", x + ox, y + oy);
-                        }
-                    }
-						
+                    // ▼七色の玉のキラキラエフェクト（1つずつ、間隔・サイズ・透明度をランダムに発生させる）
+                    const ballSparkle = updateBallSparkle(`${r},${c}`, selectionPulse);
+                    if (ballSparkle) {
+                        const ballSparkleScale = ballSparkle.size / 100;
+                        ctx.save();
+                        ctx.translate(x + ballSparkle.ox, y + ballSparkle.oy);
+                        ctx.scale(ballSparkleScale, ballSparkleScale);
+                        ctx.translate(-50, -50);
+                        ctx.fillStyle = `rgba(255, 255, 255, ${ballSparkle.alpha})`;
+                        ctx.fill(SPARKLE_STAR_PATH);
+                        ctx.restore();
+                    }						
 				} else if (type === CONFIG.PANEL_TYPE.ALMIGHTY) { //プリズムパネル
 					ctx.save();
 					if (!almightyGradCache) {
@@ -5155,7 +5192,7 @@ canvas.addEventListener('pointercancel', (e) => {
         else { btn.disabled = true; btn.classList.remove('rainbow-active'); }
     }
 
-    function animateCurveChargeParticle(customStartX = null, customStartY = null) {
+    function animateCurveChargeParticle(customStartX = null, customStartY = null, customDuration = CONFIG.GAUGE_CHARGE_DURATION_FROM_COMBO) {
         return new Promise((resolve) => {
             const gaugeFill = document.getElementById('gauge-fill');
             const nextStarIndex = skillStock + 1; 
@@ -5183,7 +5220,7 @@ canvas.addEventListener('pointercancel', (e) => {
             p.className = 'charge-particle';
             document.body.appendChild(p);
 
-            const duration = CONFIG.GAUGE_CHARGE_DURATION; // ⏱️ 実時間ベース（ms）
+            const duration = customDuration; // ⏱️ 実時間ベース（ms）
             const startTime = performance.now();
 
             function frame(now) {
@@ -5374,9 +5411,11 @@ canvas.addEventListener('pointercancel', (e) => {
                     clearedTypes[type] = (clearedTypes[type] || 0) + 1;
                 }
                 if (type !== CONFIG.PANEL_TYPE.ALLCLEAR) {
-                    if (type !== CONFIG.PANEL_TYPE.ALLCLEAR) {
-                    spawnParticles(m.c, m.r, CONFIG.COLORS[type]);
-                }
+                    if (type === CONFIG.PANEL_TYPE.ALMIGHTY) {
+                        spawnRainbowParticles(m.c, m.r); // 🌈 プリズムパネル：虹玉・闇玉と同じくカラフルな星にする
+                    } else {
+                        spawnParticles(m.c, m.r, CONFIG.COLORS[type]);
+                    }
                 }
                 board[m.r][m.c] = -1;
                 // 隣接マスが凍結中なら解凍
@@ -5427,9 +5466,9 @@ canvas.addEventListener('pointercancel', (e) => {
 						const canvasRect = canvas.getBoundingClientRect();
 						const panelX = canvasRect.left + (s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.width / logicalSize) + window.scrollX;
                     const panelY = canvasRect.top + (s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.height / logicalSize) + window.scrollY;
-						setTimeout(() => {
-							if (!isGameOver) animateCurveChargeParticle(panelX, panelY);
-						}, 500);
+					setTimeout(() => {
+						if (!isGameOver) animateCurveChargeParticle(panelX, panelY, CONFIG.GAUGE_CHARGE_DURATION_FROM_PANEL);
+					}, 500);
 					}
 				} else if (board[s.r][s.c] === CONFIG.PANEL_TYPE.DARK) {
 					spawnRainbowParticles(s.c, s.r);
@@ -6025,7 +6064,7 @@ canvas.addEventListener('pointercancel', (e) => {
 		document.body.appendChild(ball);
 
 		// ぽいんと飛ぶアニメーション（animateCurveChargeParticleと同じWeb Animations API方式）
-		const duration = 550;
+		const duration = CONFIG.BALL_TO_SLOT_DURATION;
 		const cp1x = fromX + (toX - fromX) * 0.3 + (Math.random() * 40 - 20);
 		const cp1y = fromY - 60 - Math.random() * 40;  // 少し上に弧を描く
 
