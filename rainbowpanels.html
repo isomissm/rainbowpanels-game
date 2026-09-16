@@ -2196,12 +2196,25 @@ const CONFIG = {
     const dpr = window.devicePixelRatio || 1;
     document.getElementById('dbg-dpr').textContent = `DPR: ${dpr}`;
     let logicalSize = CONFIG.BOARD_SIZE * CONFIG.CELL_SIZE;
-    canvas.width = logicalSize * dpr;
-    canvas.height = logicalSize * dpr;
-    canvas.style.width = logicalSize + 'px';
-    canvas.style.height = logicalSize + 'px';
-    ctx.scale(dpr, dpr);
-    ctx.imageSmoothingEnabled = false;
+
+    // 🖥️ Canvasの解像度設定（タブ復帰時など、ブラウザに描画バッファを破棄された場合の再適用にも使う）
+    function setupCanvasScale() {
+        canvas.width = logicalSize * dpr;
+        canvas.height = logicalSize * dpr;
+        canvas.style.width = logicalSize + 'px';
+        canvas.style.height = logicalSize + 'px';
+        ctx.scale(dpr, dpr);
+        ctx.imageSmoothingEnabled = false;
+    }
+    setupCanvasScale();
+
+    // 🖥️ タブが非表示→表示に戻った時、Canvasの描画バッファが破棄されているケースに備えて再設定＋再描画する
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            setupCanvasScale();
+            draw();
+        }
+    });
 	
     let board = [];
     let selected = null;
