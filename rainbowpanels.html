@@ -1748,8 +1748,9 @@ const CONFIG = {
 
 		STAR_TO_SLOT_DURATION:      700,   // 🌙 星パネルを消した時に飛ぶ星の速さ（ms・小さいほど速い）
 	
-		BALL_TO_SLOT_DURATION:      600,   // 七色の玉を消した時に飛ぶ玉の速さ（ms・小さいほど速い）
-		GAUGE_CHARGE_DURATION_FROM_PANEL: 600,  // 虹玉パネルを消した時に飛ぶ玉の速さ（ms・小さいほど速い）
+		BALL_TO_SLOT_DURATION:      500,   // 七色の玉を消した時に飛ぶ玉の速さ（ms・小さいほど速い）
+		BALL_TO_SLOT_DELAY_MS:      200,   // 七色の玉を消してから、玉が飛び始めるまでの間（ms）
+		GAUGE_CHARGE_DURATION_FROM_PANEL: 450,  // 虹玉パネルを消した時に飛ぶ玉の速さ（ms・小さいほど速い）
 		GAUGE_CHARGE_DURATION_FROM_COMBO: 400,  // レインボーゲージが貯まった時に飛ぶ玉の速さ（ms・小さいほど速い）
 		GAUGE_CHARGE_START_OFFSET_X: -16,  // ゲージ満タン時に飛ぶ玉の出現X位置補正（px・マイナスで左へ、PC/スマホ共通）
 		GAUGE_CHARGE_START_OFFSET_Y: -6,   // ゲージ満タン時に飛ぶ玉の出現Y位置補正（px・マイナスで上へ、PC/スマホ共通）
@@ -1871,16 +1872,20 @@ const CONFIG = {
 		ALLCLEAR_SPAWN_COUNT_MIN:       7,  // 雷玉が出現する残り手数の最小値
 		ALLCLEAR_SPAWN_COUNT_RANGE:     5,  // 雷玉出現タイミングのランダム幅（min〜min+range）
 	
-	    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌙 夜モード設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		NIGHT_BASE_SCORE:       25000,  // 夜モード初回発動の基準スコア
 		NIGHT_STAR_DELAY_SCORE:  2500, // 夜モード突入後、流れ星発生までの必要追加スコア
 		NIGHT_INTERVAL_SCORE:   10000, // 2回目以降の夜モード発動間隔
 		NIGHT_DARK_PENALTY:      1000,  // 闇玉発動1回あたりのペナルティ（サイクルごとにリセット）
+
 		NIGHT_DARK_INIT_COUNT:      5, // 夜中の通常闇玉カウント（通常7）
 		NIGHT_DARK_FAST_COUNT:      3, // 夜中の高速闇玉カウント（通常5）
 		NIGHT_STAR_NEEDED:          3, // 昼に戻るために必要な星の数
+
+		NIGHT_STAR_REPLENISH_DELAY_MS: 1700,  // 🌙盤面にある星が消えてしまった時の補充時（ms）
+
 		NIGHT_COLOR_BOOST:          5, // 夜中の青・藍・紫の出現率ボーナス（0=均等 数値を増やすほど青・藍・紫が出やすくなる）
 	
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2883,9 +2888,9 @@ update(frameFactor = 1) {
             this.x = canvasW * (0.55 + Math.random() * 0.4); /* 流れ星のスタートの位置座標 */
             this.y = canvasH * (Math.random() * 0.2);
             this.len = 140 + Math.random() * 60;
-            this.speed = 9 + Math.random() * 2.7; /* 流れ星の初速（速めに開始） */
+            this.speed = 9 + Math.random() * 2.92; /* 流れ星の初速（速めに開始） */
             this.angle = Math.PI * 0.76; // 左下方向
-            this.speedDecay = 0.981; /* 1フレームごとの速度の減衰率（1に近いほど減速が緩やか＝最後まで進む） */
+            this.speedDecay = 0.982; /* 1フレームごとの速度の減衰率（1に近いほど減速が緩やか＝最後まで進む） */
             this.life = 1.0;
             this.decay = 0.008;
             this.done = false;
@@ -4846,7 +4851,7 @@ canvas.addEventListener('pointercancel', (e) => {
             if (!isNightMode) { isReplenishingStars = false; isAnimating = false; return; }
             specialEffects.push(new ShootingStarEffect());
         }
-        await new Promise(r => setTimeout(r, 1200));
+        await new Promise(r => setTimeout(r, CONFIG.NIGHT_STAR_REPLENISH_DELAY_MS));
         if (!isNightMode) { isReplenishingStars = false; isAnimating = false; return; }
 
         /* await中に状態が変わった場合のため補充数を再計算 */
@@ -5490,8 +5495,11 @@ canvas.addEventListener('pointercancel', (e) => {
 					spawnRainbowParticles(s.c, s.r);
 					const canvasRect = canvas.getBoundingClientRect();
 					const ballFromX = canvasRect.left + (s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.width / logicalSize);
-                    const ballFromY = canvasRect.top  + (s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.height / logicalSize);
-					collectRainbowBall(board[s.r][s.c] - 102, ballFromX, ballFromY);
+					const ballFromY = canvasRect.top  + (s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.height / logicalSize);
+					const ballColorIndex = board[s.r][s.c] - 102;
+					setTimeout(() => {
+						if (!isGameOver) collectRainbowBall(ballColorIndex, ballFromX, ballFromY);
+					}, CONFIG.BALL_TO_SLOT_DELAY_MS);
 				} else if (board[s.r][s.c] === CONFIG.PANEL_TYPE.ALLCLEAR) {
 					board[s.r][s.c] = -1;
 					await triggerAllClear(s.c, s.r);
