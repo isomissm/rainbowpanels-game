@@ -1945,8 +1945,7 @@ const CONFIG = {
 		NANAIRO_WAIT_MS:               250,  // ナナイロ玉を消してから変換が始まるまでの待ち時間（ms）
 		NANAIRO_CONVERT_INTERVAL_MS:    55,  // 1マスずつ変換される間隔（ms・ナナイロ玉に近い順）
 	
-		NANAIRO_WAVE_MIN_MS:             0,  // 虹色の円が広がる時間の最小値（ms・基本は変換数×変換間隔）
-		NANAIRO_WAVE_TIME_RATE:        1.4,  // 虹色の円が広がる時間の倍率（1.0＝変換の時間と同じ、大きいほどゆっくり）
+		NANAIRO_WAVE_CELL_RATE:        2.4,  // 虹色の円が1マス広がるのにかかる時間（変換間隔の何倍か・大きいほどゆっくり）
 		NANAIRO_WAVE_BAND_RATIO:      0.45,  // 虹色の帯の太さ（円の半径に対する割合）
 		NANAIRO_WAVE_ALPHA:           0.75,  // 虹色の円の濃さ
 		NANAIRO_WAVE_MARGIN_CELLS:       1,  // 一番遠い変換先から、さらに広がるマス数
@@ -6240,8 +6239,9 @@ canvas.addEventListener('pointercancel', (e) => {
 		await new Promise(res => setTimeout(res, CONFIG.NANAIRO_WAIT_MS));
 		// 🌈 虹色の円をナナイロ玉の位置から広げる（広がる時間は変換にかかる時間に合わせる）
 		const farthest = targets.length ? Math.hypot(targets[targets.length - 1].r - row, targets[targets.length - 1].c - col) * CONFIG.CELL_SIZE : CONFIG.BOARD_SIZE * CONFIG.CELL_SIZE / 2;
-		const waveMs = Math.max(CONFIG.NANAIRO_WAVE_MIN_MS, targets.length * CONFIG.NANAIRO_CONVERT_INTERVAL_MS) * CONFIG.NANAIRO_WAVE_TIME_RATE; // 広がる時間（変換にかかる時間×倍率）
-		specialEffects.push(new NanairoWaveEffect(cx, cy, farthest + CONFIG.CELL_SIZE * CONFIG.NANAIRO_WAVE_MARGIN_CELLS, waveMs));
+		const waveR = farthest + CONFIG.CELL_SIZE * CONFIG.NANAIRO_WAVE_MARGIN_CELLS; // 広がる半径
+		const waveMs = waveR / CONFIG.CELL_SIZE * CONFIG.NANAIRO_CONVERT_INTERVAL_MS * CONFIG.NANAIRO_WAVE_CELL_RATE; // 1マス分の時間×マス数（雲の数に依存しない）
+		specialEffects.push(new NanairoWaveEffect(cx, cy, waveR, waveMs));
 		if (targets.length === 0) return;
 
 		// 全色を均等に割り振る（端数の色はランダム）→ 配置順をシャッフル
