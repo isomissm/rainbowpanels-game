@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver13.0.0) </title> 
+<title>ナナイロパネル／Rainbow Panels (ver13.0.0) </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
@@ -23,7 +23,7 @@ html {
     scrollbar-width: none; /* 🔧 Firefox：スクロールバー非表示（スクロール自体は可能） */
 }
 html::-webkit-scrollbar {
-    display: none; /* 🔧 Chrome/Edge/Safari：スクロールバー非表示（スクロール自体は可能） */
+display: none; /* 🔧 Chrome/Edge/Safari：スクロールバー非表示（スクロール自体は可能） */
 }
 body {
     background-color: #CAF5FF;
@@ -44,10 +44,7 @@ button, input, select, textarea {
     font-family: inherit;
 }
 /* メインUI：Nunitoフォント適用（英語表示のみ） */
-.score-val, .moves-val, .ui-section-title,
-.best-score-label, .best-score-label-mobile,
-.status-level-val, .status-moves-val, .status-next-label,
-#overlay h2, #final-score {
+.score-val, .moves-val, .ui-section-title, .best-score-label, .best-score-label-mobile, .status-level-val, .status-moves-val, .status-next-label, #overlay h2, #final-score {
     font-family: var(--font-main-ui);
 }
 /* スマホのタップ時の青いハイライトを無効化 */
@@ -91,11 +88,12 @@ button, input, select, textarea {
     background: #34495e;
     color: white;
 }
+
 /* 🔧 hoverはマウス操作可能な端末のみに限定（スマホタップ後に色が戻らなくなる問題への対応） */
 @media (hover: hover) and (pointer: fine) {
-    .debug-btns button:hover {
-        background: #4e6a85;
-    }
+.debug-btns button:hover {
+    background: #4e6a85;
+}
 }
 /* top-button-row と main-layout をまとめて、幅を main-layout に自動追従させる */
 #top-area {
@@ -120,7 +118,7 @@ button, input, select, textarea {
 /* 左側：ゲーム盤面の白い枠 */
 #game-container {
     position: relative;
-	z-index: 0;
+    z-index: 0;
     background: white;
     padding: 12px;
     border-radius: 20px;
@@ -140,7 +138,8 @@ canvas {
     display: block;
     cursor: pointer;
     border-radius: 12px;
-    touch-action: none; 🖐️ フリック操作とブラウザのスクロール・ズームジェスチャーの競合を防ぐ */
+    touch-action: none;
+🖐️ フリック操作とブラウザのスクロール・ズームジェスチャーの競合を防ぐ */
 }
 /* 下側レベル表示UI */
 #level-status-bar {
@@ -168,9 +167,15 @@ canvas {
     animation: levelUpBounce 1.1s cubic-bezier(0.15, 0.6, 0.3, 1);
 }
 @keyframes levelUpBounce {
-    0%   { transform: scale(1.4); }
-    20%  { transform: scale(1.38); }
-    100% { transform: scale(1); }
+0% {
+transform: scale(1.4);
+}
+20% {
+transform: scale(1.38);
+}
+100% {
+transform: scale(1);
+}
 }
 .status-level-val {
     color: #6c5ce7;
@@ -235,7 +240,7 @@ canvas {
 }
 /* 説明文用のBURSTカウンター画像（ゲージのカウンターSVGと同じ形・配色の🌈） */
 .mini-burst-counter-img {
-    --burst-counter-size: 16px; /* 説明文中のカウンター画像サイズ */
+--burst-counter-size: 16px; /* 説明文中のカウンター画像サイズ */
     width: var(--burst-counter-size);
     height: var(--burst-counter-size);
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='7.65 7.11 70.95 70.95'%3E%3Cdefs%3E%3CradialGradient id='a' cx='100%25' cy='100%25' r='95%25'%3E%3Cstop offset='0' stop-color='%23c175ff'/%3E%3Cstop offset='0.46' stop-color='%23c175ff'/%3E%3Cstop offset='0.52' stop-color='%236c5ce7'/%3E%3Cstop offset='0.6' stop-color='%231e90ff'/%3E%3Cstop offset='0.68' stop-color='%232ed573'/%3E%3Cstop offset='0.8' stop-color='%23ffe53b'/%3E%3Cstop offset='1' stop-color='%23ff4757'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cpath fill='url(%23a)' d='M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
@@ -243,6 +248,46 @@ canvas {
     vertical-align: middle;
     margin: 0 1px 3px 1px;
 }
+/* 説明文用の七色の玉アイコン（極小の玉を上4個・下3個の2段に並べて1文字分にする） */
+.mini-balls-img {
+--mini-ball-size: 4px; /* 玉1個のサイズ */
+--mini-ball-gap: 1px;  /* 玉同士の間隔 */
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    gap: var(--mini-ball-gap);
+width: calc(var(--mini-ball-size) * 4 + var(--mini-ball-gap) * 3);
+    vertical-align: middle;
+    margin: 0 2px 3px 2px;
+}
+.mini-balls-img i {
+    width: var(--mini-ball-size);
+    height: var(--mini-ball-size);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffffff 0%, var(--c) 55%, var(--c) 100%);
+}
+.mini-balls-img i:nth-child(1) {
+--c: #FF6A69;
+} /* 赤 */
+.mini-balls-img i:nth-child(2) {
+--c: #ff9300;
+} /* オレンジ */
+.mini-balls-img i:nth-child(3) {
+--c: #ffe53b;
+} /* 黄 */
+.mini-balls-img i:nth-child(4) {
+--c: #18E5B4;
+} /* 緑 */
+.mini-balls-img i:nth-child(5) {
+--c: #60B2FF;
+} /* 青 */
+.mini-balls-img i:nth-child(6) {
+--c: #6E67FF;
+} /* 藍色 */
+.mini-balls-img i:nth-child(7) {
+--c: #C775FF;
+} /* 紫 */
 /* 説明文用のミニ雷玉画像（丸型） */
 .mini-allclear-img {
     width: 16px;
@@ -324,9 +369,50 @@ canvas {
     vertical-align: middle;
     margin: 0 2px 3px 2px;
 }
+/* 説明文用のミニナナイロ玉画像（盤面のナナイロ玉と同じグラデ） */
+.mini-nanairo-img {
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle closest-side, #c175ff 0%, #1e90ff 30%, #2ed573 45%, #ffe53b 65%, #FF6A39 90%, #c82333 100%);
+    border-radius: 50%;
+    display: inline-flex;
+    vertical-align: middle;
+    margin: 0 2px 3px 2px;
+}
+/* 説明文用の⚡（雲から出る予兆と同じ形） */
+.mini-thunder-spark-img {
+--mini-spark-size: 16px;       /* ⚡の高さ */
+--mini-spark-outline: #e6a800; /* 縁取りの色（淡い背景でも見えるように） */
+width: calc(var(--mini-spark-size) * 32 / 38);
+    height: var(--mini-spark-size);
+    vertical-align: middle;
+    margin: 0 1px 3px 1px;
+}
+.mini-thunder-spark-img path {
+    fill: #ffe600;
+    stroke: var(--mini-spark-outline);
+    stroke-width: 2;
+    stroke-linejoin: round;
+}
+/* あそびかた：「色パネルを揃えた時に〜」「直接選んで〜」をまとめて囲む枠 */
+.guide-list-box {
+    --guide-list-border:  #A2A6AA; /* 枠線の色 */
+    --guide-list-divider: #DEE2E5; /* 内側の区切り線の色 */
+    background-color: #FFFFFF;
+    border: 1px solid var(--guide-list-border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin: 8px auto 10px auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+.guide-list-box .desc-divider {
+    border-top-color: var(--guide-list-divider); /* 白背景で見えるよう色を変更 */
+    margin: 8px auto;
+}
 /* 特殊パネルの説明を囲むパステル調のボックス */
 .special-panel-box {
-    background-color: #f8fafc; /* ほんのり明るいグレー */
+    background-color: #F0F2F4; /* ほんのり明るいグレー */
     border: 1px solid #e2e8f0;    /* 控えめな境界線 */
     border-radius: 12px;         /* 角丸 */
     padding: 10px 14px;          /* 内側の余白 */
@@ -335,6 +421,20 @@ canvas {
     width: 100%;
     box-sizing: border-box;
     text-align: left;            /* 箇条書きを左寄せに */
+}
+/* あそびかた：雲パネル〜七色の玉の説明枠 */
+.guide-detail-box {
+    --guide-detail-bg:     #E9ECF2; /* 背景色 */
+    --guide-detail-border: #C7C7C7; /* 枠線の色 */
+    background-color: var(--guide-detail-bg);
+    border-color: var(--guide-detail-border);
+}
+/* あそびかた：昼モード／夜モード説明ボックス（水色→紺色の斜めグラデ） */
+.guide-daynight-box {
+    --daynight-grad-from: #d9f0ff; /* 左上：水色 */
+    --daynight-grad-to: #bcc6ee;   /* 右下：紺色（文字が読める薄さ） */
+    background: linear-gradient(135deg, var(--daynight-grad-from), var(--daynight-grad-to));
+    border-color: #c5d3f0;
 }
 /* 右側：統合UIパネル */
 #right-ui {
@@ -533,7 +633,7 @@ transform: scale(1);
     filter: blur(4px);
     /* RAINBOW BURSTボタンのエフェクト設定 ※別の行も数値を合わせる→setTimeout(() => ring.remove(), */
     animation: waveExpand 1.8s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
-}	
+}
 .rainbow-shockwave-wrap {
     position: absolute;
     inset: 0;
@@ -560,8 +660,7 @@ transform: scale(1);
     mask-composite: exclude;
     pointer-events: none;
     z-index: 60;
-    animation: rainbowWaveExpand 5.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards, /* 虹色波紋の速度・見た目の動き */
-               rainbowMaskShrink 5.5s linear forwards; /* 枠の太さの変化（最初の2秒はなめらか、以降は間引き） */
+    animation: rainbowWaveExpand 5.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards, /* 虹色波紋の速度・見た目の動き */ rainbowMaskShrink 5.5s linear forwards; /* 枠の太さの変化（最初の2秒はなめらか、以降は間引き） */
 }
 @keyframes rainbowWaveExpand {
 0% {
@@ -761,7 +860,7 @@ opacity: 0;
     text-align: center;
     line-height: 1.8;
 }
-/* あそびかたモーダル：闇玉〜七色の玉リストの行間調整用（この2つを直せば全8行に反映） */
+/* あそびかたモーダル：雲パネル〜七色の玉リストの行間調整用（この2つを直せば全10行に反映） */
 .guide-td-icon {
     padding: 5px 6px 5px 0;
     vertical-align: middle;
@@ -851,10 +950,18 @@ background: #c8e8ff;
     animation: rainbowBg 4s linear infinite;
 }
 @keyframes sevenColorsEndFade {
-    0% { opacity: 0; }
-    60% { opacity: 1; }
-    75% { opacity: 1; }
-    100% { opacity: 0; }
+0% {
+opacity: 0;
+}
+60% {
+opacity: 1;
+}
+75% {
+opacity: 1;
+}
+100% {
+opacity: 0;
+}
 }
 .seven-colors-end-flash {
     position: absolute;
@@ -1084,12 +1191,14 @@ canvas {
     width: 100%;
     height: 100%;
 }
-	
 /* 🖼️ パネル画像差し替えモーダル */
 #panel-image-modal-overlay {
     display: none;
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: rgba(0,0,0,0.5);
     z-index: 1100;
     justify-content: center;
@@ -1206,21 +1315,20 @@ canvas {
 
 /* PC表示だけ、GAME OVERの黒枠が盤面下に少し足りない分を延長 */
 @media (min-width: 769px) {
-    #overlay {
-        height: calc(100% + 15px + 57px); /*最後の数値がサイズ調整用*/
-    }
+#overlay {
+    height: calc(100% + 15px + 57px); /*最後の数値がサイズ調整用*/
 }
-	
+}
 /* 説明文用の七色の玉アイコン（極小の玉を上4個・下3個の2段に並べて1文字分にする） */
 .mini-balls-img {
-    --mini-ball-size: 4px; /* 玉1個のサイズ */
-    --mini-ball-gap: 1px;  /* 玉同士の間隔 */
+--mini-ball-size: 4px; /* 玉1個のサイズ */
+--mini-ball-gap: 1px;  /* 玉同士の間隔 */
     display: inline-flex;
     flex-wrap: wrap;
     justify-content: center;
     align-content: center;
     gap: var(--mini-ball-gap);
-    width: calc(var(--mini-ball-size) * 4 + var(--mini-ball-gap) * 3);
+width: calc(var(--mini-ball-size) * 4 + var(--mini-ball-gap) * 3);
     vertical-align: middle;
     margin: 0 2px 3px 2px;
 }
@@ -1230,13 +1338,27 @@ canvas {
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, #ffffff 0%, var(--c) 55%, var(--c) 100%);
 }
-.mini-balls-img i:nth-child(1) { --c: #FF6A69; } /* 赤 */
-.mini-balls-img i:nth-child(2) { --c: #ff9300; } /* オレンジ */
-.mini-balls-img i:nth-child(3) { --c: #ffe53b; } /* 黄 */
-.mini-balls-img i:nth-child(4) { --c: #18E5B4; } /* 緑 */
-.mini-balls-img i:nth-child(5) { --c: #60B2FF; } /* 青 */
-.mini-balls-img i:nth-child(6) { --c: #6E67FF; } /* 藍色 */
-.mini-balls-img i:nth-child(7) { --c: #C775FF; } /* 紫 */
+.mini-balls-img i:nth-child(1) {
+--c: #FF6A69;
+} /* 赤 */
+.mini-balls-img i:nth-child(2) {
+--c: #ff9300;
+} /* オレンジ */
+.mini-balls-img i:nth-child(3) {
+--c: #ffe53b;
+} /* 黄 */
+.mini-balls-img i:nth-child(4) {
+--c: #18E5B4;
+} /* 緑 */
+.mini-balls-img i:nth-child(5) {
+--c: #60B2FF;
+} /* 青 */
+.mini-balls-img i:nth-child(6) {
+--c: #6E67FF;
+} /* 藍色 */
+.mini-balls-img i:nth-child(7) {
+--c: #C775FF;
+} /* 紫 */
 </style>
 </head>
 
@@ -1289,7 +1411,8 @@ canvas {
         <button onclick="setDebugLevel(2)">L 2</button>
         <button onclick="setDebugLevel(3)">L 3</button>
         <button onclick="setDebugLevel(4)">L 4</button>
-        <button onclick="setDebugLevel(5)">L 5</button><br>
+        <button onclick="setDebugLevel(5)">L 5</button>
+        <br>
         <button onclick="setDebugLevel(6)">L 6</button>
         <button onclick="setDebugLevel(7)">L 7</button>
         <button onclick="setDebugLevel(8)">L 8</button>
@@ -1332,122 +1455,124 @@ canvas {
 </div>
 <!-- ⚙️ ゲーム画面の外、デバッグパネルの下に置く専用のボタン行（後々ここにボタンが増える予定） -->
 <div id="top-area">
-<div id="top-button-row" style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; box-sizing: border-box; margin-bottom: 10px;">
-  <button id="about-open-btn" onclick="openAboutModal()" aria-label="このゲームについて" style="border: none; border-radius: 14px; background: transparent; color: #64748b; font-size: 12px; font-weight: 700; padding: 6px 4px; cursor: pointer; white-space: nowrap; font-family: var(--font-jp); margin-right: auto;">ℹ️ このゲームについて</button>
-  <button id="guide-open-btn" onclick="openGuideModal()" aria-label="あそびかた" style="border: none; border-radius: 14px; background: #3D9DFF; color: #ffffff; box-shadow: 0 3px 8px rgba(61,157,255,0.35); font-size: 14px; font-weight: 900; padding: 6px 10px; cursor: pointer; white-space: nowrap; font-family: var(--font-jp);">📖 あそびかた</button>
-  <button id="options-open-btn" onclick="openOptionsModal()" aria-label="オプション" style="border: none; border-radius: 14px; background: #3D9DFF; color: #ffffff; box-shadow: 0 3px 8px rgba(61,157,255,0.35); font-size: 14px; font-weight: 900; padding: 6px 10px; cursor: pointer; white-space: nowrap; font-family: var(--font-jp);">⚙️ OPTION</button>
-</div>
-<div id="main-layout">
-  <div id="left-area">
-    <div id="game-container">
-      <div id="rainbow-collection-ui" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:#fff; border-radius:15px; box-shadow:0 8px 20px rgba(0,0,0,0.04); border:3px solid #fff;">
-        <div id="rainbow-balls-display" style="display:flex; gap:6px;">
-          <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:0;"></div>
-          <!-- 赤 -->
-          <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:2;"></div>
-          <!-- 黄 -->
-          <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:3;"></div>
-          <!-- 緑 -->
-          <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:4;"></div>
-          <!-- 青 -->
-          <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:6;"></div>
-          <!-- 紫 -->
-          <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:1;"></div>
-          <!-- 橙 -->
-          <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:5;"></div>
-          <!-- 藍 --> 
-        </div>
-        <!-- 🌙 夜モード星スロット -->
-        <div id="night-star-slot" style="display:none; align-items:center; gap:4px; margin-left:8px; height:24px; overflow:visible;">
-          <div id="night-star-0" class="night-star-slot-item"></div>
-          <div id="night-star-1" class="night-star-slot-item"></div>
-          <div id="night-star-2" class="night-star-slot-item"></div>
-        </div>
-      </div>
-      <canvas id="stage"></canvas>
-      <div id="allclear-overlay"></div>
-      <div id="overlay" style="padding-top: 10px;"> <!-- GAMEOVERテキストの上の隙間調整-->
-        <h2 style="font-size:22px; margin: 0; line-height: 1; letter-spacing: 0.05em; color: #ff7675;">GAME OVER</h2>
-        <div id="final-score" style="font-size:24px; font-weight: 900; margin-bottom: 2px; color: #fff;"></div>
-        <div id="name-input-box" style="margin-top: 2px; margin-bottom: 8px; display: none; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 12px;"> <span style="font-size:14px; font-weight:bold; color:#ffe53b; display:block; margin-bottom:3px;">🎉 ランクイン！ 名前を入力してね</span>
-          <input type="text" id="player-name-field" maxlength="8" value="Player" style="padding:6px 10px; width:120px; border-radius:6px; border:none; outline:none; font-weight:bold; font-size:14px; margin-right:6px; text-align:center;">
-          <button onclick="saveRankedScore()" style="padding:6px 14px; border-radius:12px; border:none; background: linear-gradient(90deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff4757); background-size: 200% 100%; animation: rainbowFlow 4s linear infinite; color:white; font-size:14px; font-weight:900; cursor:pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.2);">登録する</button>
-        </div>
-        <div style="font-size:11px; font-weight:900; margin-bottom:2px; color:#cbd5e1; text-align:left; width:85%; max-width:270px; letter-spacing: 0.05em;">🌈 TOP 10 RANKING</div>
-        <div id="ranking-box" style="width: 85%; max-width: 270px; overflow: hidden; margin-bottom: 12px; display: flex; flex-direction: column; gap: 2px;"> </div>
-        <button id="retry-btn" onclick="initGame()" style="padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:12px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">もう一度プレイする</button>
-        <button id="reset-ranking-btn" onclick="confirmResetRanking()" style="margin-top:12px; margin-bottom:10px; padding:6px 16px; border-radius:20px; border:1.5px solid rgba(255,255,255,0.3); cursor:pointer; font-weight:700; font-size:11px; background:transparent; color:#cbd5e1;">ランキングをリセットする</button>
-        <button id="back-to-game-btn" onclick="closeRankingScreen()" style="display:none; padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:12px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">ゲームに戻る</button>
-      </div>
-    </div>
-    <div id="level-status-bar"> <span id="status-level" class="status-level-val">LEVEL 1</span> <span class="status-next-label">Next
-      <div class="mini-obstacle-img mini-obstacle-next">
-        <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
-          <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
-        </svg>
-      </div>
-      : MOVES <span id="status-moves" class="status-moves-val">10</span></span> </div>
+  <div id="top-button-row" style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; box-sizing: border-box; margin-bottom: 10px;">
+    <button id="about-open-btn" onclick="openAboutModal()" aria-label="このゲームについて" style="border: none; border-radius: 14px; background: transparent; color: #64748b; font-size: 12px; font-weight: 700; padding: 6px 4px; cursor: pointer; white-space: nowrap; font-family: var(--font-jp); margin-right: auto;">ℹ️ このゲームについて</button>
+    <button id="guide-open-btn" onclick="openGuideModal()" aria-label="あそびかた" style="border: none; border-radius: 14px; background: #3D9DFF; color: #ffffff; box-shadow: 0 3px 8px rgba(61,157,255,0.35); font-size: 14px; font-weight: 900; padding: 6px 10px; cursor: pointer; white-space: nowrap; font-family: var(--font-jp);">📖 あそびかた</button>
+    <button id="options-open-btn" onclick="openOptionsModal()" aria-label="オプション" style="border: none; border-radius: 14px; background: #3D9DFF; color: #ffffff; box-shadow: 0 3px 8px rgba(61,157,255,0.35); font-size: 14px; font-weight: 900; padding: 6px 10px; cursor: pointer; white-space: nowrap; font-family: var(--font-jp);">⚙️ OPTION</button>
   </div>
-  <div id="right-ui">
-    <div id="right-ui-top">
-      <button id="view-ranking-btn" onclick="showRankingScreen()" class="view-ranking-btn view-ranking-btn-pc">🏆 ランキングを見る</button>
-		<div id="best-score" class="best-score-label">BEST: 0000</div>
-      <div class="score-group">
-        <div class="ui-section-title">SCORE</div>
-        <div id="score" class="score-val">0</div>
+  <div id="main-layout">
+    <div id="left-area">
+      <div id="game-container">
+        <div id="rainbow-collection-ui" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:#fff; border-radius:15px; box-shadow:0 8px 20px rgba(0,0,0,0.04); border:3px solid #fff;">
+          <div id="rainbow-balls-display" style="display:flex; gap:6px;">
+            <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:0;"></div>
+            <!-- 赤 -->
+            <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:2;"></div>
+            <!-- 黄 -->
+            <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:3;"></div>
+            <!-- 緑 -->
+            <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:4;"></div>
+            <!-- 青 -->
+            <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:6;"></div>
+            <!-- 紫 -->
+            <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:1;"></div>
+            <!-- 橙 -->
+            <div class="rb-slot" style="border-radius:50%; background:#b2bec3; order:5;"></div>
+            <!-- 藍 --> 
+          </div>
+          <!-- 🌙 夜モード星スロット -->
+          <div id="night-star-slot" style="display:none; align-items:center; gap:4px; margin-left:8px; height:24px; overflow:visible;">
+            <div id="night-star-0" class="night-star-slot-item"></div>
+            <div id="night-star-1" class="night-star-slot-item"></div>
+            <div id="night-star-2" class="night-star-slot-item"></div>
+          </div>
+        </div>
+        <canvas id="stage"></canvas>
+        <div id="allclear-overlay"></div>
+        <div id="overlay" style="padding-top: 10px;"> <!-- GAMEOVERテキストの上の隙間調整-->
+          <h2 style="font-size:22px; margin: 0; line-height: 1; letter-spacing: 0.05em; color: #ff7675;">GAME OVER</h2>
+          <div id="final-score" style="font-size:24px; font-weight: 900; margin-bottom: 2px; color: #fff;"></div>
+          <div id="name-input-box" style="margin-top: 2px; margin-bottom: 8px; display: none; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 12px;"> <span style="font-size:14px; font-weight:bold; color:#ffe53b; display:block; margin-bottom:3px;">🎉 ランクイン！ 名前を入力してね</span>
+            <input type="text" id="player-name-field" maxlength="8" value="Player" style="padding:6px 10px; width:120px; border-radius:6px; border:none; outline:none; font-weight:bold; font-size:14px; margin-right:6px; text-align:center;">
+            <button onclick="saveRankedScore()" style="padding:6px 14px; border-radius:12px; border:none; background: linear-gradient(90deg, #ff4757, #ffe53b, #2ed573, #1e90ff, #c175ff, #ff4757); background-size: 200% 100%; animation: rainbowFlow 4s linear infinite; color:white; font-size:14px; font-weight:900; cursor:pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.2);">登録する</button>
+          </div>
+          <div style="font-size:11px; font-weight:900; margin-bottom:2px; color:#cbd5e1; text-align:left; width:85%; max-width:270px; letter-spacing: 0.05em;">🌈 TOP 10 RANKING</div>
+          <div id="ranking-box" style="width: 85%; max-width: 270px; overflow: hidden; margin-bottom: 12px; display: flex; flex-direction: column; gap: 2px;"> </div>
+          <button id="retry-btn" onclick="initGame()" style="padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:12px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">もう一度プレイする</button>
+          <button id="reset-ranking-btn" onclick="confirmResetRanking()" style="margin-top:12px; margin-bottom:10px; padding:6px 16px; border-radius:20px; border:1.5px solid rgba(255,255,255,0.3); cursor:pointer; font-weight:700; font-size:11px; background:transparent; color:#cbd5e1;">ランキングをリセットする</button>
+          <button id="back-to-game-btn" onclick="closeRankingScreen()" style="display:none; padding:10px 30px; border-radius:30px; border:none; cursor:pointer; font-weight:900; font-size:12px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">ゲームに戻る</button>
+        </div>
       </div>
-      <div class="score-group">
-        <div class="ui-section-title">MOVES</div>
-        <div id="moves" class="moves-val">3</div>
-      </div>
-    </div>
-    <div id="right-ui-bottom">
-      <div class="ui-section-title" id="gauge-title-top">RAINBOW GAUGE</div>
-      <div class="gauge-bar-bg">
-        <div id="gauge-fill" class="gauge-bar-fill"></div>
-        <div class="ui-section-title gauge-title-overlay">RAINBOW GAUGE</div>
-      </div>
-      <div class="skill-combined-box" id="skill-box">
-        <div class="stock-container" id="stars-container-row">
-          <!-- 共有グラデーション定義（非表示SVG） -->
-          <svg width="0" height="0" style="position:absolute">
-            <defs>
-              <radialGradient id="rbArcGrad" cx="100%" cy="100%" r="95%">
-                <stop offset="0%"  stop-color="#c175ff"/>
-                <stop offset="46%" stop-color="#c175ff"/>
-                <stop offset="52%" stop-color="#6c5ce7"/>
-                <stop offset="60%" stop-color="#1e90ff"/>
-                <stop offset="68%" stop-color="#2ed573"/>
-                <stop offset="80%" stop-color="#ffe53b"/>
-                <stop offset="100%" stop-color="#ff4757"/>
-              </radialGradient>
-            </defs>
+      <div id="level-status-bar"> <span id="status-level" class="status-level-val">LEVEL 1</span> <span class="status-next-label">Next
+        <div class="mini-obstacle-img mini-obstacle-next">
+          <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
+            <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
           </svg>
-          <div id="stock-1" class="stock-star">
-            <svg viewBox="0 0 85 85">
-              <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
-            </svg>
-          </div>
-          <div id="stock-2" class="stock-star">
-            <svg viewBox="0 0 85 85">
-              <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
-            </svg>
-          </div>
-          <div id="stock-3" class="stock-star">
-            <svg viewBox="0 0 85 85">
-              <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
-            </svg>
-          </div>
         </div>
-        <button id="skill-btn" onclick="triggerSkillWithEffects()" disabled>RAINBOW<br>
-        BURST!</button>
-        <div class="stock-container-spacer" aria-hidden="true">
-          <div class="stock-star"></div><div class="stock-star"></div><div class="stock-star"></div>
+        : MOVES <span id="status-moves" class="status-moves-val">10</span></span> </div>
+    </div>
+    <div id="right-ui">
+      <div id="right-ui-top">
+        <button id="view-ranking-btn" onclick="showRankingScreen()" class="view-ranking-btn view-ranking-btn-pc">🏆 ランキングを見る</button>
+        <div id="best-score" class="best-score-label">BEST: 0000</div>
+        <div class="score-group">
+          <div class="ui-section-title">SCORE</div>
+          <div id="score" class="score-val">0</div>
+        </div>
+        <div class="score-group">
+          <div class="ui-section-title">MOVES</div>
+          <div id="moves" class="moves-val">3</div>
+        </div>
+      </div>
+      <div id="right-ui-bottom">
+        <div class="ui-section-title" id="gauge-title-top">RAINBOW GAUGE</div>
+        <div class="gauge-bar-bg">
+          <div id="gauge-fill" class="gauge-bar-fill"></div>
+          <div class="ui-section-title gauge-title-overlay">RAINBOW GAUGE</div>
+        </div>
+        <div class="skill-combined-box" id="skill-box">
+          <div class="stock-container" id="stars-container-row"> 
+            <!-- 共有グラデーション定義（非表示SVG） -->
+            <svg width="0" height="0" style="position:absolute">
+              <defs>
+                <radialGradient id="rbArcGrad" cx="100%" cy="100%" r="95%">
+                  <stop offset="0%"  stop-color="#c175ff"/>
+                  <stop offset="46%" stop-color="#c175ff"/>
+                  <stop offset="52%" stop-color="#6c5ce7"/>
+                  <stop offset="60%" stop-color="#1e90ff"/>
+                  <stop offset="68%" stop-color="#2ed573"/>
+                  <stop offset="80%" stop-color="#ffe53b"/>
+                  <stop offset="100%" stop-color="#ff4757"/>
+                </radialGradient>
+              </defs>
+            </svg>
+            <div id="stock-1" class="stock-star">
+              <svg viewBox="0 0 85 85">
+                <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
+              </svg>
+            </div>
+            <div id="stock-2" class="stock-star">
+              <svg viewBox="0 0 85 85">
+                <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
+              </svg>
+            </div>
+            <div id="stock-3" class="stock-star">
+              <svg viewBox="0 0 85 85">
+                <path class="rb-arc" d="M46.15,78.06H7.65C7.65,38.93,39.47,7.11,78.6,7.11v38.5c-17.89,0-32.45,14.56-32.45,32.45Z"/>
+              </svg>
+            </div>
+          </div>
+          <button id="skill-btn" onclick="triggerSkillWithEffects()" disabled>RAINBOW<br>
+          BURST!</button>
+          <div class="stock-container-spacer" aria-hidden="true">
+            <div class="stock-star"></div>
+            <div class="stock-star"></div>
+            <div class="stock-star"></div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 </div>
 <div id="best-score-mobile" class="best-score-label-mobile">BEST: 0000</div>
 <button id="view-ranking-btn-mobile" onclick="showRankingScreen()" class="view-ranking-btn view-ranking-btn-mobile">🏆 ランキングを見る</button>
@@ -1458,126 +1583,160 @@ canvas {
 <div id="panel-image-modal-overlay">
   <div id="panel-image-modal">
     <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">🖼️ パネル画像設定</h3>
-   <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: normal; color: #4b5563;">好きな画像をパネルの絵柄に差し替えられます<br>※透過PNGも使えるよ！</p>
-	<p style="margin: 0 0 16px 0; font-size: 12px; color: #D92929;">画像はご利用の端末（PC・スマホなど）のみで使用されます<br>インターネット上には送信されません</p>
-
+    <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: normal; color: #4b5563;">好きな画像をパネルの絵柄に差し替えられます<br>
+      ※透過PNGも使えるよ！</p>
+    <p style="margin: 0 0 16px 0; font-size: 12px; color: #D92929;">画像はご利用の端末（PC・スマホなど）のみで使用されます<br>
+      インターネット上には送信されません</p>
     <input type="file" id="panel-image-bulk-input" accept="image/png,image/jpeg" multiple style="display:none;">
-    <button id="panel-image-bulk-btn" onclick="document.getElementById('panel-image-bulk-input').click()">📁 一括アップロード<br>（各色に自動で割り当て）</button>
-    <div id="panel-image-bulk-hint">💡複数選択のやり方<br>以下のキーを押しながらファイルを選択する<br>Windows：<b>Ctrl</b>キー／Mac：<b>Cmd</b>キー</div>
-
+    <button id="panel-image-bulk-btn" onclick="document.getElementById('panel-image-bulk-input').click()">📁 一括アップロード<br>
+    （各色に自動で割り当て）</button>
+    <div id="panel-image-bulk-hint">💡複数選択のやり方<br>
+      以下のキーを押しながらファイルを選択する<br>
+      Windows：<b>Ctrl</b>キー／Mac：<b>Cmd</b>キー</div>
     <div id="panel-image-rows"></div>
-
     <button id="panel-image-remove-all-btn" onclick="removeAllCustomPanelImages()">全ての画像を削除する</button>
     <button onclick="closePanelImageModal()" style="display:block; width:220px; margin:10px auto 0 auto; border:none; border-radius:14px; background:#dbeeff; color:#2b7fd1; font-size:12px; font-weight:900; padding:10px 0; cursor:pointer;">閉じる</button>
   </div>
 </div>
 <!-- 📖 あそびかたモーダル -->
 <div id="guide-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
-<div style="background: white; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); max-width: 460px; width: 95%; max-height: 85vh; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" id="guide-modal-content">
-<div style="overflow-y: auto; flex: 1; min-height: 0; padding: 28px 14px; box-sizing: border-box; text-align: center;">
-    <div style="position: sticky; top: -28px; left: -18px; margin: -28px 0 4px -18px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
-      <button onclick="closeGuideModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
+  <div style="background: white; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); max-width: 460px; width: 95%; max-height: 85vh; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" id="guide-modal-content">
+    <div style="overflow-y: auto; flex: 1; min-height: 0; padding: 28px 14px; box-sizing: border-box; text-align: center;">
+      <div style="position: sticky; top: -28px; left: -18px; margin: -28px 0 4px -18px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
+        <button onclick="closeGuideModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
+      </div>
+      <h3 style="margin: 0 0 16px 0; color: #2c3e50; font-size: 18px; font-weight: 900; font-family: var(--font-jp);">📖 あそびかた</h3>
+      <div class="description">
+        <div class="special-panel-box" style="margin: 0 auto 8px auto; background-color: #ffffff; border: 1px solid #FF6700; text-align: center;"> <strong style="color: #FF6700;">💾 オートセーブ機能つき！<br>
+          ブラウザを閉じても続きから遊べるよ</strong> </div>
+        <div style="line-height: 1.3; margin-top: 14px; font-size: 16px;"> 隣同士のパネルを入れ替えて<br>
+          同じ色を縦横3つ揃えよう！<br>
+          クリック・タップ／フリックで動かせるよ</div>
+        <div style="line-height: 1.3; margin-top: 6px;">連鎖するとレインボーゲージが貯まって<br>
+          BURSTカウンター(<span class="mini-burst-counter-img"></span>)が増えるよ</div>
+        <hr class="desc-divider" style="margin: 10px auto;">
+        <div class="guide-list-box">
+        <span style="line-height: 1.3; display: inline-block;"><strong>色パネルを揃えた時に<br>
+        隣接していると<br>
+        一緒に消えるパネル</strong></span><br>
+        <span class="mini-dark-img"></span>闇玉・ <span class="mini-rainbow-img"></span>虹玉・ <span class="mini-nanairo-img"></span>ナナイロ玉<br>
+        <span class="mini-sunny-img"></span>晴玉・ <span class="mini-rainy-img"></span>雨玉・ <span class="mini-snow-img"></span>雪玉・ <span class="mini-allclear-img">
+        <svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600">
+          <polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/>
+        </svg>
+        </span>雷玉<br>
+        <span class="mini-balls-img"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>七色の玉・ <span class="mini-star-img"></span>流れ星<br>
+        <hr class="desc-divider">
+        <span style="line-height: 1.3; display: inline-block;"><strong>直接選んで<br>
+        RAINBOW BURST!ボタンで<br>
+        消せるパネル</strong></span><br>
+        <span class="mini-obstacle-img">
+        <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
+          <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
+        </svg>
+        </span>雲パネル・ <span class="mini-dark-img"></span>闇玉・ <span class="mini-nanairo-img"></span>ナナイロ玉<br>
+        <span class="mini-sunny-img"></span>晴玉・ <span class="mini-rainy-img"></span>雨玉・ <span class="mini-snow-img"></span>雪玉・ <span class="mini-allclear-img">
+        <svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600">
+          <polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/>
+        </svg>
+        </span>雷玉<br>
+        <span class="mini-star-img"></span>流れ星
+        </div>
+        <div class="special-panel-box guide-detail-box">
+          <table style="border-collapse: collapse; line-height: 1.2;">
+            <!-- 説明文白枠内の行間*/ -->
+            <tr>
+              <td class="guide-td-icon"><span class="mini-obstacle-img">
+                <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
+                  <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
+                </svg>
+                </span><strong>雲パネル</strong>：</td>
+              <td class="guide-td-text">どんどん増えるお邪魔パネル</td>
+            </tr>
+            <tr>
+              <td class="guide-td-icon"><span class="mini-dark-img"></span><strong>闇玉</strong>：</td>
+              <td class="guide-td-text">カウントが0になると周囲を<br>
+                <span class="mini-obstacle-img">
+                <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
+                  <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
+                </svg>
+                </span>雲パネルに変えてしまう</td>
+            </tr>
+            <tr>
+              <td class="guide-td-icon"><span class="mini-rainbow-img"></span><strong>虹玉</strong>：</td>
+              <td class="guide-td-text">BURSTカウンター(<span class="mini-burst-counter-img"></span>)が1つ増える</td>
+            </tr>
+            <tr>
+              <td class="guide-td-icon"><span class="mini-nanairo-img"></span><strong>ナナイロ玉</strong>：</td>
+              <td class="guide-td-text"><span class="mini-obstacle-img">
+                <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
+                  <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
+                </svg>
+                </span>雲パネルと<span class="mini-dark-img"></span>闇玉を<br>
+                全て色パネルに変化させるよ！</td>
+            </tr>
+            <tr>
+              <td class="guide-td-icon"><span class="mini-sunny-img"></span><strong>晴玉</strong>：</td>
+              <td class="guide-td-text">周囲5×5マスの<span class="mini-obstacle-img">
+                <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
+                  <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
+                </svg>
+                </span>雲パネルが<br>
+                🟥赤パネルに変わる<br>
+                ・凍っているパネルが解ける</td>
+            </tr>
+            <tr>
+              <td class="guide-td-icon"><span class="mini-rainy-img"></span><strong>雨玉</strong>：</td>
+              <td class="guide-td-text">色パネルがランダムに<br>
+                🟦青パネルに変わる</td>
+            </tr>
+            <tr>
+              <td class="guide-td-icon"><span class="mini-snow-img"></span><strong>雪玉</strong>：</td>
+              <td class="guide-td-text">カウントが0になると<br>
+                色パネルがランダムに凍ってしまう<br>
+                ・凍ったパネルは移動できない<br>
+                ・色パネル隣接か手数経過で解ける</td>
+            </tr>
+            <tr>
+              <td class="guide-td-icon"><span class="mini-allclear-img">
+                <svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600">
+                  <polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/>
+                </svg>
+                </span><strong>雷玉</strong>：</td>
+              <td class="guide-td-text"><span class="mini-obstacle-img">
+                <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
+                  <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
+                </svg>
+                </span>雲パネルと<br>
+                <span class="mini-dark-img"></span>闇玉を一気に消せる！<br>
+                雲から
+                <svg class="mini-thunder-spark-img" viewBox="-16 -19 32 38">
+                  <path d="M5,-18 L-15,3 L-3,3 L-5,18 L15,-3 L3,-3 Z"/>
+                </svg>
+                が出てきたら<br>
+                雷玉の出現が近い合図！</td>
+            </tr>
+          </table>
+          <table style="border-collapse: collapse; line-height: 1.2; margin-top: 4px;">
+            <tr>
+              <td class="guide-td-icon"><span class="mini-almighty-img"></span><strong>プリズム</strong>：</td>
+              <td class="guide-td-text">どの色のパネルとも揃えられる！</td>
+            </tr>
+            <tr>
+              <td class="guide-td-icon"><span class="mini-balls-img"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><strong>七色の玉</strong>：</td>
+              <td class="guide-td-text">色パネルをたくさん消すと<br>
+                同色の玉が出現！七色集めると…!?</td>
+            </tr>
+          </table>
+        </div>
+        <div class="special-panel-box guide-daynight-box" style="margin-top: 8px;"> <strong>《昼モード／夜モード》</strong><br>
+          <span style="line-height: 1.3; display: inline-block;"> スコアが上がると夜モードが発動！<br>
+          流れ星<span class="mini-star-img"></span>を3つ集めると昼モードに戻るよ<br>
+          夜モード中は<span class="mini-balls-img"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>七色の玉、<span class="mini-rainbow-img"></span>虹玉、<span class="mini-almighty-img"></span>プリズムパネルが出現しなくなるので注意！</span> </div>
+      </div>
+      <button onclick="closeGuideModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 14px; cursor: pointer; margin-top: 20px;">閉じる</button>
     </div>
-   <h3 style="margin: 0 0 16px 0; color: #2c3e50; font-size: 18px; font-weight: 900; font-family: var(--font-jp);">📖 あそびかた</h3>
-<div class="description">
-  <div class="special-panel-box" style="margin: 0 auto 8px auto; background-color: #ffffff; border: 1px solid #FF6700; text-align: center;">
-    <strong style="color: #FF6700;">💾 オートセーブ機能つき！<br>
-    ブラウザを閉じても続きから遊べるよ</strong>
   </div>
-	<div style="line-height: 1.3; margin-top: 14px; font-size: 16px;">
-	隣同士のパネルを入れ替えて<br>
-	同じ色を縦横3つ揃えよう！<br>
-	クリック・タップ／フリックで動かせるよ</div>
-	<div style="line-height: 1.3; margin-top: 6px;">連鎖するとレインボーゲージが貯まって<br>
-	BURSTカウンター(<span class="mini-burst-counter-img"></span>)が増えるよ</div>
-  <hr class="desc-divider" style="margin: 10px auto;">
-  <span style="line-height: 1.3; display: inline-block;"><strong>色パネルを揃えた時に<br>隣接していると<br>一緒に消えるパネル</strong></span><br>
-  <span class="mini-dark-img"></span>闇玉・
-  <span class="mini-rainbow-img"></span>虹玉・
-  <span class="mini-allclear-img"><svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600"><polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/></svg></span>雷玉<br>
-  <span class="mini-sunny-img"></span>晴玉・
-  <span class="mini-rainy-img"></span>雨玉・
-  <span class="mini-snow-img"></span>雪玉<br>
-  七色の玉・<span class="mini-star-img"></span>流れ星<br>
-  <hr class="desc-divider">
-  <span style="line-height: 1.3; display: inline-block;"><strong>直接選んで<br>RAINBOW BURST!ボタンで<br>消せるパネル</strong></span><br>
-  <span class="mini-obstacle-img"><svg width="14" height="14" viewBox="0 0 85 85" fill="white"><path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/></svg></span>お邪魔パネル・
-  <span class="mini-dark-img"></span>闇玉・
-  <span class="mini-allclear-img"><svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600"><polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/></svg></span>雷玉<br>
-  <span class="mini-sunny-img"></span>晴玉・
-  <span class="mini-rainy-img"></span>雨玉・
-  <span class="mini-snow-img"></span>雪玉<br>
-  <span class="mini-star-img"></span>流れ星<br>
-  <div class="special-panel-box">
-    <table style="border-collapse: collapse; line-height: 1.2;">
-      <!-- 説明文白枠内の行間*/ -->
-      <tr>
-        <td class="guide-td-icon"><span class="mini-dark-img"></span><strong>闇玉</strong>：</td>
-        <td class="guide-td-text">カウントが0になると周囲を<br><span class="mini-obstacle-img">
-          <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
-            <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
-          </svg>
-          </span>お邪魔パネルに変えてしまう </td>
-      </tr>
-      <tr>
-        <td class="guide-td-icon"><span class="mini-rainbow-img"></span><strong>虹玉</strong>：</td>
-        <td class="guide-td-text">BURSTカウンター(<span class="mini-burst-counter-img"></span>)が1つ増える</td>
-      </tr>
-      <tr>
-        <td class="guide-td-icon"><span class="mini-allclear-img">
-          <svg width="8" height="12" viewBox="-15 -18 30 36" fill="#ffe600">
-            <polygon points="5,-18 -15,3 -3,3 -5,18 15,-3 3,-3"/>
-          </svg>
-          </span><strong>雷玉</strong>：</td>
-        <td class="guide-td-text">
-<span class="mini-obstacle-img">
-          <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
-            <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
-          </svg>
-          </span>お邪魔パネルと<br><span class="mini-dark-img"></span>闇玉を一気に消せる！</td>
-      </tr>
-      
-      <tr>
-        <td class="guide-td-icon"><span class="mini-sunny-img"></span><strong>晴玉</strong>：</td>
-        <td class="guide-td-text">周囲5×5マスの<span class="mini-obstacle-img">
-          <svg width="14" height="14" viewBox="0 0 85 85" fill="white">
-            <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
-          </svg>
-          </span>お邪魔パネルが<br>🟥赤パネルに変わる<br>・凍っているパネルが解ける</td>
-      </tr>
-      <tr>
-        <td class="guide-td-icon"><span class="mini-rainy-img"></span><strong>雨玉</strong>：</td>
-        <td class="guide-td-text">色パネルがランダムに<br>🟦青パネルに変わる</td>
-      </tr>
-      <tr>
-        <td class="guide-td-icon"><span class="mini-snow-img"></span><strong>雪玉</strong>：</td>
-        <td class="guide-td-text">カウントが0になると<br>色パネルがランダムに凍ってしまう<br>
-		・凍ったパネルは移動できない<br>・色パネル消去の隣接か手数経過で解ける</td>
-      </tr>
-    </table>
-    <table style="border-collapse: collapse; line-height: 1.2; margin-top: 4px;">
-		<tr>
-        <td class="guide-td-icon"><span class="mini-almighty-img"></span><strong>プリズム</strong>：</td>
-        <td class="guide-td-text">どの色のパネルとも揃えられる！</td>
-      </tr>
-      <tr>
-        <td class="guide-td-icon">🌈<strong>七色の玉</strong>：</td>
-        <td class="guide-td-text">色パネルをたくさん消すと<br>同色の玉が出現！七色集めると…!?</td>
-      </tr>
-    </table>
-  </div>
-  <div class="special-panel-box" style="margin-top: 8px;">
-    <strong>《昼モード／夜モード》</strong><br>
-    <span style="line-height: 1.3; display: inline-block;">
-    スコアが上がると夜モードが発動！<br>
-    流れ星<span class="mini-star-img"></span>を3つ集めると昼モードに戻るよ<br>
-    夜モード中は七色の玉、虹玉、プリズムパネルが出現しなくなるので注意！
-    </span>
-  </div>
-</div>
-    <button onclick="closeGuideModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 14px; cursor: pointer; margin-top: 20px;">閉じる</button>
-  </div>
-</div>
 </div>
 <!-- ℹ️ このゲームについてモーダル -->
 <div id="about-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
@@ -1587,11 +1746,12 @@ canvas {
     <p id="about-version" style="margin: 0 0 20px 0; color: #2c3e50; font-size: 14px; font-weight: 700;"></p>
     <!-- ©クレジット表記 -->
     <p style="margin: 0 0 20px 0; color: #64748b; font-size: 13px;">© 2026 by isomi_ssm</p>
-    <!-- Xのリンクボタン -->
+    <!-- Xのリンクボタン --> 
     <a href="https://x.com/isomi_ssm" target="_blank" rel="noopener" style="display: inline-block; margin-bottom: 16px; padding: 8px 16px; border-radius: 999px; background: #f1f5f9; color: #2c3e50; font-size: 13px; font-weight: 700; text-decoration: none;">🔗 X (@isomi_ssm)</a><br>
-    <!-- Xのリンクボタンここまで -->
+    <!-- Xのリンクボタンここまで --> 
     <!-- フォント表記追加 -->
-    <p style="margin: 0 0 20px 0; color: #94a3b8; font-size: 11px;">Font: (Google Fonts) <br>Nunito / Noto Sans Japanese</p>
+    <p style="margin: 0 0 20px 0; color: #94a3b8; font-size: 11px;">Font: (Google Fonts) <br>
+      Nunito / Noto Sans Japanese</p>
     <button onclick="closeAboutModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 14px; cursor: pointer;">閉じる</button>
   </div>
 </div>
@@ -1613,7 +1773,7 @@ canvas {
 <div id="reset-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; padding: 20px 15px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 85%; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="reset-modal-content">
     <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">最初からやりなおす？</h3>
-   <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: normal; line-height: 1.5;">現在のスコアやパネルの配置などが<br>
+    <p style="margin: 0 0 25px 0; color: #64748b; font-size: 14px; font-weight: normal; line-height: 1.5;">現在のスコアやパネルの配置などが<br>
       全てリセットされます</p>
     <div style="display: flex; gap: 8px; justify-content: center;">
       <button onclick="confirmResetGame()" style="flex: 1; padding: 12px 4px; border: none; border-radius: 15px; background: #ff7675; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">リセットして<br>
@@ -1639,7 +1799,8 @@ canvas {
 <!-- 🔊 音設定モーダル(初回のみ表示) -->
 <div id="sound-pref-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1001; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; padding: 20px 15px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; max-width: var(--start-modal-width); width: 85%; height: var(--start-modal-height); box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease;" id="sound-pref-modal-content">
-     <h3 style="margin: 0 0 25px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">BGM・効果音の設定<br><span style="font-size: 14px; color: #64748b; font-weight: 700;">（後からOPTIONで変更できます）</span></h3>
+    <h3 style="margin: 0 0 25px 0; color: #2c3e50; font-size: 18px; font-weight: 900;">BGM・効果音の設定<br>
+      <span style="font-size: 14px; color: #64748b; font-weight: 700;">（後からOPTIONで変更できます）</span></h3>
     <div style="display: flex; gap: 12px; justify-content: center;">
       <button onclick="chooseSoundPref(false)" style="width: var(--start-modal-btn-width); height: var(--start-modal-btn-height); flex-shrink: 0; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 12px; line-height: 1.3; border: none; border-radius: 15px; background: #433994; color: #E9E7F7; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(36,30,88,0.3);">🔇 音なし</button>
       <button onclick="chooseSoundPref(true)" style="width: var(--start-modal-btn-width); height: var(--start-modal-btn-height); box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 12px; line-height: 1.3; border: none; border-radius: 15px; background: #3D9DFF; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(61,157,255,0.3);">🔊 音あり</button>
@@ -1652,7 +1813,7 @@ canvas {
     <h3 style="margin: 0 0 6px 0; color: #2c3e50; font-size: 20px; font-weight: 900; font-family: var(--font-jp);">🌈 ナナイロパネル</h3>
     <p style="margin: 0 0 12px 0; color: #64748b; font-size: 13px; font-weight: 700; font-family: var(--font-main-ui);">Rainbow Panels</p>
     <p style="margin: 0 0 26px 0; color: #64748b; font-size: 13px;">© 2026 by isomi_ssm</p>
-     <div id="start-gate-panel-row" style="display: flex; gap: 6px; justify-content: center; margin: 0 0 48px 0;"></div>
+    <div id="start-gate-panel-row" style="display: flex; gap: 6px; justify-content: center; margin: 0 0 48px 0;"></div>
     <div style="display: flex; gap: 12px; justify-content: center;">
       <button onclick="startGameFromGate()" style="width: var(--start-modal-btn-width); height: var(--start-modal-btn-height); box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 12px; line-height: 1.3; border: none; border-radius: 15px; background: #3D9DFF; color: white; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(61,157,255,0.3);">はじめる</button>
     </div>
@@ -1661,90 +1822,78 @@ canvas {
 <!-- ⚙️ オプションモーダル -->
 <div id="options-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.2s ease;">
   <div style="background: white; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); max-width: 380px; width: 88%; max-height: 85vh; border: 4px solid #fff; transform: scale(0.9); transition: transform 0.2s ease; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" id="options-modal-content">
-  <div style="overflow-y: auto; flex: 1; min-height: 0; padding: 28px 24px; box-sizing: border-box; text-align: center;">
-    <div style="position: sticky; top: -28px; left: -28px; margin: -28px 0 4px -28px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
-      <button onclick="closeOptionsModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
-    </div>
-    <h3 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 18px; font-weight: 900; font-family: var(--font-jp);">⚙️ OPTION</h3>
-
-    <div style="text-align: left; margin-bottom: 20px;">
-      <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">アニメーション速度</div>
-	<div style="display: flex; gap: 6px;">
-        <button id="opt-speed-none" onclick="setAnimSpeed('none')" style="flex: 0 0 calc((100% - 12px) / 3); padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; line-height: 1; cursor: pointer;">なし</button>
-        <button id="opt-speed-normal" onclick="setAnimSpeed('normal')" style="flex: 0 0 calc((100% - 12px) / 3); padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; line-height: 1; cursor: pointer;">ふつう</button>
-        <button id="opt-speed-fast" onclick="setAnimSpeed('fast')" style="flex: 0 0 calc((100% - 12px) / 3); padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; line-height: 1; cursor: pointer;">はやい</button>
+    <div style="overflow-y: auto; flex: 1; min-height: 0; padding: 28px 24px; box-sizing: border-box; text-align: center;">
+      <div style="position: sticky; top: -28px; left: -28px; margin: -28px 0 4px -28px; padding: 6px 0 6px 12px; background: white; text-align: left; z-index: 10;">
+        <button onclick="closeOptionsModal()" style="padding: 4px 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 12px; cursor: pointer;">閉じる</button>
+      </div>
+      <h3 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 18px; font-weight: 900; font-family: var(--font-jp);">⚙️ OPTION</h3>
+      <div style="text-align: left; margin-bottom: 20px;">
+        <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">アニメーション速度</div>
+        <div style="display: flex; gap: 6px;">
+          <button id="opt-speed-none" onclick="setAnimSpeed('none')" style="flex: 0 0 calc((100% - 12px) / 3); padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; line-height: 1; cursor: pointer;">なし</button>
+          <button id="opt-speed-normal" onclick="setAnimSpeed('normal')" style="flex: 0 0 calc((100% - 12px) / 3); padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; line-height: 1; cursor: pointer;">ふつう</button>
+          <button id="opt-speed-fast" onclick="setAnimSpeed('fast')" style="flex: 0 0 calc((100% - 12px) / 3); padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; line-height: 1; cursor: pointer;">はやい</button>
+        </div>
+      </div>
+      <div style="text-align: left; margin-bottom: 20px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="opt-reduce-motion" onchange="toggleReduceMotion()" style="width: 18px; height: 18px; cursor: pointer;">
+          <span style="font-size: 12px; color: #475569;"> <span style="font-size: 14px; font-weight: 900;">モーション減少</span><br>
+          <span style="font-weight: normal;">（パネルの揺れ・跳ねを止める）</span> </span> </label>
+      </div>
+      <div id="opt-sound-section" style="text-align: left; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <div style="font-size: 14px; font-weight: 900; color: #475569;">BGM音量 <span id="opt-bgm-volume-label" style="color: #3D9DFF; font-size: 18px;">80%</span></div>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 900; color: #475569; cursor: pointer;">
+            <input type="checkbox" id="opt-bgm-mute" onchange="toggleSoundMute('bgm')" style="width: 18px; height: 18px; cursor: pointer;">
+            消音 </label>
+        </div>
+        <input type="range" id="opt-bgm-volume" min="0" max="100" step="5" oninput="onVolumeChange('bgm', this.value)" style="width: 100%; cursor: pointer; accent-color: #3D9DFF;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin: 12px 0 8px 0;">
+          <div style="font-size: 14px; font-weight: 900; color: #475569;">SE音量 <span id="opt-se-volume-label" style="color: #3D9DFF; font-size: 18px;">80%</span></div>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 900; color: #475569; cursor: pointer;">
+            <input type="checkbox" id="opt-se-mute" onchange="toggleSoundMute('se')" style="width: 18px; height: 18px; cursor: pointer;">
+            消音 </label>
+        </div>
+        <input type="range" id="opt-se-volume" min="0" max="100" step="5" oninput="onVolumeChange('se', this.value)" style="width: 100%; cursor: pointer; accent-color: #3D9DFF;">
+      </div>
+      <div style="text-align: left; margin-bottom: 8px;">
+        <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">アイコン</div>
+        <div style="display: flex; gap: 6px;">
+          <button id="opt-icon-cute" onclick="setIconStyle('cute')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;"> かわいい </button>
+          <button id="opt-icon-simple" onclick="setIconStyle('simple')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;"> シンプル </button>
+        </div>
+      </div>
+      <div style="text-align: left; margin-bottom: 8px; margin-top: 16px;">
+        <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">七色の玉の形</div>
+        <div style="display: flex; gap: 6px;">
+          <button id="opt-shape-circle" onclick="setBallShape('circle')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <svg width="22" height="22" viewBox="0 0 85 85">
+            <path d="M 41, 42 m -35, 0 a 35,35 0 1,0 70,0 a 35,35 0 1,0 -70,0" fill="currentColor"/>
+          </svg>
+          通常玉 </button>
+          <button id="opt-shape-magatama" onclick="setBallShape('magatama')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <svg width="22" height="22" viewBox="0 0 85 85">
+            <path d="M67.47,35.96c0-14.3-10.5-26.6-24.8-26.9s-26.5,10.1-26.9,24.8c-.2,7.2,1.6,11.3,4,14.5,2.8,3.8,7.67,6.61,11.19,8.41s5.72,5.11,5.12,9.51c-.7,5.1-1.88,7.28.62,9.18,4.2,3.1,30.82-9.73,30.77-39.49Z" fill="currentColor"/>
+          </svg>
+          勾玉 </button>
+          <button id="opt-shape-hexagon" onclick="setBallShape('hexagon')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <svg width="22" height="22" viewBox="0 0 85 85">
+            <path d="M40.84,7.19 L70.86,24.52 L70.86,59.18 L40.84,76.51 L10.82,59.18 L10.82,24.52 Z" fill="currentColor"/>
+          </svg>
+          六角形 </button>
+        </div>
+        <div class="panel-image-btn-slot" style="margin-top: 24px; text-align: center;"></div>
+      </div>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 32px 0;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+        <button onclick="resetUserSettingsToDefault()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #ff7675; color: #FFFFFF; font-weight: 700; font-size: 14px; cursor: pointer;">初期設定に戻す</button>
+        <button onclick="closeOptionsModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 14px; cursor: pointer;">閉じる</button>
       </div>
     </div>
-
-    <div style="text-align: left; margin-bottom: 20px;">
-      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-        <input type="checkbox" id="opt-reduce-motion" onchange="toggleReduceMotion()" style="width: 18px; height: 18px; cursor: pointer;">
-        <span style="font-size: 12px; color: #475569;">
-          <span style="font-size: 14px; font-weight: 900;">モーション減少</span><br>
-          <span style="font-weight: normal;">（パネルの揺れ・跳ねを止める）</span>
-        </span>
-      </label>
-    </div>
-
-    <div id="opt-sound-section" style="text-align: left; margin-bottom: 20px;">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-        <div style="font-size: 14px; font-weight: 900; color: #475569;">BGM音量 <span id="opt-bgm-volume-label" style="color: #3D9DFF; font-size: 18px;">80%</span></div>
-        <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 900; color: #475569; cursor: pointer;">
-          <input type="checkbox" id="opt-bgm-mute" onchange="toggleSoundMute('bgm')" style="width: 18px; height: 18px; cursor: pointer;"> 消音
-        </label>
-      </div>
-      <input type="range" id="opt-bgm-volume" min="0" max="100" step="5" oninput="onVolumeChange('bgm', this.value)" style="width: 100%; cursor: pointer; accent-color: #3D9DFF;">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin: 12px 0 8px 0;">
-        <div style="font-size: 14px; font-weight: 900; color: #475569;">SE音量 <span id="opt-se-volume-label" style="color: #3D9DFF; font-size: 18px;">80%</span></div>
-        <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 900; color: #475569; cursor: pointer;">
-          <input type="checkbox" id="opt-se-mute" onchange="toggleSoundMute('se')" style="width: 18px; height: 18px; cursor: pointer;"> 消音
-        </label>
-      </div>
-      <input type="range" id="opt-se-volume" min="0" max="100" step="5" oninput="onVolumeChange('se', this.value)" style="width: 100%; cursor: pointer; accent-color: #3D9DFF;">
-    </div>
-
-    <div style="text-align: left; margin-bottom: 8px;">
-      <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">アイコン</div>
-      <div style="display: flex; gap: 6px;">
-        <button id="opt-icon-cute" onclick="setIconStyle('cute')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">
-          かわいい
-        </button>
-        <button id="opt-icon-simple" onclick="setIconStyle('simple')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;">
-          シンプル
-        </button>
-      </div>
-    </div>
-
-    <div style="text-align: left; margin-bottom: 8px; margin-top: 16px;">
-      <div style="font-size: 14px; font-weight: 900; color: #475569; margin-bottom: 8px;">七色の玉の形</div>
-      <div style="display: flex; gap: 6px;">
-        <button id="opt-shape-circle" onclick="setBallShape('circle')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
-          <svg width="22" height="22" viewBox="0 0 85 85"><path d="M 41, 42 m -35, 0 a 35,35 0 1,0 70,0 a 35,35 0 1,0 -70,0" fill="currentColor"/></svg>
-          通常玉
-        </button>
-        <button id="opt-shape-magatama" onclick="setBallShape('magatama')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
-          <svg width="22" height="22" viewBox="0 0 85 85"><path d="M67.47,35.96c0-14.3-10.5-26.6-24.8-26.9s-26.5,10.1-26.9,24.8c-.2,7.2,1.6,11.3,4,14.5,2.8,3.8,7.67,6.61,11.19,8.41s5.72,5.11,5.12,9.51c-.7,5.1-1.88,7.28.62,9.18,4.2,3.1,30.82-9.73,30.77-39.49Z" fill="currentColor"/></svg>
-          勾玉
-        </button>
-        <button id="opt-shape-hexagon" onclick="setBallShape('hexagon')" style="flex: 1; padding: 8px 4px; border: none; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
-          <svg width="22" height="22" viewBox="0 0 85 85"><path d="M40.84,7.19 L70.86,24.52 L70.86,59.18 L40.84,76.51 L10.82,59.18 L10.82,24.52 Z" fill="currentColor"/></svg>
-          六角形
-        </button>
-      </div>
-      <div class="panel-image-btn-slot" style="margin-top: 24px; text-align: center;"></div>
-    </div>
-
-    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 32px 0;">
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
-      <button onclick="resetUserSettingsToDefault()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #ff7675; color: #FFFFFF; font-weight: 700; font-size: 14px; cursor: pointer;">初期設定に戻す</button>
-      <button onclick="closeOptionsModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 14px; cursor: pointer;">閉じる</button>
-    </div>
-
   </div>
 </div>
-</div>
 <p style="text-align: center; color: #64748b; font-size: 14px; margin-top: 16px;"> © 2026 ナナイロパネル／Rainbow Panels by isomi_ssm </p>
-	
 <script>
 
 	/************************************************************
@@ -1797,17 +1946,29 @@ const CONFIG = {
         // 🟦 パネル種類数（スコアで解放）
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		BASE_TYPE_COUNT:        5,     // 開始時のパネル種類数（赤〜紫）
-		ORANGE_UNLOCK_SCORE: 5500,     // 橙パネルが追加されるスコア
-		INDIGO_UNLOCK_SCORE: 7500,     // 藍パネルが追加されるスコア
-	
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🏆 スコア・コンボ設定
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		SCORE: {
-			BASE:        { 3: 40, 4: 80, 5: 140, 6: 230 }, // 同時消し数ごとの基本スコア（7以上は250）
-			COMBO_BONUS: { 1: 30, 2: 50, 3:  70, 4: 100, 5: 170 }, // コンボ数ごとの加算ボーナス（6以上は190）
-		},
+		ORANGE_UNLOCK_SCORE: 7000,     // 橙パネルが追加されるスコア
+		INDIGO_UNLOCK_SCORE: 10000,     // 藍パネルが追加されるスコア
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🟥 特殊パネルの出現スコア閾値
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		THRESHOLD: {
+		LIGHT_START:         6000,  // 虹玉が初めて出現するスコア
+		LIGHT_INTERVAL:      1540,  // 以降の虹玉出現間隔
+		DARK_START:          7500,  // 闇玉が初めて出現するスコア
+		DARK_INTERVAL:       1750,  // 以降の闇玉出現間隔
+		ALMIGHTY_START:      9000,  // プリズムが初めて出現するスコア
+		ALMIGHTY_INTERVAL:   2460,  // 以降のプリズム出現間隔
+		DARK_FAST_START:    12000,  // 高速闇玉が初めて出現するスコア
+		DARK_FAST_INTERVAL:  3580,  // 以降の高速闇玉出現間隔
+		SUNNY_START:        14000,  // 晴玉が初めて出現するスコア
+		SUNNY_INTERVAL:      6000,  // 以降の晴玉出現間隔
+		RAINY_START:        15500,  // 雨玉が初めて出現するスコア
+		RAINY_INTERVAL:      6000,  // 以降の雨玉出現間隔
+		SNOW_START:         18000,  // 雪玉が初めて出現するスコア
+		SNOW_INTERVAL:       2220,  // 以降の雪玉出現間隔
+        },
+	
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 📈 レベル・お邪魔パネル出現設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1837,6 +1998,14 @@ const CONFIG = {
 		],
 		LEVEL_UP_FLASH_DURATION:  900,  // レベルアップ時、枠の背景フラッシュが消えるまで(ms)
 		LEVEL_UP_BOUNCE_DURATION: 800,  // レベルアップ時、LEVEL文字が弾む演出の長さ(ms)
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🏆 スコア・コンボ設定
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		SCORE: {
+			BASE:        { 3: 40, 4: 80, 5: 140, 6: 230 }, // 同時消し数ごとの基本スコア（7以上は250）
+			COMBO_BONUS: { 1: 30, 2: 50, 3:  70, 4: 100, 5: 170 }, // コンボ数ごとの加算ボーナス（6以上は190）
+		},
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ⭐ RAINBOW BURSTスキル設定
@@ -1878,10 +2047,10 @@ const CONFIG = {
 		SNOWY_FRAME_DURATION:  120,  // 雪エフェクトの表示時間（フレーム数）
 		SNOWY_FLAKE_COUNT:      35,  // 雪モード中に降る雪片の生成数
 
-		ICE_SHARD_COUNT:        5,  // 氷パネルが割れた時に飛び散る破片の数
-		ICE_SPARKLE_FREQ:      0.4,  // 凍結パネルの✦キラキラの明滅周期。小さいほどゆっくり（間隔が空く）
-		ICE_SPARKLE_THRESHOLD: 0.82,  // 波形のうちどこから光らせるかの閾値。大きいほど光る瞬間が短く・レアになる
-		ICE_SPARKLE_COUNT:       3,  // 1回の明滅で同時に光らせる星の数
+		ICE_SHARD_COUNT:         5,    // 氷パネルが割れた時に飛び散る破片の数
+		ICE_SPARKLE_FREQ:        0.4,  // 凍結パネルの✦キラキラの明滅周期。小さいほどゆっくり（間隔が空く）
+		ICE_SPARKLE_THRESHOLD:   0.82, // 波形のうちどこから光らせるかの閾値。大きいほど光る瞬間が短く・レアになる
+		ICE_SPARKLE_COUNT:       3,    // 1回の明滅で同時に光らせる星の数
 		ICE_SPARKLE_SIZE_PEAK_TRIM: 0.03,  // サイズが最大になっている時間の短さ。大きいほど滞在時間が短い
 	
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1910,49 +2079,52 @@ const CONFIG = {
 		ALLCLEAR_SPARK_COLOR:        '#ffe600',  // ⚡の色（雷玉と同じ）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		SPECIAL_BALL_GLOW_SPEED: 1.1,  // 晴玉・雨玉・雪玉の発光（明滅）周期の速さ。数値が大きいほど速い
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         //  虹玉・七色の玉エフェクト設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		BALL_SPARKLE_INTERVAL_MIN: 0.5,  // 虹玉・七色玉キラキラの発生間隔（最短、selectionPulse単位）
-		BALL_SPARKLE_INTERVAL_MAX: 4.0,  // 虹玉・七色玉キラキラの発生間隔（最長、selectionPulse単位）
-		BALL_SPARKLE_DURATION:     3.5,  // 1回のキラキラが表示されている長さ（selectionPulse単位）
-		BALL_SPARKLE_SIZE_MIN:      16,  // キラキラのサイズ（最小）
-		BALL_SPARKLE_SIZE_MAX:      24,  // キラキラのサイズ（最大）
-		BALL_SPARKLE_ALPHA_MIN:    0.6,  // キラキラの透明度（最小、最大到達値）
-		BALL_SPARKLE_ALPHA_MAX:    0.9,  // キラキラの透明度（最大、最大到達値）
+		BALL_SPARKLE_INTERVAL_MIN:  0.5,  // 虹玉・七色玉キラキラの発生間隔（最短、selectionPulse単位）
+		BALL_SPARKLE_INTERVAL_MAX:  4.0,  // 虹玉・七色玉キラキラの発生間隔（最長、selectionPulse単位）
+		BALL_SPARKLE_DURATION:      3.5,  // 1回のキラキラが表示されている長さ（selectionPulse単位）
+
+		BALL_SPARKLE_SIZE_MIN:       16,  // キラキラのサイズ（最小）
+		BALL_SPARKLE_SIZE_MAX:       24,  // キラキラのサイズ（最大）
+		BALL_SPARKLE_ALPHA_MIN:     0.6,  // キラキラの透明度（最小、最大到達値）
+		BALL_SPARKLE_ALPHA_MAX:     0.9,  // キラキラの透明度（最大、最大到達値）
+
 		RAINBOW_BALL_COLOR_HIGHLIGHT: '#ffffff',  // 虹玉の玉ハイライト色
 		RAINBOW_BALL_COLOR_BODY:      '#d9f2ff',  // 虹玉の玉本体色（薄い水色）
 		RAINBOW_BALL_COLOR_EDGE:      '#a5d8f3',  // 虹玉の玉フチ色
+
 		RAINBOW_BALL_ARC_SCALE:        0.62,      // 🌈の大きさ（玉の直径に対する比率）
 		RAINBOW_BALL_ARC_OFFSET_X:     0,         // 🌈の位置補正X（px・マイナスで左）
 		RAINBOW_BALL_ARC_OFFSET_Y:     0,         // 🌈の位置補正Y（px・マイナスで上）
-	
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		SPECIAL_BALL_GLOW_SPEED: 1.1,  // 晴玉・雨玉・雪玉の発光（明滅）周期の速さ。数値が大きいほど速い
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌈 ナナイロモード設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		RAINBOW_BALL_THRESHOLD:        35,  // 各色の玉が出現するまでに必要な消去数
-		RAINBOW_BALL_THRESHOLD_ORANGE: 15,  // 橙玉の初回出現閾値（初回のみ低め）
-		RAINBOW_BALL_THRESHOLD_INDIGO: 10,  // 藍玉の初回出現閾値（初回のみ低め）
-		LEVEL_RAINBOW_DURATION:        20,  // SEVEN COLORS中の継続手数
+		RAINBOW_BALL_THRESHOLD:         35,  // 各色の玉が出現するまでに必要な消去数
+		RAINBOW_BALL_THRESHOLD_ORANGE:  15,  // 橙玉の初回出現閾値（初回のみ低め）
+		RAINBOW_BALL_THRESHOLD_INDIGO:  10,  // 藍玉の初回出現閾値（初回のみ低め）
+		LEVEL_RAINBOW_DURATION:         20,  // SEVEN COLORS中の継続手数
 	
-		NANAIRO_SPAWN_COUNT_MIN:        7,  // ナナイロ玉が出現する残り手数の最小値
-		NANAIRO_SPAWN_COUNT_RANGE:    5,  // ナナイロ玉出現タイミングのランダム幅（min〜min+range）
+		NANAIRO_SPAWN_COUNT_MIN:         7,  // ナナイロ玉が出現する残り手数の最小値
+		NANAIRO_SPAWN_COUNT_RANGE:       5,  // ナナイロ玉出現タイミングのランダム幅（min〜min+range）
 		NANAIRO_BALL_GLOW_BASE:         10,  // ナナイロ玉の発光の基本の強さ（shadowBlur）
-		NANAIRO_BALL_GLOW_AMP:            5,  // ナナイロ玉の発光の明滅の幅
+		NANAIRO_BALL_GLOW_AMP:           5,  // ナナイロ玉の発光の明滅の幅
 		NANAIRO_BALL_GLOW_COLOR: 'rgba(255,255,255,0.9)',  // ナナイロ玉の発光色
 		NANAIRO_WAIT_MS:               250,  // ナナイロ玉を消してから変換が始まるまでの待ち時間（ms）
 
 		NANAIRO_WAVE_CELL_RATE:        2.4,  // 虹色の円が1マス広がるのにかかる時間（変換間隔の何倍か・大きいほどゆっくり）
 		NANAIRO_WAVE_BAND_RATIO:      0.45,  // 虹色の帯の太さ（円の半径に対する割合）
-		NANAIRO_WAVE_ALPHA:                0.75,  // 虹色の円の濃さ
+		NANAIRO_WAVE_ALPHA:           0.75,  // 虹色の円の濃さ
 		NANAIRO_WAVE_FADE_START:      0.35,  // 虹色の円が消え始める進行度（0＝最初から徐々に消える、1＝最後まで消えない）
 		NANAIRO_WAVE_MARGIN_CELLS:       1,  // 一番遠い変換先から、さらに広がるマス数
 		NANAIRO_WAVE_COLORS: ['#ff4757', '#ffe53b', '#2ed573', '#1e90ff', '#c175ff'],  // 虹色の色順（外側→内側）
 
-		NANAIRO_CONVERT_INTERVAL_MS:     70,  // 雲・闇玉が1マスずつ変換される間隔（ms・ナナイロ玉に近い順）
-		NANAIRO_FADE_MS:                          200,  // 雲・闇玉が色パネルに切り替わるフェードの時間（ms）
+		NANAIRO_CONVERT_INTERVAL_MS:    70,  // 雲・闇玉が1マスずつ変換される間隔（ms・ナナイロ玉に近い順）
+		NANAIRO_FADE_MS:               200,  // 雲・闇玉が色パネルに切り替わるフェードの時間（ms）
 	
 		NANAIRO_STAR_ON_CLEAR:       false,  // ナナイロ玉を消した位置に、カラフル星を出すか
 		NANAIRO_STAR_ON_CONVERT:      true,  // 変換された各パネルの位置に、星を出すか
@@ -1961,15 +2133,17 @@ const CONFIG = {
         // 🌙 夜モード設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		NIGHT_BASE_SCORE:       25000,  // 夜モード初回発動の基準スコア
-		NIGHT_STAR_DELAY_SCORE:  2500, // 夜モード突入後、流れ星発生までの必要追加スコア
-		NIGHT_INTERVAL_SCORE:   10000, // 2回目以降の夜モード発動間隔
+		NIGHT_STAR_DELAY_SCORE:  2500,  // 夜モード突入後、流れ星発生までの必要追加スコア
+		NIGHT_INTERVAL_SCORE:   10000,  // 2回目以降の夜モード発動間隔
 		NIGHT_DARK_PENALTY:      1000,  // 闇玉発動1回あたりのペナルティ（サイクルごとにリセット）
 
 		NIGHT_DARK_INIT_COUNT:      5, // 夜中の通常闇玉カウント（通常7）
 		NIGHT_DARK_FAST_COUNT:      3, // 夜中の高速闇玉カウント（通常5）
 		NIGHT_STAR_NEEDED:          3, // 昼に戻るために必要な星の数
 
-		NIGHT_STAR_REPLENISH_DELAY_MS: 1700,  // 🌙盤面にある星が消えてしまった時の補充時（ms）
+		NIGHT_STAR_SPAWN_AFTER_EXIT_MS:   0,    // 流れ星が画面外に出てから星パネル出現までの追加待ち（ms）
+		SHOOTING_STAR_EXIT_MARGIN:      -70,    // 流れ星の画面外判定の余白（px）。プラスで遅く、マイナスで早くなる
+		SHOOTING_STAR_WAIT_TIMEOUT_MS: 3000,    // 流れ星出現待ちの上限（保険）
 
 		NIGHT_COLOR_BOOST:          5, // 夜中の青・藍・紫の出現率ボーナス（0=均等 数値を増やすほど青・藍・紫が出やすくなる）
 	
@@ -1983,26 +2157,6 @@ const CONFIG = {
 		SELECTION_BORDER_LOOP_SHARPNESS: 0.6, // 1で対称、1より小さいほど明るい側が長く続く（0.4〜0.8あたりで調整）
 		SELECTION_BORDER_ALPHA_MIN: 0.5, // フチの透明度・下限（元は0.2）
 		SELECTION_BORDER_ALPHA_MAX: 0.9, // フチの透明度・上限（元は0.8）
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🟥 特殊パネルの出現スコア閾値
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		THRESHOLD: {
-		LIGHT_START:         6000,  // 虹玉が初めて出現するスコア
-		LIGHT_INTERVAL:      1240,  // 以降の虹玉出現間隔
-		DARK_START:          7500,  // 闇玉が初めて出現するスコア
-		DARK_INTERVAL:       1350,  // 以降の闇玉出現間隔
-		ALMIGHTY_START:      9000,  // プリズムが初めて出現するスコア
-		ALMIGHTY_INTERVAL:   1660,  // 以降のプリズム出現間隔
-		DARK_FAST_START:    12000,  // 高速闇玉が初めて出現するスコア
-		DARK_FAST_INTERVAL:  3280,  // 以降の高速闇玉出現間隔
-		SUNNY_START:        14000,  // 晴玉が初めて出現するスコア
-		SUNNY_INTERVAL:      5500,  // 以降の晴玉出現間隔
-		RAINY_START:        15500,  // 雨玉が初めて出現するスコア
-		RAINY_INTERVAL:      5500,  // 以降の雨玉出現間隔
-		SNOW_START:         18000,  // 雪玉が初めて出現するスコア
-		SNOW_INTERVAL:       2220,  // 以降の雪玉出現間隔
-        },
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🖼️ ビジュアル設定
@@ -2484,7 +2638,8 @@ const CONFIG = {
 			if (this.t >= 1) return;
 			const R = this.maxR * (1 - (1 - this.t) * (1 - this.t)); // ふわっと減速しながら広がる
 			if (R <= 1) return;
-			const a = Math.min(1, this.t / 0.15) * (1 - this.t) * CONFIG.NANAIRO_WAVE_ALPHA; // すぐ現れて、ゆっくり消える
+			const fadeOut = this.t < CONFIG.NANAIRO_WAVE_FADE_START ? 1 : 1 - (this.t - CONFIG.NANAIRO_WAVE_FADE_START) / (1 - CONFIG.NANAIRO_WAVE_FADE_START); // 途中まで消えず、後半で消える
+			const a = Math.min(1, this.t / 0.15) * fadeOut * CONFIG.NANAIRO_WAVE_ALPHA; // すぐ現れて、消え始めまで濃さを保つ
 			const rgba = (hex, al) => { const n = parseInt(hex.slice(1), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${al})`; };
 			const cols = CONFIG.NANAIRO_WAVE_COLORS; // 外側→内側の順
 			const g = ctx.createRadialGradient(this.x, this.y, R * (1 - CONFIG.NANAIRO_WAVE_BAND_RATIO), this.x, this.y, R);
@@ -3071,14 +3226,21 @@ update(frameFactor = 1) {
             this.life = 1.0;
             this.decay = 0.008;
             this.done = false;
-        }
-        update(frameFactor = 1) {
-            this.speed *= Math.pow(this.speedDecay, frameFactor); // 🎞️ フレーム数分だけ累乗して減速
-            this.x += Math.cos(this.angle) * this.speed * frameFactor;
-            this.y += Math.sin(this.angle) * this.speed * frameFactor;
-            this.life -= this.decay * frameFactor;
-            if (this.life <= 0) this.done = true;
-        }
+this.exited = false; // 尾まで画面外に出たらtrue
+this.canvasH = canvasH;
+}
+update(frameFactor = 1) {
+    this.speed *= Math.pow(this.speedDecay, frameFactor); // 🎞️ フレーム数分だけ累乗して減速
+    this.x += Math.cos(this.angle) * this.speed * frameFactor;
+    this.y += Math.sin(this.angle) * this.speed * frameFactor;
+    this.life -= this.decay * frameFactor;
+    if (this.life <= 0) this.done = true;
+    /* 尾の先端が左端か下端を越えたら退場扱い */
+    const m = CONFIG.SHOOTING_STAR_EXIT_MARGIN;
+    const tailX = this.x - Math.cos(this.angle) * this.len;
+    const tailY = this.y - Math.sin(this.angle) * this.len;
+    if (this.done || tailX < -m || tailY > this.canvasH + m) this.exited = true;
+}
         draw() {
             if (this.done) return;
             ctx.save();
@@ -4864,17 +5026,33 @@ canvas.addEventListener('pointercancel', (e) => {
         document.body.appendChild(fragment);
     }
 
+/* 全ての流れ星が退場するまで待つ（上限つき） */
+function waitShootingStarsExit(stars) {
+    return new Promise(resolve => {
+        const t0 = performance.now();
+        const timer = setInterval(() => {
+            if (stars.every(s => s.exited) || performance.now() - t0 > CONFIG.SHOOTING_STAR_WAIT_TIMEOUT_MS) {
+                clearInterval(timer);
+                setTimeout(resolve, CONFIG.NIGHT_STAR_SPAWN_AFTER_EXIT_MS);
+            }
+        }, 30);
+    });
+}		
+
 	async function spawnNightStars() {
         if (!isNightMode || nightStarSpawned) return;
         nightStarSpawned = true;
         isStarEffectActive = true; // 🌙 流れ星演出中は操作ロック
         /* 流れ星を3本スポーン（時間差） */
-        for (let i = 0; i < 3; i++) {
-            await new Promise(r => setTimeout(r, i * 300));
-            specialEffects.push(new ShootingStarEffect());
-        }
-        await new Promise(r => setTimeout(r, 1200));
-        if (!isNightMode) { isReplenishingStars = false; isStarEffectActive = false; return; }
+        const stars = [];
+for (let i = 0; i < 3; i++) {
+    await new Promise(r => setTimeout(r, i * 300));
+    const s = new ShootingStarEffect();
+    stars.push(s);
+    specialEffects.push(s);
+}
+await waitShootingStarsExit(stars);
+if (!isNightMode) { isReplenishingStars = false; isStarEffectActive = false; return; }
         /* await中に状態が変わった場合のためneededを再計算 */
         let starsOnBoard2 = 0;
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++)
@@ -5045,11 +5223,14 @@ canvas.addEventListener('pointercancel', (e) => {
 
     // デバッグ用：流れ星アニメ+星玉3個スポーン
     async function debugSpawnShootingStars() {
-        for (let i = 0; i < 3; i++) {
-            await new Promise(r => setTimeout(r, i * 300));
-            specialEffects.push(new ShootingStarEffect());
-        }
-        await new Promise(r => setTimeout(r, 1200));
+        const stars = [];
+for (let i = 0; i < 3; i++) {
+    await new Promise(r => setTimeout(r, i * 300));
+    const s = new ShootingStarEffect();
+    stars.push(s);
+    specialEffects.push(s);
+}
+await waitShootingStarsExit(stars);
         const allCells = [];
         for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
             for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
@@ -5090,12 +5271,15 @@ canvas.addEventListener('pointercancel', (e) => {
         isAnimating = true; // 🌙 流れ星演出中は操作ロック
 
         /* 流れ星演出 */
-        for (let i = 0; i < needed; i++) {
-            await new Promise(r => setTimeout(r, i * 300));
-            if (!isNightMode) { isReplenishingStars = false; isAnimating = false; return; }
-            specialEffects.push(new ShootingStarEffect());
-        }
-        await new Promise(r => setTimeout(r, CONFIG.NIGHT_STAR_REPLENISH_DELAY_MS));
+        const stars = [];
+for (let i = 0; i < needed; i++) {
+    await new Promise(r => setTimeout(r, i * 300));
+    if (!isNightMode) { isReplenishingStars = false; isAnimating = false; return; }
+    const s = new ShootingStarEffect();
+    stars.push(s);
+    specialEffects.push(s);
+}
+await waitShootingStarsExit(stars);
         if (!isNightMode) { isReplenishingStars = false; isAnimating = false; return; }
 
         /* await中に状態が変わった場合のため補充数を再計算 */
