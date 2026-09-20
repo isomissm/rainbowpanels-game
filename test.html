@@ -1938,19 +1938,21 @@ const CONFIG = {
 		LEVEL_RAINBOW_DURATION:        20,  // SEVEN COLORS中の継続手数
 	
 		NANAIRO_SPAWN_COUNT_MIN:        7,  // ナナイロ玉が出現する残り手数の最小値
-		NANAIRO_SPAWN_COUNT_RANGE:      5,  // ナナイロ玉出現タイミングのランダム幅（min〜min+range）
-		NANAIRO_BALL_GLOW_BASE:        10,  // ナナイロ玉の発光の基本の強さ（shadowBlur）
-		NANAIRO_BALL_GLOW_AMP:          5,  // ナナイロ玉の発光の明滅の幅
+		NANAIRO_SPAWN_COUNT_RANGE:    5,  // ナナイロ玉出現タイミングのランダム幅（min〜min+range）
+		NANAIRO_BALL_GLOW_BASE:         10,  // ナナイロ玉の発光の基本の強さ（shadowBlur）
+		NANAIRO_BALL_GLOW_AMP:            5,  // ナナイロ玉の発光の明滅の幅
 		NANAIRO_BALL_GLOW_COLOR: 'rgba(255,255,255,0.9)',  // ナナイロ玉の発光色
 		NANAIRO_WAIT_MS:               250,  // ナナイロ玉を消してから変換が始まるまでの待ち時間（ms）
-		NANAIRO_CONVERT_INTERVAL_MS:    55,  // 1マスずつ変換される間隔（ms・ナナイロ玉に近い順）
-	
+
 		NANAIRO_WAVE_CELL_RATE:        2.4,  // 虹色の円が1マス広がるのにかかる時間（変換間隔の何倍か・大きいほどゆっくり）
 		NANAIRO_WAVE_BAND_RATIO:      0.45,  // 虹色の帯の太さ（円の半径に対する割合）
-		NANAIRO_WAVE_ALPHA:           0.75,  // 虹色の円の濃さ
+		NANAIRO_WAVE_ALPHA:                0.75,  // 虹色の円の濃さ
+		NANAIRO_WAVE_FADE_START:      0.35,  // 虹色の円が消え始める進行度（0＝最初から徐々に消える、1＝最後まで消えない）
 		NANAIRO_WAVE_MARGIN_CELLS:       1,  // 一番遠い変換先から、さらに広がるマス数
 		NANAIRO_WAVE_COLORS: ['#ff4757', '#ffe53b', '#2ed573', '#1e90ff', '#c175ff'],  // 虹色の色順（外側→内側）
-		NANAIRO_FADE_MS:               200,  // 雲・闇玉が色パネルに切り替わるフェードの時間（ms）
+
+		NANAIRO_CONVERT_INTERVAL_MS:     70,  // 雲・闇玉が1マスずつ変換される間隔（ms・ナナイロ玉に近い順）
+		NANAIRO_FADE_MS:                          200,  // 雲・闇玉が色パネルに切り替わるフェードの時間（ms）
 	
 		NANAIRO_STAR_ON_CLEAR:       false,  // ナナイロ玉を消した位置に、カラフル星を出すか
 		NANAIRO_STAR_ON_CONVERT:      true,  // 変換された各パネルの位置に、星を出すか
