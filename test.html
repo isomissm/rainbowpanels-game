@@ -1892,13 +1892,20 @@ const CONFIG = {
 		ALLCLEAR_CHARGE_RATE_PER_CLOUD: 0.03,  // 最小数を超えた雲1個ごとの帯電速度の加算（1.0が等倍）
 		ALLCLEAR_CHARGE_RATE_MAX:        1.6,  // 帯電速度の上限
 		ALLCLEAR_SPARK_START_RATIO:      0.5,  // 帯電が何割を超えたら⚡を出し始めるか
+	
 		ALLCLEAR_SPARK_INTERVAL_MAX:    4000,  // ⚡の間隔・出し始め（ms）
 		ALLCLEAR_SPARK_INTERVAL_MIN:     500,  // ⚡の間隔・満タン間近（ms）
-		ALLCLEAR_SPARK_JITTER:          0.25,  // ⚡の間隔のばらつき（±の割合）
+		ALLCLEAR_SPARK_JITTER:          0.25,  // ⚡の間隔・ずれのばらつき（±の割合）
+	
+		ALLCLEAR_SPARK_COUNT_MIN:          2,  // 1回に⚡が出る雲の数（最小）
+		ALLCLEAR_SPARK_COUNT_MAX:          3,  // 1回に⚡が出る雲の数（最大）
+		ALLCLEAR_SPARK_STAGGER_MS:       300,  // 複数の⚡が出るタイミングのずれ（ms）
+	
 		ALLCLEAR_SPARK_DURATION_MS:      450,  // ⚡1回の表示時間（ms）
 		ALLCLEAR_SPARK_SIZE:              26,  // ⚡の高さ（px）
 		ALLCLEAR_SPARK_DISTANCE:          30,  // ⚡が雲の中心から飛び出す距離（px）
-		ALLCLEAR_SPARK_TILT:             0.3,  // ⚡の向きのばらつき（ラジアン・±）
+		ALLCLEAR_SPARK_FOLLOW:          0.10,  // ⚡が進行方向へ向く度合い（0＝傾けない、1＝完全に進行方向）
+		ALLCLEAR_SPARK_TILT:            0.05,  // ⚡の傾きのばらつき（ラジアン・±）
 		ALLCLEAR_SPARK_GLOW:              10,  // ⚡の発光の強さ（shadowBlur）
 		ALLCLEAR_SPARK_COLOR:        '#ffe600',  // ⚡の色（雷玉と同じ）
 
@@ -1935,8 +1942,19 @@ const CONFIG = {
 		NANAIRO_BALL_GLOW_BASE:        10,  // ナナイロ玉の発光の基本の強さ（shadowBlur）
 		NANAIRO_BALL_GLOW_AMP:          5,  // ナナイロ玉の発光の明滅の幅
 		NANAIRO_BALL_GLOW_COLOR: 'rgba(255,255,255,0.9)',  // ナナイロ玉の発光色
-		NANAIRO_WAIT_MS:               450,  // ナナイロ玉を消してから変換が始まるまでの待ち時間（ms）
-		NANAIRO_CONVERT_INTERVAL_MS:    40,  // 1マスずつ変換される間隔（ms・ナナイロ玉に近い順）
+		NANAIRO_WAIT_MS:               250,  // ナナイロ玉を消してから変換が始まるまでの待ち時間（ms）
+		NANAIRO_CONVERT_INTERVAL_MS:    55,  // 1マスずつ変換される間隔（ms・ナナイロ玉に近い順）
+	
+		NANAIRO_WAVE_MIN_MS:             0,  // 虹色の円が広がる時間の最小値（ms・基本は変換数×変換間隔）
+		NANAIRO_WAVE_TIME_RATE:        1.4,  // 虹色の円が広がる時間の倍率（1.0＝変換の時間と同じ、大きいほどゆっくり）
+		NANAIRO_WAVE_BAND_RATIO:      0.45,  // 虹色の帯の太さ（円の半径に対する割合）
+		NANAIRO_WAVE_ALPHA:           0.75,  // 虹色の円の濃さ
+		NANAIRO_WAVE_MARGIN_CELLS:       1,  // 一番遠い変換先から、さらに広がるマス数
+		NANAIRO_WAVE_COLORS: ['#ff4757', '#ffe53b', '#2ed573', '#1e90ff', '#c175ff'],  // 虹色の色順（外側→内側）
+		NANAIRO_FADE_MS:               200,  // 雲・闇玉が色パネルに切り替わるフェードの時間（ms）
+	
+		NANAIRO_STAR_ON_CLEAR:       false,  // ナナイロ玉を消した位置に、カラフル星を出すか
+		NANAIRO_STAR_ON_CONVERT:      true,  // 変換された各パネルの位置に、星を出すか
 	
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌙 夜モード設定
@@ -1970,19 +1988,19 @@ const CONFIG = {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		THRESHOLD: {
 		LIGHT_START:         6000,  // 虹玉が初めて出現するスコア
-		LIGHT_INTERVAL:      1040,  // 以降の虹玉出現間隔
+		LIGHT_INTERVAL:      1240,  // 以降の虹玉出現間隔
 		DARK_START:          7500,  // 闇玉が初めて出現するスコア
-		DARK_INTERVAL:       1150,  // 以降の闇玉出現間隔
+		DARK_INTERVAL:       1350,  // 以降の闇玉出現間隔
 		ALMIGHTY_START:      9000,  // プリズムが初めて出現するスコア
-		ALMIGHTY_INTERVAL:   1530,  // 以降のプリズム出現間隔
+		ALMIGHTY_INTERVAL:   1660,  // 以降のプリズム出現間隔
 		DARK_FAST_START:    12000,  // 高速闇玉が初めて出現するスコア
-		DARK_FAST_INTERVAL:  2980,  // 以降の高速闇玉出現間隔
+		DARK_FAST_INTERVAL:  3280,  // 以降の高速闇玉出現間隔
 		SUNNY_START:        14000,  // 晴玉が初めて出現するスコア
-		SUNNY_INTERVAL:      5000,  // 以降の晴玉出現間隔
+		SUNNY_INTERVAL:      5500,  // 以降の晴玉出現間隔
 		RAINY_START:        15500,  // 雨玉が初めて出現するスコア
-		RAINY_INTERVAL:      5000,  // 以降の雨玉出現間隔
+		RAINY_INTERVAL:      5500,  // 以降の雨玉出現間隔
 		SNOW_START:         18000,  // 雪玉が初めて出現するスコア
-		SNOW_INTERVAL:       1920,  // 以降の雪玉出現間隔
+		SNOW_INTERVAL:       2220,  // 以降の雪玉出現間隔
         },
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2421,28 +2439,83 @@ const CONFIG = {
 
 	class ThunderSparkEffect {
 		// 雲パネルの中心から外側へ飛び出す小さな⚡（帯電が進んだときの予兆）
-		constructor(x, y) {
+		constructor(x, y, delayMs = 0) {
 			this.x = x; this.y = y; // 雲の中心
+			this.delay = delayMs; // 出現までの待ち時間（ms）
 			this.life = 1.0;
 			this.decay = 1 / (CONFIG.ALLCLEAR_SPARK_DURATION_MS / (1000 / 60));
 			this.angle = Math.random() * Math.PI * 2; // 飛び出す方向
 			this.tilt = (Math.random() * 2 - 1) * CONFIG.ALLCLEAR_SPARK_TILT;
 		}
-		update(frameFactor = 1) { this.life -= this.decay * frameFactor; }
+		update(frameFactor = 1) {
+			if (this.delay > 0) { this.delay -= frameFactor * (1000 / 60); return; } // 出現待ち
+			this.life -= this.decay * frameFactor;
+		}
 		draw() {
-			if (this.life <= 0) return;
+			if (this.delay > 0 || this.life <= 0) return;
 			const p = 1 - this.life;
 			const move = CONFIG.ALLCLEAR_SPARK_DISTANCE * (1 - (1 - p) * (1 - p)); // 勢いよく出て徐々に減速
 			const s = CONFIG.ALLCLEAR_SPARK_SIZE / 36;
 			ctx.save();
 			ctx.globalAlpha = Math.min(1, this.life * 2); // 前半は明るく、後半で消える
 			ctx.translate(this.x + Math.cos(this.angle) * move, this.y + Math.sin(this.angle) * move);
-			ctx.rotate(this.angle - Math.PI / 2 + this.tilt); // 先端を進行方向へ向ける
+			const dir = Math.atan2(Math.sin(this.angle - Math.PI / 2), Math.cos(this.angle - Math.PI / 2)); // -π〜πに正規化
+			ctx.rotate(dir * CONFIG.ALLCLEAR_SPARK_FOLLOW + this.tilt); // 進行方向×追従率＋ばらつき
 			ctx.scale(s, s);
 			ctx.shadowColor = CONFIG.ALLCLEAR_SPARK_COLOR;
 			ctx.shadowBlur = CONFIG.ALLCLEAR_SPARK_GLOW;
 			ctx.fillStyle = CONFIG.ALLCLEAR_SPARK_COLOR;
 			ctx.fill(THUNDER_BOLT_PATH);
+			ctx.restore();
+		}
+		get isFinished() { return this.life <= 0; }
+	}
+
+	class NanairoWaveEffect {
+		// ナナイロ玉の位置から外へ広がって消える、虹色の円
+		constructor(x, y, maxR, durationMs) {
+			this.x = x; this.y = y; this.maxR = maxR;
+			this.t = 0;
+			this.speed = 1 / (Math.max(durationMs, 1) / (1000 / 60));
+		}
+		update(frameFactor = 1) { this.t += this.speed * frameFactor; }
+		draw() {
+			if (this.t >= 1) return;
+			const R = this.maxR * (1 - (1 - this.t) * (1 - this.t)); // ふわっと減速しながら広がる
+			if (R <= 1) return;
+			const a = Math.min(1, this.t / 0.15) * (1 - this.t) * CONFIG.NANAIRO_WAVE_ALPHA; // すぐ現れて、ゆっくり消える
+			const rgba = (hex, al) => { const n = parseInt(hex.slice(1), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${al})`; };
+			const cols = CONFIG.NANAIRO_WAVE_COLORS; // 外側→内側の順
+			const g = ctx.createRadialGradient(this.x, this.y, R * (1 - CONFIG.NANAIRO_WAVE_BAND_RATIO), this.x, this.y, R);
+			g.addColorStop(0, rgba(cols[cols.length - 1], 0));
+			for (let i = cols.length - 1; i >= 0; i--) {
+				g.addColorStop(0.15 + 0.7 * (1 - i / Math.max(cols.length - 1, 1)), rgba(cols[i], 1));
+			}
+			g.addColorStop(1, rgba(cols[0], 0));
+			ctx.save();
+			ctx.globalAlpha = a;
+			ctx.fillStyle = g;
+			ctx.beginPath();
+			ctx.arc(this.x, this.y, R, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.restore();
+		}
+		get isFinished() { return this.t >= 1; }
+	}
+
+	class PanelFadeOutEffect {
+		// 変換前のパネルの見た目（切り取り画像）を重ねて、フェードアウトさせる
+		constructor(c, r, image, durationMs) {
+			this.c = c; this.r = r; this.image = image;
+			this.life = 1.0;
+			this.decay = 1 / (Math.max(durationMs, 1) / (1000 / 60));
+		}
+		update(frameFactor = 1) { this.life -= this.decay * frameFactor; }
+		draw() {
+			if (this.life <= 0) return;
+			ctx.save();
+			ctx.globalAlpha = this.life;
+			ctx.drawImage(this.image, this.c * CONFIG.CELL_SIZE, this.r * CONFIG.CELL_SIZE, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
 			ctx.restore();
 		}
 		get isFinished() { return this.life <= 0; }
@@ -5943,8 +6016,13 @@ canvas.addEventListener('pointercancel', (e) => {
 			}
 		}
 		if (clouds.length < CONFIG.ALLCLEAR_CHARGE_CLOUD_MIN) return; // 雲が少ない間は出さない
-		const pick = clouds[Math.floor(Math.random() * clouds.length)];
-		specialEffects.push(new ThunderSparkEffect(pick.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2, pick.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2));
+		// ピリッピリッと2〜3箇所の雲から、少しずつタイミングをずらして出す
+		const count = CONFIG.ALLCLEAR_SPARK_COUNT_MIN + Math.floor(Math.random() * (CONFIG.ALLCLEAR_SPARK_COUNT_MAX - CONFIG.ALLCLEAR_SPARK_COUNT_MIN + 1));
+		for (let i = 0; i < count && clouds.length > 0; i++) {
+			const pick = clouds.splice(Math.floor(Math.random() * clouds.length), 1)[0];
+			const delay = i * CONFIG.ALLCLEAR_SPARK_STAGGER_MS * (1 - CONFIG.ALLCLEAR_SPARK_JITTER + Math.random() * CONFIG.ALLCLEAR_SPARK_JITTER * 2);
+			specialEffects.push(new ThunderSparkEffect(pick.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2, pick.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2, delay));
+		}
 	}
 
 	async function addSingleSpecialPanel(type, initCount = CONFIG.DARK_PANEL_INIT_COUNT) {
@@ -6146,7 +6224,7 @@ canvas.addEventListener('pointercancel', (e) => {
 		// 🌈 ナナイロ玉：お邪魔雲・闇玉を色パネルに変換（色は均等に割り振ってシャッフル）
 		const cx = col * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
 		const cy = row * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
-		spawnRainbowParticles(col, row);
+		if (CONFIG.NANAIRO_STAR_ON_CLEAR) spawnRainbowParticles(col, row); // カラフル星の表示・非表示
 		specialEffects.push(new SpecialSpawnEffect(cx, cy, CONFIG.PANEL_TYPE.RAINBOW));
 
 		// 対象をナナイロ玉に近い順に並べる
@@ -6160,6 +6238,10 @@ canvas.addEventListener('pointercancel', (e) => {
 
 		draw();
 		await new Promise(res => setTimeout(res, CONFIG.NANAIRO_WAIT_MS));
+		// 🌈 虹色の円をナナイロ玉の位置から広げる（広がる時間は変換にかかる時間に合わせる）
+		const farthest = targets.length ? Math.hypot(targets[targets.length - 1].r - row, targets[targets.length - 1].c - col) * CONFIG.CELL_SIZE : CONFIG.BOARD_SIZE * CONFIG.CELL_SIZE / 2;
+		const waveMs = Math.max(CONFIG.NANAIRO_WAVE_MIN_MS, targets.length * CONFIG.NANAIRO_CONVERT_INTERVAL_MS) * CONFIG.NANAIRO_WAVE_TIME_RATE; // 広がる時間（変換にかかる時間×倍率）
+		specialEffects.push(new NanairoWaveEffect(cx, cy, farthest + CONFIG.CELL_SIZE * CONFIG.NANAIRO_WAVE_MARGIN_CELLS, waveMs));
 		if (targets.length === 0) return;
 
 		// 全色を均等に割り振る（端数の色はランダム）→ 配置順をシャッフル
@@ -6176,11 +6258,18 @@ canvas.addEventListener('pointercancel', (e) => {
 		for (let i = 0; i < targets.length; i++) {
 			const { r, c } = targets[i];
 			if (board[r][c] === CONFIG.PANEL_TYPE.DARK) darkClearedCount++; // 🌙 消去カウント
+			// 変換前の見た目を切り取り、フェードアウトさせて色パネルと入れ替える
+			const snap = document.createElement('canvas');
+			snap.width = snap.height = Math.round(CONFIG.CELL_SIZE * dpr);
+			snap.getContext('2d').drawImage(canvas, c * CONFIG.CELL_SIZE * dpr, r * CONFIG.CELL_SIZE * dpr, CONFIG.CELL_SIZE * dpr, CONFIG.CELL_SIZE * dpr, 0, 0, snap.width, snap.height);
+			specialEffects.push(new PanelFadeOutEffect(c, r, snap, CONFIG.NANAIRO_FADE_MS));
 			board[r][c] = colorPool[i];
 			const px = c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
 			const py = r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
-			for (let p = 0; p < CONFIG.PARTICLE_COUNT_NORMAL; p++) {
-				particles.push(new Particle(px, py, CONFIG.COLORS[colorPool[i]], "star"));
+			if (CONFIG.NANAIRO_STAR_ON_CONVERT) {
+				for (let p = 0; p < CONFIG.PARTICLE_COUNT_NORMAL; p++) {
+					particles.push(new Particle(px, py, CONFIG.COLORS[colorPool[i]], "star"));
+				}
 			}
 			draw();
 			await new Promise(res => setTimeout(res, CONFIG.NANAIRO_CONVERT_INTERVAL_MS));
