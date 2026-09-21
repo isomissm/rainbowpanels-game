@@ -1930,6 +1930,11 @@ const CONFIG = {
 		FALL_ANIM_DURATION_MAX:      900,  // パネル落下アニメの最大所要時間（ms）※大きく落ちても間延びしないよう上限を設ける
 		LAND_ANIM_DURATION:          215,  // 着地バウンドの長さ（ms）
 		LAND_BOUNCE_HEIGHT:           10,  // バウンドの高さ（px）
+		/* 📱 スマホ用の補正値（元の数値への加算。マイナスで減算） */
+		MOBILE_FALL_DURATION_PER_ROW_ADD:  6,  // 落下：1マスあたりの時間に加算（ms）
+		MOBILE_FALL_DURATION_MAX_ADD:     50,  // 落下：最大所要時間に加算（ms）
+		MOBILE_LAND_BOUNCE_HEIGHT_ADD:     2,  // 着地バウンドの高さに加算（px）
+		MOBILE_ADJUST_FORCE_ON_PC:     false,  // trueでPCでも補正を適用（動作確認用）
 
 		STAR_TO_SLOT_DURATION:      700,   // 🌙 星パネルを消した時に飛ぶ星の速さ（ms・小さいほど速い）
 	
@@ -2066,11 +2071,15 @@ const CONFIG = {
 		ALLCLEAR_SPARK_INTERVAL_MIN:     500,  // ⚡の間隔・満タン間近（ms）
 		ALLCLEAR_SPARK_JITTER:          0.25,  // ⚡の間隔・ずれのばらつき（±の割合）
 	
-		ALLCLEAR_SPARK_COUNT_MIN:          2,  // 1回に⚡が出る雲の数（最小）
-		ALLCLEAR_SPARK_COUNT_MAX:          3,  // 1回に⚡が出る雲の数（最大）
-		ALLCLEAR_SPARK_STAGGER_MS:       300,  // 複数の⚡が出るタイミングのずれ（ms）
-	
-		ALLCLEAR_SPARK_DURATION_MS:      450,  // ⚡1回の表示時間（ms）
+		ALLCLEAR_SPARK_COUNT_MIN:          2,  // 1回に⚡が出る雲の数（最小・出し始め）
+		ALLCLEAR_SPARK_COUNT_MAX:          3,  // 1回に⚡が出る雲の数（最大・出し始め）
+		ALLCLEAR_SPARK_COUNT_MIN_NEAR:     4,  // 同・満タン間近の最小
+		ALLCLEAR_SPARK_COUNT_MAX_NEAR:     5,  // 同・満タン間近の最大
+		ALLCLEAR_SPARK_STAGGER_MS:       300,  // 複数の⚡が出るタイミングのずれ・出し始め（ms）
+		ALLCLEAR_SPARK_STAGGER_MS_NEAR:  200,  // 同・満タン間近（ms）
+		ALLCLEAR_SPARK_DURATION_MS:      450,  // ⚡1回の表示時間・出し始め（ms）。短いほど速く飛ぶ
+		ALLCLEAR_SPARK_DURATION_MS_NEAR: 340,  // 同・満タン間近（ms）
+
 		ALLCLEAR_SPARK_SIZE:              26,  // ⚡の高さ（px）
 		ALLCLEAR_SPARK_DISTANCE:          30,  // ⚡が雲の中心から飛び出す距離（px）
 		ALLCLEAR_SPARK_FOLLOW:          0.10,  // ⚡が進行方向へ向く度合い（0＝傾けない、1＝完全に進行方向）
@@ -2126,8 +2135,10 @@ const CONFIG = {
 		NANAIRO_CONVERT_INTERVAL_MS:    70,  // 雲・闇玉が1マスずつ変換される間隔（ms・ナナイロ玉に近い順）
 		NANAIRO_FADE_MS:               200,  // 雲・闇玉が色パネルに切り替わるフェードの時間（ms）
 	
-		NANAIRO_STAR_ON_CLEAR:       false,  // ナナイロ玉を消した位置に、カラフル星を出すか
-		NANAIRO_STAR_ON_CONVERT:      true,  // 変換された各パネルの位置に、星を出すか
+		NANAIRO_STAR_ON_CLEAR:       false,  // ナナイロ玉を消した位置に、カラフル星を出すか（true/false）
+		NANAIRO_STAR_ON_CONVERT:      true,  // ナナイロ玉で変換された各パネルの位置に、星を出すか（true/false）
+		NANAIRO_CLEAR_FLASH_DECAY:    0.04,  // ナナイロ玉を消した時の白い丸の消える速さ（大きいほど速い。従来0.012）
+		NANAIRO_CLEAR_FLASH_EXPAND:     70,  // ナナイロ玉を消した時の白い丸の広がり幅（px。従来35）
 	
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🌙 夜モード設定
@@ -2287,6 +2298,8 @@ const CONFIG = {
     const BASE_SWAP_ANIM_DURATION        = CONFIG.SWAP_ANIM_DURATION;
     const BASE_FALL_ANIM_DURATION_PER_ROW = CONFIG.FALL_ANIM_DURATION_PER_ROW;
     const BASE_FALL_ANIM_DURATION_MAX     = CONFIG.FALL_ANIM_DURATION_MAX;
+    const BASE_LAND_BOUNCE_HEIGHT         = CONFIG.LAND_BOUNCE_HEIGHT;
+    const IS_MOBILE_ENV = window.matchMedia('(pointer: coarse)').matches; // タッチ操作が主の端末
 
     let userSettings = { ...DEFAULT_SETTINGS };
 
@@ -2318,10 +2331,12 @@ const CONFIG = {
             CONFIG.FALL_ANIM_DURATION_MAX = 200;
         } else {
             const speedMul = CONFIG.ANIM_SPEED_PRESETS[userSettings.animSpeed] ?? 1.0;
+            const mobile = IS_MOBILE_ENV || CONFIG.MOBILE_ADJUST_FORCE_ON_PC;
             CONFIG.SWAP_ANIM_DURATION = Math.round(BASE_SWAP_ANIM_DURATION * speedMul);
-            CONFIG.FALL_ANIM_DURATION_PER_ROW = Math.round(BASE_FALL_ANIM_DURATION_PER_ROW * speedMul);
-            CONFIG.FALL_ANIM_DURATION_MAX = Math.round(BASE_FALL_ANIM_DURATION_MAX * speedMul);
+            CONFIG.FALL_ANIM_DURATION_PER_ROW = Math.round((BASE_FALL_ANIM_DURATION_PER_ROW + (mobile ? CONFIG.MOBILE_FALL_DURATION_PER_ROW_ADD : 0)) * speedMul);
+            CONFIG.FALL_ANIM_DURATION_MAX = Math.round((BASE_FALL_ANIM_DURATION_MAX + (mobile ? CONFIG.MOBILE_FALL_DURATION_MAX_ADD : 0)) * speedMul);
         }
+        CONFIG.LAND_BOUNCE_HEIGHT = BASE_LAND_BOUNCE_HEIGHT + ((IS_MOBILE_ENV || CONFIG.MOBILE_ADJUST_FORCE_ON_PC) ? CONFIG.MOBILE_LAND_BOUNCE_HEIGHT_ADD : 0);
         applyBallShape(userSettings.ballShape);
         BGM.setVolume(userSettings.bgmMuted ? 0 : userSettings.bgmVolume);
         // SE音量：効果音実装後にここへ接続予定
@@ -2594,11 +2609,12 @@ const CONFIG = {
 
 	class ThunderSparkEffect {
 		// 雲パネルの中心から外側へ飛び出す小さな⚡（帯電が進んだときの予兆）
-		constructor(x, y, delayMs = 0) {
+		constructor(x, y, delayMs = 0, t = 0) { // t：帯電の進み具合（0＝出し始め、1＝満タン間近）
 			this.x = x; this.y = y; // 雲の中心
 			this.delay = delayMs; // 出現までの待ち時間（ms）
 			this.life = 1.0;
-			this.decay = 1 / (CONFIG.ALLCLEAR_SPARK_DURATION_MS / (1000 / 60));
+			const duration = CONFIG.ALLCLEAR_SPARK_DURATION_MS + (CONFIG.ALLCLEAR_SPARK_DURATION_MS_NEAR - CONFIG.ALLCLEAR_SPARK_DURATION_MS) * t;
+			this.decay = 1 / (duration / (1000 / 60)); // 間近ほど短時間で飛ぶ＝速い
 			this.angle = Math.random() * Math.PI * 2; // 飛び出す方向
 			this.tilt = (Math.random() * 2 - 1) * CONFIG.ALLCLEAR_SPARK_TILT;
 		}
@@ -3136,10 +3152,11 @@ update(frameFactor = 1) {
     }
 
     class SpecialSpawnEffect {
-        constructor(x, y, type) {
+        constructor(x, y, type, opts = {}) { // opts：decay（消える速さ）／expand（白丸の広がり幅）を個別指定できる
             this.x = x; this.y = y; this.type = type; 
             this.life = 1.0; 
-            this.decay = type === CONFIG.PANEL_TYPE.RAINBOW ? 0.012 : type === CONFIG.PANEL_TYPE.ALMIGHTY ? 0.02 : 0.011; /*プリズムパネルのエフェクトの速度 0.02*/
+            this.decay = opts.decay ?? (type === CONFIG.PANEL_TYPE.RAINBOW ? 0.012 : type === CONFIG.PANEL_TYPE.ALMIGHTY ? 0.02 : 0.011); /*プリズムパネルのエフェクトの速度 0.02*/
+            this.expand = opts.expand ?? 35; // 白丸の広がり幅
             this.rotation = 0;
             
             if (this.type === CONFIG.PANEL_TYPE.DARK) {
@@ -3190,7 +3207,7 @@ update(frameFactor = 1) {
                 }
 			/*虹玉と闇玉の出現エフェクト*/
 			} else if (this.type === CONFIG.PANEL_TYPE.RAINBOW) {
-				let radius = (1 - this.life) * 35 + 10;
+				let radius = (1 - this.life) * this.expand + 10;
 					ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
 					ctx.beginPath();
 					ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
@@ -4832,12 +4849,6 @@ update(frameFactor = 1) {
     
     await processMatches();
     
-    // ナナイロ玉の出現チェック（マッチ処理後に出現させる）
-    if (isLevelRainbow && nanairoSpawnCount !== null && levelRainbowCount === nanairoSpawnCount) {
-        await addSingleSpecialPanel(CONFIG.PANEL_TYPE.NANAIRO);
-        nanairoSpawnCount = null; // 使用済みにする
-    }
-    
     // 雷玉の出現チェック（ナナイロモード以外。お邪魔雲の数で確率判定）
     await checkAllClearSpawn();
     
@@ -4853,6 +4864,12 @@ update(frameFactor = 1) {
         await checkSnowFreezes();
         
         await checkDifficultyThresholds();
+        
+        // ナナイロ玉の出現チェック（連鎖・爆発・凍結など全ての処理が終わった最後に出現させる）
+        if (isLevelRainbow && nanairoSpawnCount !== null && levelRainbowCount === nanairoSpawnCount && !isGameOver) {
+            await addSingleSpecialPanel(CONFIG.PANEL_TYPE.NANAIRO);
+            nanairoSpawnCount = null; // 使用済みにする
+        }
         
         updateLevelUI(); 
         draw();
@@ -6201,12 +6218,16 @@ await waitShootingStarsExit(stars);
 			}
 		}
 		if (clouds.length < CONFIG.ALLCLEAR_CHARGE_CLOUD_MIN) return; // 雲が少ない間は出さない
-		// ピリッピリッと2〜3箇所の雲から、少しずつタイミングをずらして出す
-		const count = CONFIG.ALLCLEAR_SPARK_COUNT_MIN + Math.floor(Math.random() * (CONFIG.ALLCLEAR_SPARK_COUNT_MAX - CONFIG.ALLCLEAR_SPARK_COUNT_MIN + 1));
+		// 帯電が進むほど、数が増え・ずれが詰まり・速く飛ぶ（tで補間）
+		const lerp = (a, b) => a + (b - a) * t;
+		const cMin = Math.round(lerp(CONFIG.ALLCLEAR_SPARK_COUNT_MIN, CONFIG.ALLCLEAR_SPARK_COUNT_MIN_NEAR));
+		const cMax = Math.round(lerp(CONFIG.ALLCLEAR_SPARK_COUNT_MAX, CONFIG.ALLCLEAR_SPARK_COUNT_MAX_NEAR));
+		const count = cMin + Math.floor(Math.random() * (cMax - cMin + 1));
+		const stagger = lerp(CONFIG.ALLCLEAR_SPARK_STAGGER_MS, CONFIG.ALLCLEAR_SPARK_STAGGER_MS_NEAR);
 		for (let i = 0; i < count && clouds.length > 0; i++) {
 			const pick = clouds.splice(Math.floor(Math.random() * clouds.length), 1)[0];
-			const delay = i * CONFIG.ALLCLEAR_SPARK_STAGGER_MS * (1 - CONFIG.ALLCLEAR_SPARK_JITTER + Math.random() * CONFIG.ALLCLEAR_SPARK_JITTER * 2);
-			specialEffects.push(new ThunderSparkEffect(pick.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2, pick.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2, delay));
+			const delay = i * stagger * (1 - CONFIG.ALLCLEAR_SPARK_JITTER + Math.random() * CONFIG.ALLCLEAR_SPARK_JITTER * 2);
+			specialEffects.push(new ThunderSparkEffect(pick.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2, pick.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2, delay, t));
 		}
 	}
 
@@ -6410,7 +6431,7 @@ await waitShootingStarsExit(stars);
 		const cx = col * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
 		const cy = row * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
 		if (CONFIG.NANAIRO_STAR_ON_CLEAR) spawnRainbowParticles(col, row); // カラフル星の表示・非表示
-		specialEffects.push(new SpecialSpawnEffect(cx, cy, CONFIG.PANEL_TYPE.RAINBOW));
+		specialEffects.push(new SpecialSpawnEffect(cx, cy, CONFIG.PANEL_TYPE.RAINBOW, { decay: CONFIG.NANAIRO_CLEAR_FLASH_DECAY, expand: CONFIG.NANAIRO_CLEAR_FLASH_EXPAND }));
 
 		// 対象をナナイロ玉に近い順に並べる
 		const targets = [];
