@@ -138,8 +138,7 @@ canvas {
     display: block;
     cursor: pointer;
     border-radius: 12px;
-    touch-action: none;
-🖐️ フリック操作とブラウザのスクロール・ズームジェスチャーの競合を防ぐ */
+touch-action: none; /* 🖐️ フリック操作とブラウザのスクロール・ズームジェスチャーの競合を防ぐ */
 }
 /* 下側レベル表示UI */
 #level-status-bar {
@@ -1180,9 +1179,9 @@ canvas {
 	
 /* 🌙 夜モード星スロット */
 .night-star-slot-item {
-    width: 32px;
+    width: 32px;  /* 星スロットのサイズ */
     height: 32px;
-//星スロットのサイズ display: flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.15s ease-out;
@@ -2026,6 +2025,8 @@ const CONFIG = {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		DARK_PANEL_INIT_COUNT:  7,   // 通常闇玉の初期カウントダウン
 		DARK_PANEL_FAST_COUNT:  5,   // 高速闇玉の初期カウントダウン
+
+		DARK_EXPLOSION_CONVERT_DELAY_MS: 500,  // 闇玉の爆発演出から雲への変換までの時間（ms）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ☔ 雨玉設定
@@ -4855,9 +4856,9 @@ update(frameFactor = 1) {
     if (!isGameOver) {
         advanceDangerCounts();
         advanceFrozenCells();
-        let exploded = checkDangerExplosions();
+        let exploded = await checkDangerExplosions();
         if (exploded) {
-            draw(); await new Promise(res => setTimeout(res, 250));
+            draw();
             await processMatches(); 
         }
 
@@ -5343,7 +5344,7 @@ await waitShootingStarsExit(stars);
         }
     }
 
-    function checkDangerExplosions() {
+    async function checkDangerExplosions() {
         let exploded = false;
         let cellsToTurn = [];
         
@@ -5365,33 +5366,32 @@ await waitShootingStarsExit(stars);
             }
         }
         
-        if (exploded) {
+if (exploded) {
             cellsToTurn.forEach(cell => {
                 const targetX = cell.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
                 const targetY = cell.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
                 specialEffects.push(new DarkExplosionEffect(targetX, targetY));
             });
-            /* 全マスまとめて1つのsetTimeoutで変換・draw・補充チェック */
-            setTimeout(() => {
-                if (!isGameOver) {
-                    let starLost = false;
-                    cellsToTurn.forEach(cell => {
-                        if (board[cell.r][cell.c] === CONFIG.PANEL_TYPE.STAR) starLost = true;
-                        board[cell.r][cell.c] = CONFIG.PANEL_TYPE.OBSTACLE;
-                        if (!userSettings.reduceMotion) { // モーション減少ONなら震え演出をスキップ
-                            particles.push(new Particle(cell.c * CONFIG.CELL_SIZE, cell.r * CONFIG.CELL_SIZE, CONFIG.THEME_COLORS.OBSTACLE, "shake"));
-                            shakingCells.add(`${cell.r},${cell.c}`);
-                            setTimeout(() => {
-                                shakingCells.delete(`${cell.r},${cell.c}`);
-                                if (!isGameOver) draw();
-                            }, 500);
-                        }
-                    });
-                    cleanUpDangerCountsData();
-                    draw();
-                    if (starLost) checkStarReplenish(); // 🌙 星が消えた時のみ補充チェック
-                }
-            }, 500);
+            /* 爆発演出のあとに変換する（この間は呼び出し側も次の処理へ進まない） */
+            await new Promise(res => setTimeout(res, CONFIG.DARK_EXPLOSION_CONVERT_DELAY_MS));
+            if (!isGameOver) {
+                let starLost = false;
+                cellsToTurn.forEach(cell => {
+                    if (board[cell.r][cell.c] === CONFIG.PANEL_TYPE.STAR) starLost = true;
+                    board[cell.r][cell.c] = CONFIG.PANEL_TYPE.OBSTACLE;
+                    if (!userSettings.reduceMotion) { // モーション減少ONなら震え演出をスキップ
+                        particles.push(new Particle(cell.c * CONFIG.CELL_SIZE, cell.r * CONFIG.CELL_SIZE, CONFIG.THEME_COLORS.OBSTACLE, "shake"));
+                        shakingCells.add(`${cell.r},${cell.c}`);
+                        setTimeout(() => {
+                            shakingCells.delete(`${cell.r},${cell.c}`);
+                            if (!isGameOver) draw();
+                        }, 500);
+                    }
+                });
+                cleanUpDangerCountsData();
+                draw();
+                if (starLost) checkStarReplenish(); // 🌙 星が消えた時のみ補充チェック
+            }
         }
         return exploded;
     }
