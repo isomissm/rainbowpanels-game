@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver13.0.0) </title>
+<title>ナナイロパネル／Rainbow Panels (ver13.1.1) </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
@@ -2023,10 +2023,13 @@ const CONFIG = {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🟣 闇玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		DARK_PANEL_INIT_COUNT:  7,   // 通常闇玉の初期カウントダウン
+        DARK_PANEL_INIT_COUNT:  7,   // 通常闇玉の初期カウントダウン
 		DARK_PANEL_FAST_COUNT:  5,   // 高速闇玉の初期カウントダウン
 
 		DARK_EXPLOSION_CONVERT_DELAY_MS: 500,  // 闇玉の爆発演出から雲への変換までの時間（ms）
+	
+		DARK_GLOW_ALPHA_NEAR: 0.99,  // カウント3以下の時のぼかしマルの濃さ（アルファ値。通常時は0.8固定）
+		DARK_GLOW_RADIUS_BONUS_NEAR: -4,  // カウント3以下の時のぼかし範囲(shadowBlur)の修正値
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ☔ 雨玉設定
@@ -2059,6 +2062,8 @@ const CONFIG = {
 		ICE_SPARKLE_COUNT:       3,    // 1回の明滅で同時に光らせる星の数
 		ICE_SPARKLE_SIZE_PEAK_TRIM: 0.03,  // サイズが最大になっている時間の短さ。大きいほど滞在時間が短い
 	
+		SNOW_GLOW_ALPHA_NEAR: 0.99,  // カウント3以下の時のぼかしマルの濃さ（アルファ値）
+	
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ⚡️ 雷玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2089,7 +2094,9 @@ const CONFIG = {
 		ALLCLEAR_SPARK_COLOR:        '#ffe600',  // ⚡の色（雷玉と同じ）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		SPECIAL_BALL_GLOW_SPEED: 1.1,  // 晴玉・雨玉・雪玉の発光（明滅）周期の速さ。数値が大きいほど速い
+        //  特殊玉のエフェクト設定（各玉の共有設定）
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		SPECIAL_BALL_GLOW_SPEED: 1.1,  // ナナイロ玉・晴玉・雨玉・雪玉の発光（明滅）周期の速さ。数値が大きいほど速い
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         //  虹玉・七色の玉エフェクト設定
@@ -4344,11 +4351,13 @@ update(frameFactor = 1) {
                         ctx.restore();
                     }
                     ctx.restore();
-                } else if (type === CONFIG.PANEL_TYPE.DARK) {
+				} else if (type === CONFIG.PANEL_TYPE.DARK) {
                     ctx.save();
+                    let count = dangerCounts[`${r},${c}`] !== undefined ? dangerCounts[`${r},${c}`] : CONFIG.DARK_PANEL_INIT_COUNT;
                     let glow = 12 + Math.cos(selectionPulse * 2.0) * 5; 
+                    if (count <= 3) glow += CONFIG.DARK_GLOW_RADIUS_BONUS_NEAR; // 見える範囲を広げて濃さを出す
                     ctx.shadowBlur = glow;
-                    ctx.shadowColor = "rgba(116, 21, 117, 0.8)"; 
+                    ctx.shadowColor = count <= 3 ? `rgba(116, 21, 117, ${CONFIG.DARK_GLOW_ALPHA_NEAR})` : "rgba(116, 21, 117, 0.8)";
                     
                     if (!darkGradCache) {
                         darkGradCache = ctx.createRadialGradient(CONFIG.CELL_SIZE/2 - 2, CONFIG.CELL_SIZE/2 - 2, 1, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4);
@@ -4362,7 +4371,6 @@ update(frameFactor = 1) {
                     ctx.beginPath(); ctx.arc(CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2); ctx.fill();
                     
                     ctx.shadowBlur = 0;
-                    let count = dangerCounts[`${r},${c}`] !== undefined ? dangerCounts[`${r},${c}`] : CONFIG.DARK_PANEL_INIT_COUNT;
 					ctx.fillStyle = count <= 3 ? "#ff4757" : "white"; ctx.font = "600 30px 'Titillium Web', sans-serif";
 					ctx.textAlign = "center"; ctx.textBaseline = "middle";
 					ctx.fillText(count, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 + 2.0);
@@ -4426,7 +4434,7 @@ update(frameFactor = 1) {
 				} else if (type === CONFIG.PANEL_TYPE.NANAIRO) { // ナナイロ玉
 					ctx.save();
 					ctx.translate(x, y);
-					ctx.shadowBlur = CONFIG.NANAIRO_BALL_GLOW_BASE + Math.sin(selectionPulse * 1.5) * CONFIG.NANAIRO_BALL_GLOW_AMP;
+					ctx.shadowBlur = CONFIG.NANAIRO_BALL_GLOW_BASE + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * CONFIG.NANAIRO_BALL_GLOW_AMP;
 					ctx.shadowColor = CONFIG.NANAIRO_BALL_GLOW_COLOR;
 					drawRainbowGradBall();
 					ctx.shadowBlur = 0;
@@ -4555,7 +4563,7 @@ update(frameFactor = 1) {
 					let isCold = snowCount <= 3;
 					let glow = 8 + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * 4;
 					ctx.shadowBlur = glow;
-					ctx.shadowColor = isCold ? "rgba(140, 108, 255, 0.8)" : "#dff3ff";
+					ctx.shadowColor = isCold ? `rgba(140, 108, 255, ${CONFIG.SNOW_GLOW_ALPHA_NEAR})` : "#dff3ff";
 					if (!snowGradCache[isCold]) {
 						let snowGrad = ctx.createRadialGradient(
 							CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, 0,
