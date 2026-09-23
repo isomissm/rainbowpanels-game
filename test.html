@@ -6424,7 +6424,7 @@ if (exploded) {
 
 		// 1. 背景薄青＋雨粒エフェクト
 		rainyOverlayAlpha = CONFIG.RAINY_OVERLAY_ALPHA;
-		specialEffects.push(new RainyEffect(canvas.width, canvas.height));
+		specialEffects.push(new RainyEffect(canvas.width / dpr, canvas.height / dpr));
 		draw();
 		await new Promise(res => setTimeout(res, CONFIG.RAINY_EFFECT_DURATION));
 
