@@ -1905,7 +1905,7 @@ width: calc(var(--mini-ball-size) * 4 + var(--mini-ball-gap) * 3);
 	 * 
 	 ************************************************************/
 
-/* ⚙️コンフィグ */
+/* ⚙️ここはコンフィグだよ */
 const CONFIG = {
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2035,8 +2035,8 @@ const CONFIG = {
         // ☔ 雨玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		RAINY_EFFECT_DURATION:  700,  // 薄青エフェクトの表示時間（ms）
-		RAINY_DROP_COUNT:        30,  // 雨粒の生成数
-		RAINY_FRAME_DURATION:    90,  // 雨アニメの表示時間（フレーム数）
+		RAINY_DROP_COUNT:        50,  // 雨粒の生成数
+		RAINY_FRAME_DURATION:   140,  // 雨アニメの表示時間（フレーム数）
 		RAINY_LINE_WIDTH:       1.5,  // 雨粒の太さ
 	
 		RAINY_COUNT_MIN:  7,  // 雨玉の効果の青パネル出現数（最低値）
@@ -2973,7 +2973,7 @@ update(frameFactor = 1) {
 				ctx.fillStyle = '#a4d4ff';
 				const dropX = d.x - 2;
 				const dropY = d.y + d.len + 9;  // 雨の線と雨粒に隙間を作る
-				const dropSize = 4;
+				const dropSize = 5; //雨粒のサイズ
 				ctx.beginPath();
 				ctx.moveTo(dropX, dropY - dropSize * 1.6);  // 雫の先端（上）
 				ctx.bezierCurveTo(
@@ -4355,8 +4355,8 @@ update(frameFactor = 1) {
                     ctx.save();
                     let count = dangerCounts[`${r},${c}`] !== undefined ? dangerCounts[`${r},${c}`] : CONFIG.DARK_PANEL_INIT_COUNT;
                     let glow = 12 + Math.cos(selectionPulse * 2.0) * 5; 
-                    if (count <= 3) glow += CONFIG.DARK_GLOW_RADIUS_BONUS_NEAR; // 見える範囲を広げて濃さを出す
-                    ctx.shadowBlur = glow;
+                    if (count <= 3) glow += CONFIG.DARK_GLOW_RADIUS_BONUS_NEAR;
+                    ctx.shadowBlur = glow * dpr; // スマホ(高DPR)でぼかしが細くなる端末差を補正
                     ctx.shadowColor = count <= 3 ? `rgba(116, 21, 117, ${CONFIG.DARK_GLOW_ALPHA_NEAR})` : "rgba(116, 21, 117, 0.8)";
                     
                     if (!darkGradCache) {
@@ -4434,7 +4434,7 @@ update(frameFactor = 1) {
 				} else if (type === CONFIG.PANEL_TYPE.NANAIRO) { // ナナイロ玉
 					ctx.save();
 					ctx.translate(x, y);
-					ctx.shadowBlur = CONFIG.NANAIRO_BALL_GLOW_BASE + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * CONFIG.NANAIRO_BALL_GLOW_AMP;
+					ctx.shadowBlur = (CONFIG.NANAIRO_BALL_GLOW_BASE + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * CONFIG.NANAIRO_BALL_GLOW_AMP) * dpr; // 端末差補正
 					ctx.shadowColor = CONFIG.NANAIRO_BALL_GLOW_COLOR;
 					drawRainbowGradBall();
 					ctx.shadowBlur = 0;
@@ -4490,7 +4490,7 @@ update(frameFactor = 1) {
 					ctx.save();
 					// 明るい黄色〜オレンジのグラデーション背景
 					let glow = 8 + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * 4;
-					ctx.shadowBlur = glow;
+					ctx.shadowBlur = glow * dpr; // 端末差補正
 					ctx.shadowColor = "#ffe600";
 					if (!sunnyGradCache) {
 						sunnyGradCache = ctx.createRadialGradient(
@@ -4513,7 +4513,7 @@ update(frameFactor = 1) {
 				} else if (type === CONFIG.PANEL_TYPE.RAINY) {
 					ctx.save();
 					let glow = 8 + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * 4;
-					ctx.shadowBlur = glow;
+					ctx.shadowBlur = glow * dpr; // 端末差補正
 					ctx.shadowColor = "#74b9ff";
 					if (!rainyGradCache) {
 						rainyGradCache = ctx.createRadialGradient(
@@ -4562,7 +4562,7 @@ update(frameFactor = 1) {
 					let snowCount = dangerCounts[`${r},${c}`] !== undefined ? dangerCounts[`${r},${c}`] : CONFIG.SNOW_COUNT;
 					let isCold = snowCount <= 3;
 					let glow = 8 + Math.sin(selectionPulse * CONFIG.SPECIAL_BALL_GLOW_SPEED) * 4;
-					ctx.shadowBlur = glow;
+					ctx.shadowBlur = glow * dpr; // 端末差補正
 					ctx.shadowColor = isCold ? `rgba(140, 108, 255, ${CONFIG.SNOW_GLOW_ALPHA_NEAR})` : "#dff3ff";
 					if (!snowGradCache[isCold]) {
 						let snowGrad = ctx.createRadialGradient(
