@@ -1935,7 +1935,7 @@ const CONFIG = {
 		MOBILE_LAND_BOUNCE_HEIGHT_ADD:     1,  // 着地バウンドの高さに加算（px）
 		MOBILE_ADJUST_FORCE_ON_PC:     false,  // trueでPCでも補正を適用（動作確認用）
 
-		STAR_TO_SLOT_DURATION:      700,   // 🌙 星パネルを消した時に飛ぶ星の速さ（ms・小さいほど速い）
+		STAR_TO_SLOT_DURATION:      700,   // 🌟星パネルを消した時に飛ぶ星の速さ（ms・小さいほど速い）
 	
 		BALL_TO_SLOT_DURATION:      500,   // 七色の玉を消した時に飛ぶ玉の速さ（ms・小さいほど速い）
 		BALL_TO_SLOT_DELAY_MS:      200,   // 七色の玉を消してから、玉が飛び始めるまでの間（ms）
@@ -2023,7 +2023,7 @@ const CONFIG = {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🟣 闇玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        DARK_PANEL_INIT_COUNT:  7,   // 通常闇玉の初期カウントダウン
+		DARK_PANEL_INIT_COUNT:  7,   // 通常闇玉の初期カウントダウン
 		DARK_PANEL_FAST_COUNT:  5,   // 高速闇玉の初期カウントダウン
 
 		DARK_EXPLOSION_CONVERT_DELAY_MS: 500,  // 闇玉の爆発演出から雲への変換までの時間（ms）
@@ -2032,12 +2032,25 @@ const CONFIG = {
 		DARK_GLOW_RADIUS_BONUS_NEAR: -4,  // カウント3以下の時のぼかし範囲(shadowBlur)の修正値
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ☀️ 晴玉設定
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		SUNNY_RADIUS: 2,  // 晴玉の効果範囲（中心から±2マス、計5×5）
+		SUNNY_CONVERT_NORMAL: false,  // trueにすると通常パネルも赤に変換
+
+		SUNNY_OVERLAY_HOLD_MS: 600,  // オレンジオーバーレイの表示保持時間（ms）
+		SUNNY_OVERLAY_ALPHA:  0.6,  // オレンジオーバーレイの不透明度
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // ☔ 雨玉設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		RAINY_EFFECT_DURATION:  700,  // 薄青エフェクトの表示時間（ms）
-		RAINY_DROP_COUNT:        50,  // 雨粒の生成数
+		RAINY_OVERLAY_ALPHA:    0.5,  // 薄青オーバーレイの不透明度
+
+		RAINY_DROP_COUNT:        45,  // 雨粒の生成数
 		RAINY_FRAME_DURATION:   140,  // 雨アニメの表示時間（フレーム数）
-		RAINY_LINE_WIDTH:       1.5,  // 雨粒の太さ
+		RAINY_LINE_WIDTH:       1.2,  // 雨粒の太さ
+		RAINY_LINE_LEN_MIN:       26,  // 雨の線の長さ（最小値）
+		RAINY_LINE_LEN_RANGE:     24,  // 雨の線の長さのランダム幅
 	
 		RAINY_COUNT_MIN:  7,  // 雨玉の効果の青パネル出現数（最低値）
 		RAINY_COUNT_MAX:  9,  // 雨玉の効果の青パネル出現数（最高値）
@@ -2160,9 +2173,13 @@ const CONFIG = {
 		NIGHT_DARK_FAST_COUNT:      3, // 夜中の高速闇玉カウント（通常5）
 		NIGHT_STAR_NEEDED:          3, // 昼に戻るために必要な星の数
 
-		NIGHT_STAR_SPAWN_AFTER_EXIT_MS:   0,    // 流れ星が画面外に出てから星パネル出現までの追加待ち（ms）
+		NIGHT_STAR_SPAWN_AFTER_EXIT_MS:   0,    // 流れ星が画面外に出てから🌟星パネル出現までの追加待ち（ms）
 		SHOOTING_STAR_EXIT_MARGIN:      -70,    // 流れ星の画面外判定の余白（px）。プラスで遅く、マイナスで早くなる
 		SHOOTING_STAR_WAIT_TIMEOUT_MS: 3000,    // 流れ星出現待ちの上限（保険）
+
+		STAR_GLOW_BASE:   5,    // 🌟星パネルの光ぼかしの基本の強さ（小さくするとぼかしが縮む）
+		STAR_GLOW_AMP:    3,    // 🌟星パネルの光ぼかしの明滅の振れ幅
+		STAR_GLOW_SPEED: 0.7,   // 🌟星パネルの光ぼかしの明滅速度。数値が大きいほど速い
 
 		NIGHT_COLOR_BOOST:          5, // 夜中の青・藍・紫の出現率ボーナス（0=均等 数値を増やすほど青・藍・紫が出やすくなる）
 	
@@ -2217,7 +2234,7 @@ const CONFIG = {
 			36, // 6: 藍（tuki）
 		], 
 		
-		// ⭐ 星玉消去時の散る色（星パネルのグラデーションに合わせた色味）
+		// ⭐ 星玉消去時の散る色（🌟星パネルのグラデーションに合わせた色味）
 		STAR_PARTICLE_COLORS: ["#fffde7", "#ffe53b", "#ffc400", "#e6a800"], 
 
 		THEME_COLORS: {
@@ -2280,9 +2297,6 @@ const CONFIG = {
 			STAR:     114, // 星玉：夜モード中に出現、3つ集めると昼復帰
 			NANAIRO:  115, // ナナイロ玉：ナナイロモード用。消すとお邪魔雲・闇玉を色パネルに変換（七色の玉BALL_*とは別物）
 		},
-
-			SUNNY_RADIUS: 2,  // 晴玉の効果範囲（中心から±2マス、計5×5）
-			SUNNY_CONVERT_NORMAL: false,  // trueにすると通常パネルも赤に変換
 		};
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2940,7 +2954,7 @@ const CONFIG = {
 					x: Math.random() * canvasWidth,
 					y: Math.random() * canvasHeight - canvasHeight * 0.5,
 					speed: 4 + Math.random() * 4,
-					len: 8 + Math.random() * 36,
+					len: CONFIG.RAINY_LINE_LEN_MIN + Math.random() * CONFIG.RAINY_LINE_LEN_RANGE,
 					alpha: 0.6 + Math.random() * 0.4,
 				});
 			}
@@ -4534,7 +4548,7 @@ update(frameFactor = 1) {
 					ctx.drawImage(rainyImage, Math.floor((CONFIG.CELL_SIZE - iconSize) / 2), Math.floor((CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
 					ctx.restore();
                 } else if (type === CONFIG.PANEL_TYPE.STAR) {
-					// ⭐ 星パネル（●なし、星形のみ）
+					// 🌟星パネル（●なし、星形のみ）
 					ctx.save();
 					const svgSize = 85;
 					const iconSize = CONFIG.CELL_SIZE * 0.88;
@@ -4544,7 +4558,7 @@ update(frameFactor = 1) {
 					ctx.translate(ox, oy);
 					ctx.scale(scale, scale);
 					// グロー
-					ctx.shadowBlur = (9 + Math.sin(selectionPulse * 1.5) * 4) / scale; //星パネルの光ぼかしと明滅の振れ幅
+					ctx.shadowBlur = (CONFIG.STAR_GLOW_BASE + Math.sin(selectionPulse * CONFIG.STAR_GLOW_SPEED) * CONFIG.STAR_GLOW_AMP) * dpr / scale; //🌟星パネルの光ぼかしと明滅の振れ幅（scale=アイコン拡縮、dpr=端末差補正）
 					ctx.shadowColor = "#ffe600";
 					// グラデーション塗り
 					if (!starGradCache) {
@@ -4721,8 +4735,9 @@ update(frameFactor = 1) {
 		// 晴玉発動時のオレンジオーバーレイ
 		if (sunnyOverlayAlpha > 0) {
 			ctx.save();
+			ctx.globalCompositeOperation = 'hard-light';
 			ctx.globalAlpha = sunnyOverlayAlpha;
-			ctx.fillStyle = '#ffaa00';
+			ctx.fillStyle = '#ffb700'; //晴玉オーバーレイの色
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			ctx.restore();
 		}
@@ -5214,7 +5229,7 @@ if (!isNightMode) { isReplenishingStars = false; isStarEffectActive = false; ret
             ctx.save();
             ctx.globalAlpha = this.life;
             /* 白い閃光（序盤に強く） */
-            const flashAlpha = Math.max(0, 1 - t * 3); // 星パネル背面の白丸が残る時間（最後の数値を小さくすると時間が伸びる）
+            const flashAlpha = Math.max(0, 1 - t * 3); // 🌟星パネル背面の白丸が残る時間（最後の数値を小さくすると時間が伸びる）
             if (flashAlpha > 0) {
                 ctx.globalAlpha = flashAlpha;
                 const flashRadius = CONFIG.CELL_SIZE * 0.5 * (1 - t * 0.5);
@@ -6352,9 +6367,9 @@ if (exploded) {
 		targets.forEach(({tr, tc}) => flashingCells.add(`${tr},${tc}`));
 		flashAlpha = 0.7;
 		flashColor = '#ff8c00';
-		sunnyOverlayAlpha = 0.35;
+		sunnyOverlayAlpha = CONFIG.SUNNY_OVERLAY_ALPHA;
 		draw();
-		await new Promise(res => setTimeout(res, 400));  // 雨玉の薄青色エフェクトの時間
+		await new Promise(res => setTimeout(res, CONFIG.SUNNY_OVERLAY_HOLD_MS));  // 晴玉のオレンジ色エフェクトの表示保持時間
 
 		// 2. 赤に変換（凍結中のパネルは解凍のみ、色変換しない）
 		flashingCells = new Set();
@@ -6373,7 +6388,7 @@ if (exploded) {
 		cleanUpDangerCountsData();
 
 		// 3. 背景フェードアウト
-		for (let a = 0.35; a > 0; a -= 0.05) {
+		for (let a = CONFIG.SUNNY_OVERLAY_ALPHA; a > 0; a -= 0.05) {
 			sunnyOverlayAlpha = a;
 			draw();
 			await new Promise(res => setTimeout(res, 30));
@@ -6408,7 +6423,7 @@ if (exploded) {
 		specialEffects.push(new RainyPopEffect(cx, cy));
 
 		// 1. 背景薄青＋雨粒エフェクト
-		rainyOverlayAlpha = 0.3;
+		rainyOverlayAlpha = CONFIG.RAINY_OVERLAY_ALPHA;
 		specialEffects.push(new RainyEffect(canvas.width, canvas.height));
 		draw();
 		await new Promise(res => setTimeout(res, CONFIG.RAINY_EFFECT_DURATION));
@@ -6425,7 +6440,7 @@ if (exploded) {
 		cleanUpDangerCountsData();
 
 		// 3. 背景フェードアウト
-		for (let a = 0.3; a > 0; a -= 0.03) {
+		for (let a = CONFIG.RAINY_OVERLAY_ALPHA; a > 0; a -= 0.03) {
 			rainyOverlayAlpha = a;
 			draw();
 			await new Promise(res => setTimeout(res, 30));
