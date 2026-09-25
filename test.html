@@ -1925,7 +1925,7 @@ const CONFIG = {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🖐️ 操作設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-		FLICK_THRESHOLD:    18,   // フリックと判定する移動距離のしきい値（px・仮値、実機調整予定）
+		FLICK_THRESHOLD:    18,   // フリックと判定する移動距離のしきい値（px）
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🎬 パネル移動アニメーション設定
@@ -2149,6 +2149,8 @@ const CONFIG = {
 		NANAIRO_SPAWN_COUNT_MIN:         7,  // ナナイロ玉が出現する残り手数の最小値
 		NANAIRO_SPAWN_COUNT_RANGE:       5,  // ナナイロ玉出現タイミングのランダム幅（min〜min+range）
 		NANAIRO_WAIT_MS:               250,  // ナナイロ玉を消してから変換が始まるまでの待ち時間（ms）
+
+		NANAIRO_EDGE_SPAWN_CHANCE:     0.65,  // ナナイロ玉が大外セルに出現するのを許可する確率（1で通常通り、小さいほど大外に出にくい）
 	
 		NANAIRO_BALL_GLOW_BASE:         10,  // ナナイロ玉の発光の基本の強さ（shadowBlur）
 		NANAIRO_BALL_GLOW_AMP:           5,  // ナナイロ玉の発光の明滅の幅
@@ -6312,6 +6314,10 @@ if (exploded) {
 		while (tries < 100) {
 			r = Math.floor(Math.random() * CONFIG.BOARD_SIZE);
 			c = Math.floor(Math.random() * CONFIG.BOARD_SIZE);
+			const isEdgeCell = r === 0 || r === CONFIG.BOARD_SIZE - 1 || c === 0 || c === CONFIG.BOARD_SIZE - 1;
+			if (type === CONFIG.PANEL_TYPE.NANAIRO && isEdgeCell && Math.random() > CONFIG.NANAIRO_EDGE_SPAWN_CHANCE) {
+				tries++; continue; // 🌈 ナナイロ玉は大外セルの当選率を少し下げるため再抽選
+			}
 			if (board[r][c] < CONFIG.PANEL_TYPE.OBSTACLE && board[r][c] !== -1 && frozenCells[`${r},${c}`] === undefined && !(lastMovedCell && lastMovedCell.some(cell => cell.r === r && cell.c === c))) {
 				board[r][c] = type;
 				let targetX = c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
