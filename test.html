@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver13.1.1) </title>
+<title>ナナイロパネル／Rainbow Panels (ver13.2.0) </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
@@ -120,10 +120,14 @@ button, input, select, textarea {
     position: relative;
     z-index: 0;
     background: white;
-    padding: 12px;
+    padding: 4px;
     border-radius: 20px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.06);
     border: none;
+    box-sizing: border-box;
+}#game-container {
+    width: 100%;
+    padding: 8px;
     box-sizing: border-box;
 }
 /*左上：七色の玉のサイズ変更*/
@@ -1060,7 +1064,7 @@ body {
 }
 #game-container {
     width: 100%;
-    padding: 8px;
+    padding: 0px;
     box-sizing: border-box;
 }
 canvas {
@@ -1913,6 +1917,9 @@ const CONFIG = {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		BOARD_SIZE:         7,   // 盤面のマス数（縦横共通）
 		CELL_SIZE:         55,   // 1マスのサイズ（ピクセル）
+
+		BOARD_EDGE_MARGIN:  8,   // 盤面の外周に確保する余白(px)。白い枠との隙間を光ぼかしのはみ出し用に転用する
+
 		INITIAL_MOVES:      3,   // マッチ成立時に回復する手数
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2141,15 +2148,22 @@ const CONFIG = {
 	
 		NANAIRO_SPAWN_COUNT_MIN:         7,  // ナナイロ玉が出現する残り手数の最小値
 		NANAIRO_SPAWN_COUNT_RANGE:       5,  // ナナイロ玉出現タイミングのランダム幅（min〜min+range）
+		NANAIRO_WAIT_MS:               250,  // ナナイロ玉を消してから変換が始まるまでの待ち時間（ms）
+	
 		NANAIRO_BALL_GLOW_BASE:         10,  // ナナイロ玉の発光の基本の強さ（shadowBlur）
 		NANAIRO_BALL_GLOW_AMP:           5,  // ナナイロ玉の発光の明滅の幅
 		NANAIRO_BALL_GLOW_COLOR: 'rgba(255,255,255,0.9)',  // ナナイロ玉の発光色
-		NANAIRO_WAIT_MS:               250,  // ナナイロ玉を消してから変換が始まるまでの待ち時間（ms）
+
+		NANAIRO_RING_GAP:                7,  // 玉のフチと逆さ虹リングの隙間(px)
+		NANAIRO_RING_WIDTH:              8,  // 逆さ虹リングの太さ(px)
+		NANAIRO_RING_BLUR:               8,  // 逆さ虹リングのぼかし(shadowBlur)
+		NANAIRO_RING_ALPHA:           0.20,  // 逆さ虹リングの透明度
 
 		NANAIRO_WAVE_CELL_RATE:        2.4,  // 虹色の円が1マス広がるのにかかる時間（変換間隔の何倍か・大きいほどゆっくり）
 		NANAIRO_WAVE_BAND_RATIO:      0.45,  // 虹色の帯の太さ（円の半径に対する割合）
-		NANAIRO_WAVE_ALPHA:           0.75,  // 虹色の円の濃さ
-		NANAIRO_WAVE_FADE_START:      0.35,  // 虹色の円が消え始める進行度（0＝最初から徐々に消える、1＝最後まで消えない）
+		NANAIRO_WAVE_ALPHA:           0.70,  // 虹色の円の濃さ
+		NANAIRO_WAVE_FADE_START:      0.40,  // 虹色の円が消え始める進行度（0＝最初から徐々に消える、1＝最後まで消えない）
+		NANAIRO_WAVE_REACH_CELLS:      9.2,  // 虹色の円が広がる最大範囲（マス数換算の半径）
 		NANAIRO_WAVE_MARGIN_CELLS:       1,  // 一番遠い変換先から、さらに広がるマス数
 		NANAIRO_WAVE_COLORS: ['#ff4757', '#ffe53b', '#2ed573', '#1e90ff', '#c175ff'],  // 虹色の色順（外側→内側）
 
@@ -2477,7 +2491,7 @@ const CONFIG = {
     
     const dpr = window.devicePixelRatio || 1;
     document.getElementById('dbg-dpr').textContent = `DPR: ${dpr}`;
-    let logicalSize = CONFIG.BOARD_SIZE * CONFIG.CELL_SIZE;
+    let logicalSize = CONFIG.BOARD_SIZE * CONFIG.CELL_SIZE + CONFIG.BOARD_EDGE_MARGIN * 2;
 
     // 🖥️ Canvasの解像度設定（タブ復帰時など、ブラウザに描画バッファを破棄された場合の再適用にも使う）
     function setupCanvasScale() {
@@ -2486,6 +2500,7 @@ const CONFIG = {
         canvas.style.width = logicalSize + 'px';
         canvas.style.height = logicalSize + 'px';
         ctx.scale(dpr, dpr);
+        ctx.translate(CONFIG.BOARD_EDGE_MARGIN, CONFIG.BOARD_EDGE_MARGIN);
         ctx.imageSmoothingEnabled = false;
     }
     setupCanvasScale();
@@ -3582,6 +3597,39 @@ update(frameFactor = 1) {
 		ctx.fillStyle = rainbowGradBallCache;
 		ctx.beginPath(); ctx.arc(CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 - 4, 0, Math.PI*2); ctx.fill();
 	}
+
+	// ナナイロ玉の外側の逆さ虹リング（盤面・画面の外にはみ出しても構わないので、最後にまとめて上から描く）
+	let nanairoRingGradCache = null;
+	function drawNanairoRings(queue) {
+		if (!queue.length) return;
+		if (!nanairoRingGradCache) {
+			const innerR = CONFIG.CELL_SIZE/2 - 4 + CONFIG.NANAIRO_RING_GAP;
+			const outerR = innerR + CONFIG.NANAIRO_RING_WIDTH;
+			nanairoRingGradCache = ctx.createRadialGradient(CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, innerR, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, outerR);
+			nanairoRingGradCache.addColorStop(0,    '#c82333');
+			nanairoRingGradCache.addColorStop(0.25, '#FF6A39');
+			nanairoRingGradCache.addColorStop(0.45, '#ffe53b');
+			nanairoRingGradCache.addColorStop(0.65, '#2ed573');
+			nanairoRingGradCache.addColorStop(0.85, '#1e90ff');
+			nanairoRingGradCache.addColorStop(1.0,  '#c175ff');
+		}
+		const innerR = CONFIG.CELL_SIZE/2 - 4 + CONFIG.NANAIRO_RING_GAP;
+		const outerR = innerR + CONFIG.NANAIRO_RING_WIDTH;
+		queue.forEach(({x, y}) => {
+			ctx.save();
+			ctx.translate(x, y);
+			ctx.globalAlpha = CONFIG.NANAIRO_RING_ALPHA;
+			ctx.shadowBlur = CONFIG.NANAIRO_RING_BLUR * dpr;
+			ctx.shadowColor = '#c175ff';
+			ctx.strokeStyle = nanairoRingGradCache;
+			ctx.lineWidth = CONFIG.NANAIRO_RING_WIDTH;
+			ctx.beginPath();
+			ctx.arc(CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2, (innerR + outerR) / 2, 0, Math.PI*2);
+			ctx.stroke();
+			ctx.restore();
+		});
+	}
+
 	let darkGradCache = null;
 	const ballGradCache = {}; // 色番号ごとにキャッシュ
 	let almightyGradCache = null;
@@ -4309,7 +4357,8 @@ update(frameFactor = 1) {
     function draw() {
     if (!board || board.length < CONFIG.BOARD_SIZE) return; // 💾 再開確認モーダル表示中など、盤面がまだ初期化されていない場合は何もしない
     pruneFinishedAnimations();
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(-CONFIG.BOARD_EDGE_MARGIN, -CONFIG.BOARD_EDGE_MARGIN, logicalSize, logicalSize);
+    const nanairoRingQueue = []; // 逆さ虹リング：盤面や画面の外にはみ出しても構わないので、全マス描画後に上のレイヤーでまとめて描く
     
     for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
         for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
@@ -4465,6 +4514,7 @@ update(frameFactor = 1) {
 						ctx.restore();
 					}
 					ctx.restore();
+					nanairoRingQueue.push({x, y}); // 玉の現在位置(アニメ中のずれ込みも反映済み)を記録しておく
 				} else if (type === CONFIG.PANEL_TYPE.ALLCLEAR) { //雷パネル
 					ctx.save();
 					let glow = 10 + Math.sin(selectionPulse * 1.5) * 5;
@@ -4722,13 +4772,14 @@ update(frameFactor = 1) {
                 }
             }
         }
+		drawNanairoRings(nanairoRingQueue);
 		
 		// canvas暗転
 		if (darkOverlayAlpha > 0) {
 			ctx.save();
 			ctx.globalAlpha = darkOverlayAlpha;
 			ctx.fillStyle = '#000000';
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			ctx.fillRect(-CONFIG.BOARD_EDGE_MARGIN, -CONFIG.BOARD_EDGE_MARGIN, logicalSize, logicalSize);
 			ctx.restore();
 		}
 		
@@ -4738,7 +4789,7 @@ update(frameFactor = 1) {
 			ctx.globalCompositeOperation = 'hard-light';
 			ctx.globalAlpha = sunnyOverlayAlpha;
 			ctx.fillStyle = '#ffb700'; //晴玉オーバーレイの色
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			ctx.fillRect(-CONFIG.BOARD_EDGE_MARGIN, -CONFIG.BOARD_EDGE_MARGIN, logicalSize, logicalSize);
 			ctx.restore();
 		}
 		
@@ -4747,7 +4798,7 @@ update(frameFactor = 1) {
 			ctx.save();
 			ctx.globalAlpha = rainyOverlayAlpha;
 			ctx.fillStyle = '#74b9ff';
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			ctx.fillRect(-CONFIG.BOARD_EDGE_MARGIN, -CONFIG.BOARD_EDGE_MARGIN, logicalSize, logicalSize);
 			ctx.restore();
 		}
 		
@@ -4756,7 +4807,7 @@ update(frameFactor = 1) {
 			ctx.save();
 			ctx.globalAlpha = snowyOverlayAlpha;
 			ctx.fillStyle = '#ffffff';
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			ctx.fillRect(-CONFIG.BOARD_EDGE_MARGIN, -CONFIG.BOARD_EDGE_MARGIN, logicalSize, logicalSize);
 			ctx.restore();
 		}
 		
@@ -4927,8 +4978,9 @@ async function handleTap(r, c) {
 canvas.addEventListener('pointerdown', (e) => {
     if (isAnimating || isGameOver || isPaused || isStarEffectActive) return;document.getElementById('debug-time')
     const rect = canvas.getBoundingClientRect();
-    const c = Math.floor((e.clientX - rect.left) / (rect.width / CONFIG.BOARD_SIZE));
-    const r = Math.floor((e.clientY - rect.top) / (rect.height / CONFIG.BOARD_SIZE));
+    const cellOnScreen = (rect.width / logicalSize) * CONFIG.CELL_SIZE; // 画面上での1マスのサイズ
+    const c = Math.floor((e.clientX - rect.left - CONFIG.BOARD_EDGE_MARGIN * (rect.width / logicalSize)) / cellOnScreen);
+    const r = Math.floor((e.clientY - rect.top - CONFIG.BOARD_EDGE_MARGIN * (rect.height / logicalSize)) / cellOnScreen);
 		if (shakingCells.has(`${r},${c}`)) return;
 		if (frozenCells[`${r},${c}`] !== undefined) return;
     flickStart = {r, c, x: e.clientX, y: e.clientY, pointerId: e.pointerId};
@@ -5962,8 +6014,8 @@ if (exploded) {
 					spawnRainbowParticles(s.c, s.r);
 					if (skillStock < CONFIG.SKILL_STOCK_MAX) {
 						const canvasRect = canvas.getBoundingClientRect();
-						const panelX = canvasRect.left + (s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.width / logicalSize) + window.scrollX;
-                    const panelY = canvasRect.top + (s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.height / logicalSize) + window.scrollY;
+						const panelX = canvasRect.left + (CONFIG.BOARD_EDGE_MARGIN + s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.width / logicalSize) + window.scrollX;
+                    const panelY = canvasRect.top + (CONFIG.BOARD_EDGE_MARGIN + s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.height / logicalSize) + window.scrollY;
 					setTimeout(() => {
 						if (!isGameOver) animateCurveChargeParticle(panelX, panelY, CONFIG.GAUGE_CHARGE_DURATION_FROM_PANEL);
 					}, 500);
@@ -5974,8 +6026,8 @@ if (exploded) {
 				} else if (board[s.r][s.c] >= CONFIG.PANEL_TYPE.BALL_MIN && board[s.r][s.c] <= CONFIG.PANEL_TYPE.BALL_MAX) {
 					spawnRainbowParticles(s.c, s.r);
 					const canvasRect = canvas.getBoundingClientRect();
-					const ballFromX = canvasRect.left + (s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.width / logicalSize);
-					const ballFromY = canvasRect.top  + (s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.height / logicalSize);
+					const ballFromX = canvasRect.left + (CONFIG.BOARD_EDGE_MARGIN + s.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.width / logicalSize);
+					const ballFromY = canvasRect.top  + (CONFIG.BOARD_EDGE_MARGIN + s.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2) * (canvasRect.height / logicalSize);
 					const ballColorIndex = board[s.r][s.c] - 102;
 					setTimeout(() => {
 						if (!isGameOver) collectRainbowBall(ballColorIndex, ballFromX, ballFromY);
@@ -6467,10 +6519,10 @@ if (exploded) {
 
 		draw();
 		await new Promise(res => setTimeout(res, CONFIG.NANAIRO_WAIT_MS));
-		// 🌈 虹色の円をナナイロ玉の位置から広げる（広がる時間は変換にかかる時間に合わせる）
-		const farthest = targets.length ? Math.hypot(targets[targets.length - 1].r - row, targets[targets.length - 1].c - col) * CONFIG.CELL_SIZE : CONFIG.BOARD_SIZE * CONFIG.CELL_SIZE / 2;
+		// 🌈 虹色の円をナナイロ玉の位置から広げる（雲の有無・距離に関わらず、常に盤面全体を覆う一定の大きさにする）
+		const farthest = CONFIG.NANAIRO_WAVE_REACH_CELLS * CONFIG.CELL_SIZE;
 		const waveR = farthest + CONFIG.CELL_SIZE * CONFIG.NANAIRO_WAVE_MARGIN_CELLS; // 広がる半径
-		const waveMs = waveR / CONFIG.CELL_SIZE * CONFIG.NANAIRO_CONVERT_INTERVAL_MS * CONFIG.NANAIRO_WAVE_CELL_RATE; // 1マス分の時間×マス数（雲の数に依存しない）
+		const waveMs = waveR / CONFIG.CELL_SIZE * CONFIG.NANAIRO_CONVERT_INTERVAL_MS * CONFIG.NANAIRO_WAVE_CELL_RATE; // 1マス分の時間×マス数
 		specialEffects.push(new NanairoWaveEffect(cx, cy, waveR, waveMs));
 		if (targets.length === 0) return;
 
@@ -6480,7 +6532,7 @@ if (exploded) {
 				const j = Math.floor(Math.random() * (i + 1));
 				[arr[i], arr[j]] = [arr[j], arr[i]];
 			}
-			return arr;
+			return arr;1
 		};
 		const colorOrder = shuffle(Array.from({ length: CONFIG.COLORS.length }, (_, i) => i));
 		const colorPool = shuffle(targets.map((_, i) => colorOrder[i % colorOrder.length]));
@@ -6491,7 +6543,7 @@ if (exploded) {
 			// 変換前の見た目を切り取り、フェードアウトさせて色パネルと入れ替える
 			const snap = document.createElement('canvas');
 			snap.width = snap.height = Math.round(CONFIG.CELL_SIZE * dpr);
-			snap.getContext('2d').drawImage(canvas, c * CONFIG.CELL_SIZE * dpr, r * CONFIG.CELL_SIZE * dpr, CONFIG.CELL_SIZE * dpr, CONFIG.CELL_SIZE * dpr, 0, 0, snap.width, snap.height);
+			snap.getContext('2d').drawImage(canvas, (CONFIG.BOARD_EDGE_MARGIN + c * CONFIG.CELL_SIZE) * dpr, (CONFIG.BOARD_EDGE_MARGIN + r * CONFIG.CELL_SIZE) * dpr, CONFIG.CELL_SIZE * dpr, CONFIG.CELL_SIZE * dpr, 0, 0, snap.width, snap.height);
 			specialEffects.push(new PanelFadeOutEffect(c, r, snap, CONFIG.NANAIRO_FADE_MS));
 			board[r][c] = colorPool[i];
 			const px = c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
