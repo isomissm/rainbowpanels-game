@@ -4901,6 +4901,7 @@ update(frameFactor = 1) {
 		levelRainbowCount--;
 		if (levelRainbowCount <= 0) {
 		isLevelRainbow = false;
+		updateMovesDisplay(); // 🌈 手順表示はフラッシュ演出を待たず即時に通常へ戻す
 		sevenColorsEndingTransition = true;
 		playSevenColorsEndFlash();
 		const myFadeToken = ++sevenColorsEndToken; // 🌈 このフェード専用の識別番号を発行
@@ -6941,6 +6942,13 @@ if (exploded) {
 		gc.appendChild(flash);
 		setTimeout(() => flash.remove(), 2100);
 	}			
+
+	function updateMovesDisplay() {
+		const movesEl = document.getElementById('moves');
+		if (!movesEl) return;
+		movesEl.innerText = moves; // 🌈 手順(MOVES)表示だけをエフェクトと無関係に即時更新する
+		movesEl.classList.remove('rainbow-moves');
+	}
 
 	// UIの色や表示を更新する仕組み
 	function updateRainbowUI() {
