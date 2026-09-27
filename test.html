@@ -1676,7 +1676,7 @@ width: calc(var(--mini-ball-size) * 4 + var(--mini-ball-gap) * 3);
                   <path d="M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"/>
                 </svg>
                 </span>雲パネルと<span class="mini-dark-img"></span>闇玉を<br>
-                全て色パネルに変化させるよ！</td>
+                全て色パネルに変化させる！</td>
             </tr>
             <tr>
               <td class="guide-td-icon"><span class="mini-sunny-img"></span><strong>晴玉</strong>：</td>
@@ -2337,7 +2337,8 @@ const CONFIG = {
     const BASE_FALL_ANIM_DURATION_PER_ROW = CONFIG.FALL_ANIM_DURATION_PER_ROW;
     const BASE_FALL_ANIM_DURATION_MAX     = CONFIG.FALL_ANIM_DURATION_MAX;
     const BASE_LAND_BOUNCE_HEIGHT         = CONFIG.LAND_BOUNCE_HEIGHT;
-    const IS_MOBILE_ENV = window.matchMedia('(pointer: coarse)').matches; // タッチ操作が主の端末
+    const IS_MOBILE_ENV = window.matchMedia('(pointer: coarse)').matches
+        || window.matchMedia('(max-width: 768px)').matches; // タッチ操作が主、または画面幅がスマホサイズの端末
 
     let userSettings = { ...DEFAULT_SETTINGS };
 
@@ -2375,6 +2376,7 @@ const CONFIG = {
             CONFIG.FALL_ANIM_DURATION_MAX = Math.round((BASE_FALL_ANIM_DURATION_MAX + (mobile ? CONFIG.MOBILE_FALL_DURATION_MAX_ADD : 0)) * speedMul);
         }
         CONFIG.LAND_BOUNCE_HEIGHT = BASE_LAND_BOUNCE_HEIGHT + ((IS_MOBILE_ENV || CONFIG.MOBILE_ADJUST_FORCE_ON_PC) ? CONFIG.MOBILE_LAND_BOUNCE_HEIGHT_ADD : 0);
+        console.log('IS_MOBILE_ENV:', IS_MOBILE_ENV, 'FALL_PER_ROW:', CONFIG.FALL_ANIM_DURATION_PER_ROW, 'FALL_MAX:', CONFIG.FALL_ANIM_DURATION_MAX); // 🔧 デバッグ用、確認後は削除
         applyBallShape(userSettings.ballShape);
         BGM.setVolume(userSettings.bgmMuted ? 0 : userSettings.bgmVolume);
         // SE音量：効果音実装後にここへ接続予定
@@ -3907,6 +3909,12 @@ update(frameFactor = 1) {
         document.getElementById('reset-btn').disabled = true;
     }
 
+function escapeHtml(str) {
+	const div = document.createElement('div');
+	div.textContent = str;
+	return div.innerHTML; // 🔒 <, >, & などをHTMLエンティティに変換して無害化
+}
+
     function renderRankingList() {
         let ranking = loadRanking();
         let html = "";
@@ -3929,7 +3937,7 @@ update(frameFactor = 1) {
             }
 
             html += `<div class="ranking-item" style="${style}">
-                <span>${rankNum}. ${item.name}</span>
+                <span>${rankNum}. ${escapeHtml(item.name)}</span>
                 <span style="font-size: ${scoreFontSize}px; font-family: var(--font-main-ui);">${item.score}</span>
             </div>`;
         });
@@ -4165,7 +4173,7 @@ update(frameFactor = 1) {
 	
     function saveRankedScore() {
         let nameField = document.getElementById('player-name-field');
-        let name = nameField.value.trim();
+        let name = nameField.value.trim().slice(0, 8); // 🔒 入力欄のmaxlengthはUI上の制限のみで信用できないため、保存時にも強制する
         if (!name) name = "Player";
         
         let ranking = loadRanking();
