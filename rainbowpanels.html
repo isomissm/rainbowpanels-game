@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver13.2.0) </title>
+<title>ナナイロパネル／Rainbow Panels (ver13.3.0) </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
@@ -2113,6 +2113,15 @@ const CONFIG = {
 		ALLCLEAR_SPARK_GLOW:              10,  // ⚡の発光の強さ（shadowBlur）
 		ALLCLEAR_SPARK_COLOR:        '#ffe600',  // ⚡の色（雷玉と同じ）
 
+		ALLCLEAR_CLOUD_DARK_START_RATIO: 0.75,  // 帯電が何割を超えたら雲パネルが暗くなり始めるか（閾値）
+
+		ALLCLEAR_CLOUD_ICON_COLOR_NORMAL: '#ffffff',  // 通常時の雲アイコンの色
+		ALLCLEAR_CLOUD_ICON_COLOR_DARK:   '#d7dcde',  // 暗い時の雲アイコンの色
+		ALLCLEAR_CLOUD_DARK_COLOR:   '#9ba4a8',  // 暗くなった時の雲パネルの色
+		ALLCLEAR_CLOUD_DARK_FADE_IN_MS:  2000,  // 暗くなるフェードの時間（ms）
+		ALLCLEAR_CLOUD_DARK_FADE_OUT_MS:  2000,  // 元のグレーに戻るフェードの時間（ms）
+
+
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         //  特殊玉のエフェクト設定（各玉の共有設定）
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2618,6 +2627,9 @@ const CONFIG = {
     let allClearCharge = 0; // 雷玉の帯電値（雲が多い間に稼いだスコア）
     let allClearLastScore = null; // 帯電計算用：前回チェック時のスコア
     let allClearSparkTimer = 0; // ⚡を出すまでの残り時間（ms・保存しない）
+    let cloudDarkLevel = 0; // 雲パネルの暗さ（0＝元のグレー、1＝暗いグレー・保存しない）
+    let cloudFillColor = CONFIG.THEME_COLORS.OBSTACLE; // 現在の雲パネルの塗り色（毎フレーム更新）
+    let cloudIconColor = CONFIG.ALLCLEAR_CLOUD_ICON_COLOR_NORMAL; // 現在の雲アイコンの色（毎フレーム更新）
 
     // Canvas上の指定位置に✦キラキラの小片を生成するクラス
     class SparkleParticle {
@@ -3114,6 +3126,7 @@ update(frameFactor = 1) {
 	}
 	
 	const OBSTACLE_CLOUD_PATH = new Path2D("M14.3,36.5c-15.3,3.3-13,23.4,4.5,21.3,3.6,7.2,16.5,9.1,23,4.1,6.9,6.9,20.5,4.5,24.3-2.9,18.7-.2,22.9-26-.6-30.5-4.5-13.8-26.8-16.1-33.5-3-8.7-3.1-17.5,3.4-17.7,11.1Z"); // お邪魔パネルの雲模様（毎フレーム再生成しないようキャッシュ）
+	const CLOUD_ICON_PATH = new Path2D("M66.9,30.7c-3-14.5-26.9-17.2-33.9-4-8.3-3.3-18,3.2-18.4,10.9-15.3,2.9-13.7,23.1,3.8,21.5,3.5,6.6,16,9.3,22.7,4.5,6.3,6,20.9,4.4,24.5-2.7,18.7.3,23.2-26.5,1.3-30.2Z"); // 盤面の雲アイコン（CLOUD_ICON_SVGと同じ形・viewBox 85×85）。色を変える間だけ使用
 	const STAR_ICON_PATH = new Path2D("M44.27,8.41l10.25,20.52,22.68,3.41c1.51.23,2.12,2.09,1.03,3.16l-16.34,16.09,3.77,22.62c.25,1.51-1.33,2.66-2.69,1.95l-20.35-10.57-20.35,10.57c-1.36.71-2.94-.44-2.69-1.95l3.77-22.62L6.99,35.5c-1.09-1.07-.49-2.93,1.03-3.16l22.68-3.41,10.25-20.52c.68-1.37,2.64-1.37,3.32,0Z"); // ⭐ 盤面上の星玉パネル用（毎フレーム再生成しないようキャッシュ）
 	const SPARKLE_STAR_PATH = new Path2D("M50,2 L55,41.3 L91.6,26 L60,50 L91.6,74 L55,58.7 L50,98 L45,58.7 L8.4,74 L40,50 L8.4,26 L45,41.3 Z"); // ✶ 虹玉・七色玉のキラキラ用（線が長めの6方向スパークル）
 
@@ -3167,7 +3180,7 @@ update(frameFactor = 1) {
         draw() {
             ctx.save(); ctx.globalAlpha = this.alpha;
             if (this.type === "shake") {
-                ctx.fillStyle = CONFIG.THEME_COLORS.OBSTACLE;
+                ctx.fillStyle = cloudFillColor;
                 roundRect(this.x + this.offsetX + 3, this.y + 3, CONFIG.CELL_SIZE - 6, CONFIG.CELL_SIZE - 6, 12); ctx.fill();
                 ctx.fillStyle = "rgba(255,255,255,0.7)"; ctx.font = "bold 26px sans-serif";
                 ctx.textAlign = "center"; ctx.textBaseline = "middle"; 
@@ -3178,7 +3191,7 @@ update(frameFactor = 1) {
 				ctx.save();
 				ctx.translate(cx - 42.5 * s, cy - 42.5 * s);
 				ctx.scale(s, s);
-				ctx.fillStyle = "#ffffff";
+				ctx.fillStyle = cloudIconColor; // 暗い雲パネルに合わせて雲アイコンの色も変える
 				ctx.fill(OBSTACLE_CLOUD_PATH);
 				ctx.restore();
             } else {
@@ -4224,6 +4237,7 @@ function escapeHtml(str) {
 		nanairoSpawnCount = null;
 		allClearCharge = 0;
 		allClearLastScore = 0;
+		cloudDarkLevel = 0; cloudFillColor = CONFIG.THEME_COLORS.OBSTACLE; cloudIconColor = CONFIG.ALLCLEAR_CLOUD_ICON_COLOR_NORMAL;
 		pendingRainbowBalls = [];
 		lastMovedCell = null;
         
@@ -4668,13 +4682,22 @@ function escapeHtml(str) {
 					ctx.fillText(snowCount, CONFIG.CELL_SIZE/2, CONFIG.CELL_SIZE/2 + 2.0);
 					ctx.restore();
                 } else {
-                    ctx.fillStyle = (type === CONFIG.PANEL_TYPE.OBSTACLE) ? CONFIG.THEME_COLORS.OBSTACLE : CONFIG.COLORS[type];
+                    ctx.fillStyle = (type === CONFIG.PANEL_TYPE.OBSTACLE) ? cloudFillColor : CONFIG.COLORS[type];
                     roundRect(x + 3, y + 3, CONFIG.CELL_SIZE - 6, CONFIG.CELL_SIZE - 6, 12); ctx.fill();
 					// お邪魔パネルの中の模様を雲アイコンに変更（読み込めない場合は元のcloudPath）
 					if (type === CONFIG.PANEL_TYPE.OBSTACLE) {
 						if (cloudImage.complete && cloudImage.naturalWidth !== 0) {
 							const iconSize = 46;
-							ctx.drawImage(cloudImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
+							if (cloudDarkLevel > 0) { // 暗い間はパスで色指定（画像に透明度をかけると重くなるため）
+								ctx.save();
+								ctx.translate(Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2));
+								ctx.scale(iconSize / 85, iconSize / 85);
+								ctx.fillStyle = cloudIconColor;
+								ctx.fill(CLOUD_ICON_PATH);
+								ctx.restore();
+							} else {
+								ctx.drawImage(cloudImage, Math.floor(x + (CONFIG.CELL_SIZE - iconSize) / 2), Math.floor(y + (CONFIG.CELL_SIZE - iconSize) / 2), iconSize, iconSize);
+							}
 						} else {
 							const cx = x + CONFIG.CELL_SIZE / 2;
 							const cy = y + CONFIG.CELL_SIZE / 2;
@@ -4868,7 +4891,36 @@ function escapeHtml(str) {
             if (textEffects[i].life <= 0) textEffects.splice(i, 1);
         }
         updateAllClearSparks(frameFactor);
+        updateCloudDarkness(frameFactor);
     }
+
+	function mixHex(a, b, t) {
+		// #RRGGBB同士をt(0〜1)で混ぜてrgb()文字列にする
+		const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+		const m = s => Math.round(((pa >> s) & 255) + (((pb >> s) & 255) - ((pa >> s) & 255)) * t);
+		return `rgb(${m(16)},${m(8)},${m(0)})`;
+	}
+
+	function updateCloudDarkness(frameFactor) {
+		// ☁️ 帯電が閾値を超えている間、雲パネルを暗いグレーへフェード（雷玉出現・雲不足・ナナイロモード中は元に戻す）
+		let target = 0;
+		if (!isLevelRainbow && allClearCharge / CONFIG.ALLCLEAR_CHARGE_MAX >= CONFIG.ALLCLEAR_CLOUD_DARK_START_RATIO) {
+			let cloudCount = 0, hasThunder = false;
+			for (let r = 0; r < CONFIG.BOARD_SIZE; r++) {
+				for (let c = 0; c < CONFIG.BOARD_SIZE; c++) {
+					if (board[r][c] === CONFIG.PANEL_TYPE.ALLCLEAR) hasThunder = true;
+					else if (board[r][c] === CONFIG.PANEL_TYPE.OBSTACLE) cloudCount++;
+				}
+			}
+			if (!hasThunder && cloudCount >= CONFIG.ALLCLEAR_CHARGE_CLOUD_MIN) target = 1;
+		}
+		if (cloudDarkLevel === target) return;
+		const up = target > cloudDarkLevel;
+		const step = frameFactor * (1000 / 60) / Math.max(up ? CONFIG.ALLCLEAR_CLOUD_DARK_FADE_IN_MS : CONFIG.ALLCLEAR_CLOUD_DARK_FADE_OUT_MS, 1);
+		cloudDarkLevel = up ? Math.min(target, cloudDarkLevel + step) : Math.max(target, cloudDarkLevel - step);
+		cloudFillColor = mixHex(CONFIG.THEME_COLORS.OBSTACLE, CONFIG.ALLCLEAR_CLOUD_DARK_COLOR, cloudDarkLevel);
+		cloudIconColor = mixHex(CONFIG.ALLCLEAR_CLOUD_ICON_COLOR_NORMAL, CONFIG.ALLCLEAR_CLOUD_ICON_COLOR_DARK, cloudDarkLevel);
+	}
 
     let lastPulseTime = performance.now();
     function mainLoop(now) {
@@ -6545,7 +6597,7 @@ if (exploded) {
 				const j = Math.floor(Math.random() * (i + 1));
 				[arr[i], arr[j]] = [arr[j], arr[i]];
 			}
-			return arr;1
+			return arr;
 		};
 		const colorOrder = shuffle(Array.from({ length: CONFIG.COLORS.length }, (_, i) => i));
 		const colorPool = shuffle(targets.map((_, i) => colorOrder[i % colorOrder.length]));
