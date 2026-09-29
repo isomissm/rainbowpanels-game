@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver13.3.0) </title>
+<title>ナナイロパネル／Rainbow Panels (ver13.4.0) </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
@@ -104,7 +104,7 @@ button, input, select, textarea {
 #main-layout {
     position: relative;
     display: flex;
-    align-items: flex-start;
+    align-items: stretch; /* 右枠の高さを左側(#left-area)に自動で揃える */
     gap: 16px;
 }
 /* 左側エリア（盤面 ＋ 下部レベルUI） */
@@ -443,6 +443,7 @@ width: calc(var(--mini-spark-size) * 32 / 38);
 #right-ui {
     display: flex;
     flex-direction: column;
+    justify-content: space-between; /* 上下ブロックの間に伸びた高さ分を配分し、上端・下端の見た目を維持 */
     align-items: center;
     background: #ffffff;
     padding: 0;
@@ -2113,7 +2114,12 @@ const CONFIG = {
 		ALLCLEAR_SPARK_GLOW:              10,  // ⚡の発光の強さ（shadowBlur）
 		ALLCLEAR_SPARK_COLOR:        '#ffe600',  // ⚡の色（雷玉と同じ）
 
-		ALLCLEAR_CLOUD_DARK_START_RATIO: 0.75,  // 帯電が何割を超えたら雲パネルが暗くなり始めるか（閾値）
+		ALLCLEAR_BOLT_SPEED_MIN:        2.0,  // 雷玉消滅時、⚡が飛び散る速さ（最小）
+		ALLCLEAR_BOLT_SPEED_RANGE:      2.0,  // 同・ばらつき幅（speed = MIN + rand×RANGE）
+		ALLCLEAR_BOLT_DECAY_MIN:      0.018,  // ⚡が消えるまでの速さ（最小）。小さいほど遠くまで残る
+		ALLCLEAR_BOLT_DECAY_RANGE:    0.012,  // 同・ばらつき幅
+
+		ALLCLEAR_CLOUD_DARK_START_RATIO: 0.80,  // 帯電で雲パネルが暗くなり始める割合（閾値）※例 0.7＝7割
 
 		ALLCLEAR_CLOUD_ICON_COLOR_NORMAL: '#ffffff',  // 通常時の雲アイコンの色
 		ALLCLEAR_CLOUD_ICON_COLOR_DARK:   '#d7dcde',  // 暗い時の雲アイコンの色
@@ -2279,7 +2285,6 @@ const CONFIG = {
 	
 		PARTICLE_COUNT_NORMAL:   6,  // 通常パネル消去時のパーティクル数
 		PARTICLE_COUNT_RAINBOW: 12,  // 虹玉・七色玉消去時のパーティクル数
-		PARTICLE_COUNT_SKILL:   10,  // スキル発動時のパーティクル数
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🔊 オプション画面 表示切替設定
@@ -2630,30 +2635,6 @@ const CONFIG = {
     let cloudDarkLevel = 0; // 雲パネルの暗さ（0＝元のグレー、1＝暗いグレー・保存しない）
     let cloudFillColor = CONFIG.THEME_COLORS.OBSTACLE; // 現在の雲パネルの塗り色（毎フレーム更新）
     let cloudIconColor = CONFIG.ALLCLEAR_CLOUD_ICON_COLOR_NORMAL; // 現在の雲アイコンの色（毎フレーム更新）
-
-    // Canvas上の指定位置に✦キラキラの小片を生成するクラス
-    class SparkleParticle {
-        constructor(x, y) {
-            this.x = x; this.y = y;
-            this.size = 6 + Math.random() * 8;
-            this.vx = (Math.random() * 4 - 2);
-            this.vy = -(1.5 + Math.random() * 2.5); 
-            this.alpha = 1.0;
-            this.decay = 0.02 + Math.random() * 0.02;
-        }
-        update(frameFactor = 1) {
-            this.x += this.vx * frameFactor; this.y += this.vy * frameFactor;
-            this.alpha -= this.decay * frameFactor;
-        }
-        draw() {
-            ctx.save(); ctx.globalAlpha = this.alpha;
-            ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-            ctx.font = `${this.size}px sans-serif`;
-            ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.fillText("✦", this.x, this.y);
-            ctx.restore();
-        }
-    }
 	
 	/*⚡️パネルで消したお邪魔パネル・闇玉パネルのエフェクト設定*/
 	const THUNDER_BOLT_PATH = new Path2D("M5,-18 L-15,3 L-3,3 L-5,18 L15,-3 L3,-3 Z"); // 雷玉と同じ⚡の形
@@ -2751,7 +2732,7 @@ const CONFIG = {
 		this.vx = Math.cos(angle) * speed;
 		this.vy = Math.sin(angle) * speed;
 		this.alpha = 1.0;
-		this.decay = 0.018 + Math.random() * 0.012;
+		this.decay = CONFIG.ALLCLEAR_BOLT_DECAY_MIN + Math.random() * CONFIG.ALLCLEAR_BOLT_DECAY_RANGE; // 減衰が遅いほど遠くまで飛ぶ
 		this.rotation = Math.random() * Math.PI * 2;
 	}
 	update(frameFactor = 1) {
@@ -5608,15 +5589,6 @@ if (exploded) {
         
         createShockwaveRingEffect();
         createButtonCornerSparkles();
-        
-        const targetX = selected.c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
-        const targetY = selected.r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
-        const targetType = board[selected.r][selected.c];
-        if (targetType !== CONFIG.PANEL_TYPE.SUNNY && targetType !== CONFIG.PANEL_TYPE.RAINY && targetType !== CONFIG.PANEL_TYPE.SNOW) {
-            for (let i = 0; i < CONFIG.PARTICLE_COUNT_SKILL; i++) {
-                particles.push(new SparkleParticle(targetX, targetY));
-            }
-        }
 
         useSkill();
     }
@@ -6638,7 +6610,7 @@ if (exploded) {
 		for (let i = 0; i < 8; i++) {
 			const baseAngle = (Math.PI * 2 / 8) * i;
 			const angle = baseAngle + (Math.random() * 0.6 - 0.3);
-			const speed = 1.5 + Math.random() * 1.5;
+			const speed = CONFIG.ALLCLEAR_BOLT_SPEED_MIN + Math.random() * CONFIG.ALLCLEAR_BOLT_SPEED_RANGE;
 			specialEffects.push(new LightningParticle(acx, acy, angle, speed));
 		}
 		draw();
