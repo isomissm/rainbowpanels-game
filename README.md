@@ -70,7 +70,7 @@
 利用に関するご相談やご連絡は、X（[@isomi_ssm](https://x.com/isomi_ssm)）までお願いします。
 ***
 最終更新 2026/10/3<br>
-ver 13.4.1<br>
+ver 13.5.0<br>
 © 2026 ナナイロパネル／Rainbow Panels by isomi_ssm
 ***
 GeminiやClaudeなど、AIたちと一緒に作っているパズルゲームだよ🌈
