@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver13.4.1) </title>
+<title>ナナイロパネル／Rainbow Panels (ver13.5.1) </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
@@ -18,6 +18,10 @@
 --start-gate-modal-height: 340px; /* タイトルロゴモーダルのみの縦幅（ロゴ〜ボタンの余白を広げるため） */
 --start-modal-btn-width: 180px;  /* ボタン1つぶんの横幅 */
 --start-modal-btn-height: 56px;  /* ボタンの縦幅 */
+
+/* 📝 モーダル内テキストの折り返し設定 */
+--jp-line-break: strict;      /* 禁則処理：「。」「、」などが行頭に来ない */
+--jp-word-break: auto-phrase; /* 文節で折り返す（Chrome/Edgeのみ対応） */
 }
 html {
     scrollbar-width: none; /* 🔧 Firefox：スクロールバー非表示（スクロール自体は可能） */
@@ -1224,6 +1228,13 @@ canvas {
     transform: scale(0.9);
     transition: transform 0.2s ease;
 }
+/* 📝 全モーダルに禁則処理＋文節折り返しを適用（子要素へ継承される） */
+#guide-modal, #about-modal, #options-modal,
+#ranking-reset-modal, #reset-confirm-modal, #resume-confirm-modal,
+#sound-pref-modal, #start-gate-modal, #panel-image-modal-overlay {
+    line-break: var(--jp-line-break);
+    word-break: var(--jp-word-break);
+}
 .panel-image-row {
     display: flex;
     align-items: center;
@@ -2287,7 +2298,7 @@ const CONFIG = {
 		PARTICLE_COUNT_RAINBOW: 12,  // 虹玉・七色玉消去時のパーティクル数
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔊 オプション画面 表示切替設定
+        // 🔊 オプション画面（オプションモーダル） 表示切替設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SHOW_SOUND_OPTIONS: false,  // 🔧 falseにするとBGM/SE音量スライダーをオプション画面を非表示（true/false）
 
@@ -2295,18 +2306,22 @@ const CONFIG = {
         // 🎵 BGM設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		BGM_ENABLED: false,  // 🔧 falseにするとBGM機能自体を無効化（true/false）
+
 		BGM_TRACKS: {
 			day:     'assets/bgm/day.wav',
 			night:   'assets/bgm/night.wav',
 			rainbow: 'assets/bgm/rainbow.wav',
 		},
+
+		BGM_STARTUP_FADE_IN_MS:     100,  // ゲーム開始時の、BGMを鳴らし始める際のフェードイン時間（ms）※起動モーダルを閉じた直後
+
+		BGM_VOLUME_CURVE_EXPONENT:    2,  // 音量スライダー(0-100)を実ゲインへ変換する際の聴感補正カーブ
+
 		BGM_DAYNIGHT_CROSSFADE_MS: 3500,  // 昼⇔夜のクロスフェード時間（ms）
 		BGM_RAINBOW_FADE_OUT_MS:    1600,  // 昼/夜→ナナイロに入る時のフェード時間（ms）※音が動き出してからの所要時間
 		BGM_RAINBOW_FADE_IN_MS:     2000,  // ナナイロ→昼/夜に戻る時のフェード時間（ms）※音が動き出してからの所要時間
 		BGM_RAINBOW_ENTER_DELAY_MS:   0,  // ナナイロ開始判定〜実際に音が動き出すまでの遅延（ms）
 		BGM_RAINBOW_EXIT_DELAY_MS: 800,  // ナナイロ終了判定〜実際に音が動き出すまでの遅延（ms）
-		BGM_STARTUP_FADE_IN_MS:     800,  // 起動モーダルを閉じた直後、BGMを鳴らし始める際のフェードイン時間（ms）
-		BGM_VOLUME_CURVE_EXPONENT:    2,  // 音量スライダー(0-100)を実ゲインへ変換する際の聴感補正カーブ
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🔧 システム内部用（基本的に変更不要）
@@ -5821,10 +5836,11 @@ if (exploded) {
                     requestAnimationFrame(frame);
                 } else {
                     p.remove();
-                    if (skillStock < CONFIG.SKILL_STOCK_MAX) {
-                        skillStock++;
-                        updateSkillUI();
-                    } 
+if (skillStock < CONFIG.SKILL_STOCK_MAX) {
+    skillStock++;
+    if (skillStock >= CONFIG.SKILL_STOCK_MAX) skillGauge = 0; // 修正：MAX到達時のみゲージを0にする（連鎖側と統一）
+    updateSkillUI();
+}
                     resolve();
                 }
             }
@@ -6913,12 +6929,12 @@ if (exploded) {
     }
 
     function chooseSoundPref(enabled) {
-        userSettings.bgmVolume = enabled ? DEFAULT_SETTINGS.bgmVolume : 0;
-        userSettings.seVolume  = enabled ? DEFAULT_SETTINGS.seVolume  : 0;
+        userSettings.bgmMuted = !enabled;
+        userSettings.seMuted  = !enabled;
         userSettings.bgmChoiceMade = true;
         saveUserSettings();
         BGM.unlock();
-        BGM.setVolume(userSettings.bgmVolume);
+        BGM.setVolume(enabled ? userSettings.bgmVolume : 0);
         closeSoundPrefModal();
         proceedAfterSoundPref();
     }
