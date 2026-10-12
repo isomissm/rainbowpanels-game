@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver13.4.1) </title>
+<title>ナナイロパネル／Rainbow Panels (ver13.5.1) </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
@@ -18,6 +18,10 @@
 --start-gate-modal-height: 340px; /* タイトルロゴモーダルのみの縦幅（ロゴ〜ボタンの余白を広げるため） */
 --start-modal-btn-width: 180px;  /* ボタン1つぶんの横幅 */
 --start-modal-btn-height: 56px;  /* ボタンの縦幅 */
+
+/* 📝 モーダル内テキストの折り返し設定 */
+--jp-line-break: strict;      /* 禁則処理：「。」「、」などが行頭に来ない */
+--jp-word-break: auto-phrase; /* 文節で折り返す（Chrome/Edgeのみ対応） */
 }
 html {
     scrollbar-width: none; /* 🔧 Firefox：スクロールバー非表示（スクロール自体は可能） */
@@ -303,6 +307,11 @@ width: calc(var(--mini-ball-size) * 4 + var(--mini-ball-gap) * 3);
     vertical-align: middle;
     margin: 0 2px 3px 2px;
 }
+/* 説明文中で「アイコン＋直後の文字」を途中で改行させない */
+.nowrap-keep {
+    display: inline-block; /* Firefoxで前後の文字まで折り返し禁止になるのを防ぐ */
+    white-space: nowrap;
+}
 /* 説明文用のミニオールマイティ画像（角丸四角型） */
 .mini-almighty-img {
     width: 16px;
@@ -438,6 +447,16 @@ width: calc(var(--mini-spark-size) * 32 / 38);
     --daynight-grad-to: #bcc6ee;   /* 右下：紺色（文字が読める薄さ） */
     background: linear-gradient(135deg, var(--daynight-grad-from), var(--daynight-grad-to));
     border-color: #c5d3f0;
+    --daynight-gap-title: 6px; /* 《昼モード／夜モード》と「スコアが上がると～」の間 */
+    --daynight-gap-mode: 6px;  /* 「昼モードに戻るよ」と「夜モード中は～」の間 */
+}
+.daynight-gap-title {
+    display: block;
+    margin-bottom: var(--daynight-gap-title);
+}
+.daynight-gap-mode {
+    display: block;
+    margin-top: var(--daynight-gap-mode);
 }
 /* 右側：統合UIパネル */
 #right-ui {
@@ -1224,6 +1243,13 @@ canvas {
     transform: scale(0.9);
     transition: transform 0.2s ease;
 }
+/* 📝 全モーダルに禁則処理＋文節折り返しを適用（子要素へ継承される） */
+#guide-modal, #about-modal, #options-modal,
+#ranking-reset-modal, #reset-confirm-modal, #resume-confirm-modal,
+#sound-pref-modal, #start-gate-modal, #panel-image-modal-overlay {
+    line-break: var(--jp-line-break);
+    word-break: var(--jp-word-break);
+}
 .panel-image-row {
     display: flex;
     align-items: center;
@@ -1733,10 +1759,9 @@ width: calc(var(--mini-ball-size) * 4 + var(--mini-ball-gap) * 3);
             </tr>
           </table>
         </div>
-        <div class="special-panel-box guide-daynight-box" style="margin-top: 8px;"> <strong>《昼モード／夜モード》</strong><br>
+        <div class="special-panel-box guide-daynight-box" style="margin-top: 8px;"> <strong class="daynight-gap-title">《昼モード／夜モード》</strong>
           <span style="line-height: 1.3; display: inline-block;"> スコアが上がると夜モードが発動！<br>
-          流れ星<span class="mini-star-img"></span>を3つ集めると昼モードに戻るよ<br>
-          夜モード中は<span class="mini-balls-img"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>七色の玉、<span class="mini-rainbow-img"></span>虹玉、<span class="mini-almighty-img"></span>プリズムパネルが出現しなくなるので注意！</span> </div>
+          流れ星<span class="mini-star-img"></span>を3つ集めると昼モードに戻るよ<span class="daynight-gap-mode">夜モード中は、<span class="nowrap-keep"><span class="mini-balls-img"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>七色の玉・</span><span class="nowrap-keep"><span class="mini-rainbow-img"></span>虹玉・</span><span class="nowrap-keep"><span class="mini-almighty-img"></span>プリズムパネルが</span>出現しなくなるので注意！</span></span></div>
       </div>
       <button onclick="closeGuideModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 14px; cursor: pointer; margin-top: 20px;">閉じる</button>
     </div>
@@ -2287,7 +2312,7 @@ const CONFIG = {
 		PARTICLE_COUNT_RAINBOW: 12,  // 虹玉・七色玉消去時のパーティクル数
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔊 オプション画面 表示切替設定
+        // 🔊 オプション画面（オプションモーダル） 表示切替設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		SHOW_SOUND_OPTIONS: false,  // 🔧 falseにするとBGM/SE音量スライダーをオプション画面を非表示（true/false）
 
@@ -2295,18 +2320,22 @@ const CONFIG = {
         // 🎵 BGM設定
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 		BGM_ENABLED: false,  // 🔧 falseにするとBGM機能自体を無効化（true/false）
+
 		BGM_TRACKS: {
 			day:     'assets/bgm/day.wav',
 			night:   'assets/bgm/night.wav',
 			rainbow: 'assets/bgm/rainbow.wav',
 		},
+
+		BGM_STARTUP_FADE_IN_MS:     100,  // ゲーム開始時の、BGMを鳴らし始める際のフェードイン時間（ms）※起動モーダルを閉じた直後
+
+		BGM_VOLUME_CURVE_EXPONENT:    2,  // 音量スライダー(0-100)を実ゲインへ変換する際の聴感補正カーブ
+
 		BGM_DAYNIGHT_CROSSFADE_MS: 3500,  // 昼⇔夜のクロスフェード時間（ms）
 		BGM_RAINBOW_FADE_OUT_MS:    1600,  // 昼/夜→ナナイロに入る時のフェード時間（ms）※音が動き出してからの所要時間
 		BGM_RAINBOW_FADE_IN_MS:     2000,  // ナナイロ→昼/夜に戻る時のフェード時間（ms）※音が動き出してからの所要時間
 		BGM_RAINBOW_ENTER_DELAY_MS:   0,  // ナナイロ開始判定〜実際に音が動き出すまでの遅延（ms）
 		BGM_RAINBOW_EXIT_DELAY_MS: 800,  // ナナイロ終了判定〜実際に音が動き出すまでの遅延（ms）
-		BGM_STARTUP_FADE_IN_MS:     800,  // 起動モーダルを閉じた直後、BGMを鳴らし始める際のフェードイン時間（ms）
-		BGM_VOLUME_CURVE_EXPONENT:    2,  // 音量スライダー(0-100)を実ゲインへ変換する際の聴感補正カーブ
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🔧 システム内部用（基本的に変更不要）
@@ -5821,10 +5850,11 @@ if (exploded) {
                     requestAnimationFrame(frame);
                 } else {
                     p.remove();
-                    if (skillStock < CONFIG.SKILL_STOCK_MAX) {
-                        skillStock++;
-                        updateSkillUI();
-                    } 
+if (skillStock < CONFIG.SKILL_STOCK_MAX) {
+    skillStock++;
+    if (skillStock >= CONFIG.SKILL_STOCK_MAX) skillGauge = 0; // 修正：MAX到達時のみゲージを0にする（連鎖側と統一）
+    updateSkillUI();
+}
                     resolve();
                 }
             }
@@ -6913,12 +6943,12 @@ if (exploded) {
     }
 
     function chooseSoundPref(enabled) {
-        userSettings.bgmVolume = enabled ? DEFAULT_SETTINGS.bgmVolume : 0;
-        userSettings.seVolume  = enabled ? DEFAULT_SETTINGS.seVolume  : 0;
+        userSettings.bgmMuted = !enabled;
+        userSettings.seMuted  = !enabled;
         userSettings.bgmChoiceMade = true;
         saveUserSettings();
         BGM.unlock();
-        BGM.setVolume(userSettings.bgmVolume);
+        BGM.setVolume(enabled ? userSettings.bgmVolume : 0);
         closeSoundPrefModal();
         proceedAfterSoundPref();
     }
