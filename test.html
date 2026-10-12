@@ -446,6 +446,16 @@ width: calc(var(--mini-spark-size) * 32 / 38);
     --daynight-grad-to: #bcc6ee;   /* 右下：紺色（文字が読める薄さ） */
     background: linear-gradient(135deg, var(--daynight-grad-from), var(--daynight-grad-to));
     border-color: #c5d3f0;
+    --daynight-gap-title: 6px; /* 《昼モード／夜モード》とスコア説明の間 */
+    --daynight-gap-mode: 6px;  /* 「昼モードに戻るよ」と「夜モード中は」の間 */
+}
+.daynight-gap-title {
+    display: block;
+    margin-bottom: var(--daynight-gap-title);
+}
+.daynight-gap-mode {
+    display: block;
+    margin-top: var(--daynight-gap-mode);
 }
 /* 右側：統合UIパネル */
 #right-ui {
@@ -1748,10 +1758,9 @@ width: calc(var(--mini-ball-size) * 4 + var(--mini-ball-gap) * 3);
             </tr>
           </table>
         </div>
-        <div class="special-panel-box guide-daynight-box" style="margin-top: 8px;"> <strong>《昼モード／夜モード》</strong><br>
+        <div class="special-panel-box guide-daynight-box" style="margin-top: 8px;"> <strong class="daynight-gap-title">《昼モード／夜モード》</strong>
           <span style="line-height: 1.3; display: inline-block;"> スコアが上がると夜モードが発動！<br>
-          流れ星<span class="mini-star-img"></span>を3つ集めると昼モードに戻るよ<br>
-          夜モード中は<span class="nowrap-keep"><span class="mini-balls-img"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>七色の玉</span>、<span class="nowrap-keep"><span class="mini-rainbow-img"></span>虹玉</span>、<span class="nowrap-keep"><span class="mini-almighty-img"></span>プリズムパネル</span>が出現しなくなるので注意！</span> </div>
+          流れ星<span class="mini-star-img"></span>を3つ集めると昼モードに戻るよ<span class="daynight-gap-mode">夜モード中は、<span class="nowrap-keep"><span class="mini-balls-img"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>七色の玉</span>・<span class="nowrap-keep"><span class="mini-rainbow-img"></span>虹玉</span>・<span class="nowrap-keep"><span class="mini-almighty-img"></span>プリズムパネルが出現しなくなるので注意！</span></span></div>
       </div>
       <button onclick="closeGuideModal()" style="width: 70%; padding: 10px; border: none; border-radius: 999px; background: #dbeeff; color: #2b7fd1; font-weight: 900; font-size: 14px; cursor: pointer; margin-top: 20px;">閉じる</button>
     </div>
