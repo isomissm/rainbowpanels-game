@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ナナイロパネル／Rainbow Panels (ver13.5.1) </title>
+<title>ナナイロパネル／Rainbow Panels (ver13.6.0) </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Titillium+Web:wght@600&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
@@ -4954,7 +4954,8 @@ function escapeHtml(str) {
     }
 
     async function performSwap(r1, c1, r2, c2) {
-    if (!gameStartTime) gameStartTime = Date.now();
+if (!Number.isInteger(board[r1]?.[c1]) || !Number.isInteger(board[r2]?.[c2])) return; // 🔧盤面外・不正値のスワップ防止
+if (!gameStartTime) gameStartTime = Date.now();
 	isAnimating = true;
 	const swapR1 = r1, swapC1 = c1, swapR2 = r2, swapC2 = c2; // 🎬 アニメ用に座標を確定
     const temp = board[r2][c2]; board[r2][c2] = board[r1][c1]; board[r1][c1] = temp;
@@ -5052,7 +5053,9 @@ canvas.addEventListener('pointerdown', (e) => {
     const cellOnScreen = (rect.width / logicalSize) * CONFIG.CELL_SIZE; // 画面上での1マスのサイズ
     const c = Math.floor((e.clientX - rect.left - CONFIG.BOARD_EDGE_MARGIN * (rect.width / logicalSize)) / cellOnScreen);
     const r = Math.floor((e.clientY - rect.top - CONFIG.BOARD_EDGE_MARGIN * (rect.height / logicalSize)) / cellOnScreen);
-		if (shakingCells.has(`${r},${c}`)) return;
+// 🔧重要修正: 盤面外(余白)のタップで盤面外マスとスワップしパネルがundefinedになるバグ対策
+if (r < 0 || r >= CONFIG.BOARD_SIZE || c < 0 || c >= CONFIG.BOARD_SIZE) return;
+if (shakingCells.has(`${r},${c}`)) return;
 		if (frozenCells[`${r},${c}`] !== undefined) return;
     flickStart = {r, c, x: e.clientX, y: e.clientY, pointerId: e.pointerId};
     flickHandled = false;
